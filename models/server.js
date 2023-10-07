@@ -16,6 +16,7 @@ class Server {
       users: "/api/v1/users",
       measures: "/api/v1/measures",
       reports: "/api/v1/reports",
+      meters: "/api/v1/meters",
     };
 
     // Conectar a base de datos
@@ -63,6 +64,7 @@ class Server {
     // this.app.use(this.paths.users, require("../v1/routes/userRoutes.js"));
     this.app.use(this.paths.measures, require("../v1/routes/measureRoute.js"));
     this.app.use(this.paths.reports, require("../v1/routes/reportRoute.js"));
+    this.app.use(this.paths.meters, require("../v1/routes/meterRoute.js"));
   }
 
   listen() {

@@ -34,7 +34,7 @@ const generateHeaders = (doc, factura) => {
   doc.font("Helvetica-Bold").text("Manzana:", inicioPagina, 160);
   // Columna derecha (fuente predeterminada)
   doc.font("Helvetica").text(factura.Nombre, inicioPagina + 80, 130);
-  doc.font("Helvetica").text('El Porton',inicioPagina + 80, 145);
+  doc.font("Helvetica").text("El Porton", inicioPagina + 80, 145);
   doc.font("Helvetica").text(factura.Manzana, inicioPagina + 80, 160);
   // Columna del medio (negrita)
   doc.font("Helvetica-Bold").text("Lote:", inicioPagina + 220, 145);
@@ -56,7 +56,10 @@ const generateTable = (doc, data) => {
   const observacionX = 395; // Ajusta la posición X
   const totalX = 500; // Ajusta la posición X
   // doc.fillColor("blue");
-  doc.font("Helvetica-Bold").fontSize(16).text("Consumo de Agua", titleTable, 200);
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(16)
+    .text("Consumo de Agua", titleTable, 200);
   doc.moveTo(titleTable, 220).lineTo(550, 220).stroke();
   doc
     .fontSize(10)
@@ -67,18 +70,73 @@ const generateTable = (doc, data) => {
     .text("Consumo", consumoX, tableTop)
     .text("Observacion", observacionX, tableTop)
     .text("Total", totalX, tableTop);
-    // doc.fillColor("black");
-    doc.moveTo(titleTable, 245).lineTo(550, 245).stroke();
+  // doc.fillColor("black");
+  doc.moveTo(titleTable, 245).lineTo(550, 245).stroke();
   //imprimie la data en cada fila
   doc
-  .font("Helvetica").fontSize(10)
-  .text(data.Mes, fechaX, tableTop + 25)
-  .text(data.LecturaAnterior, lecturaAnteriorX, tableTop + 25)
-  .text(data.LecturaActual, lecturaActualX, tableTop + 25)
-  .text(data.LecturaActual - data.LecturaAnterior, consumoX, tableTop + 25)
-  .text('S/N', observacionX, tableTop + 25)
-  .text('$'+data.Total, totalX, tableTop + 25);
-  
+    .font("Helvetica")
+    .fontSize(10)
+    .text(data.Mes, fechaX, tableTop + 25)
+    .text(data.LecturaAnterior, lecturaAnteriorX, tableTop + 25)
+    .text(data.LecturaActual, lecturaActualX, tableTop + 25)
+    .text(data.LecturaActual - data.LecturaAnterior, consumoX, tableTop + 25)
+    .text("S/N", observacionX, tableTop + 25)
+    .text("$" + data.Total, totalX, tableTop + 25);
+
+  //pagaos anteriores
+  const pagosAnteriores = [
+    { fecha: "01/01/2021", monto: 100 },
+    { fecha: "01/02/2021", monto: 100 },
+    { fecha: "01/03/2021", monto: 100 },
+    { fecha: "01/04/2021", monto: 100 },
+    { fecha: "01/05/2021", monto: 100 },
+    { fecha: "01/06/2021", monto: 100 },
+    { fecha: "01/07/2021", monto: 100 },
+    { fecha: "01/08/2021", monto: 100 },
+    { fecha: "01/09/2021", monto: 100 },
+    { fecha: "01/10/2021", monto: 100 },
+    { fecha: "01/11/2021", monto: 100 },
+    { fecha: "01/12/2021", monto: 100 },
+  ];
+
+  doc.moveTo(titleTable, 500).lineTo(550, 500).stroke();
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(16)
+    .text("Pagos Anteriores", titleTable, 480);
+  doc.moveTo(titleTable, 500).lineTo(550, 500).stroke();
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .text("Fecha", fechaX, 500)
+    .text("Monto", lecturaAnteriorX, 500);
+  doc.moveTo(titleTable, 520).lineTo(550, 520).stroke();
+  //imprimie la data en cada fila};
+  doc
+    .font("Helvetica")
+    .fontSize(10)
+    .text(pagosAnteriores[0].fecha, fechaX, 520)
+    .text("$" + pagosAnteriores[0].monto, lecturaAnteriorX, 520)
+    .text(pagosAnteriores[1].fecha, fechaX, 540)
+    .text("$" + pagosAnteriores[1].monto, lecturaAnteriorX, 540)
+    .text(pagosAnteriores[2].fecha, fechaX, 560)
+    .text("$" + pagosAnteriores[2].monto, lecturaAnteriorX, 560)
+    .text(pagosAnteriores[3].fecha, fechaX, 580)
+    .text("$" + pagosAnteriores[3].monto, lecturaAnteriorX, 580)
+    .text(pagosAnteriores[4].fecha, fechaX, 600)
+    .text("$" + pagosAnteriores[4].monto, lecturaAnteriorX, 600)
+    .text(pagosAnteriores[5].fecha, fechaX, 620)
+    .text("$" + pagosAnteriores[5].monto, lecturaAnteriorX, 620)
+    .text(pagosAnteriores[6].fecha, fechaX, 640)
+    .text("$" + pagosAnteriores[6].monto, lecturaAnteriorX, 640)
+    .text(pagosAnteriores[7].fecha, fechaX, 660)
+    .text("$" + pagosAnteriores[7].monto, lecturaAnteriorX, 660)
+    .text(pagosAnteriores[8].fecha, fechaX, 680)
+    .text("$" + pagosAnteriores[8].monto, lecturaAnteriorX, 680)
+    .text(pagosAnteriores[9].fecha, fechaX, 700)
+    .text("$" + pagosAnteriores[9].monto, lecturaAnteriorX, 700)
+    .text(pagosAnteriores[10].fecha, fechaX, 720)
 
 };
 
@@ -113,7 +171,7 @@ const generatePdf = async (data) => {
 };
 
 const show = async (req, res) => {
-  const bodyArray = req.body; 
+  const bodyArray = req.body;
 
   const pdfStream = await generatePdf(bodyArray);
   res

@@ -7,8 +7,9 @@ CREATE TABLE JA_Medidor
     Codigo VARCHAR(50),
     Lote VARCHAR(50),
     Manzana VARCHAR(50),
-    Danado BIT DEFAULT 0
 );
+
+
 
 
 -- Crear la tabla JA_Medidor si no existe
