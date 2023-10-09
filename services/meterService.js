@@ -16,6 +16,30 @@ const getMeter = async () => {
   }
 };
 
+const updateMeterStatus = async (idMedidor, estado) => {
+  console.log(idMedidor, estado);
+  try {
+    const meters = await dbConnection.query(
+      "EXEC ActualizarEstadoMedidor :idMedidor, :estado",
+      {
+        replacements: {
+          idMedidor,
+          estado,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+    consoleHelper.success("Medida obtenida correctamente");
+    return meters;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
+
+
 module.exports = {
   getMeter,
+  updateMeterStatus,
 };

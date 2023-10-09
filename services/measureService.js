@@ -211,10 +211,23 @@ const addInterestIfUnpaidV2 = async (Anio, Mes) => {
   }
 };
 
+const execCorte = async () => {
+  try {
+    const meters = await dbConnection.query("EXEC ja_corte", {
+      type: sequelize.QueryTypes.SELECT,
+    });
+    consoleHelper.success("Medida obtenida correctamente");
+    return meters;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
 
 
 module.exports = {
   getMeasurements,
   getMeasurementsByMonthAndYear,
   updateMeasurement,
+  execCorte
 };

@@ -3,13 +3,13 @@ const getStream = require("get-stream");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
 
-const userService = require("../services/measureService");
+const measureService = require("../services/measureService");
 const Response = require("../helpers/response");
 
 const getMeasurements = async (req = request, res = response) => {
   const { limite = 10, desde = 0 } = req.query;
   try {
-    const measure = await userService.getMeasurements();
+    const measure = await measureService.getMeasurements();
     // const measurePagination = .slice(Number(desde), Number(limite) + Number(desde))
     return new Response().success(res, "Medidas obtenidas correctamente", {
       measure: measure,
@@ -24,7 +24,10 @@ const getMeasurements = async (req = request, res = response) => {
 const getMeasurementsByMonthAndYear = async (req = request, res = response) => {
   const { Mes, Anio } = req.query;
   try {
-    const measure = await userService.getMeasurementsByMonthAndYear(Mes, Anio);
+    const measure = await measureService.getMeasurementsByMonthAndYear(
+      Mes,
+      Anio
+    );
     return new Response().success(res, "Medidas obtenidas correctamente", {
       measure: measure,
       total: measure.length,
@@ -39,7 +42,7 @@ const updateMeasurement = async (req, res) => {
     req.body;
 
   try {
-    const result = await userService.updateMeasurement(
+    const result = await measureService.updateMeasurement(
       Anio,
       Mes,
       LecturaAnterior,
@@ -56,10 +59,20 @@ const updateMeasurement = async (req, res) => {
   }
 };
 
-
+const execCorte = async (req, res) => {
+  try {
+    const result = await measureService.execCorte();
+    return new Response().success(res, "Corte ejecutado correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
 
 module.exports = {
   getMeasurements,
   getMeasurementsByMonthAndYear,
   updateMeasurement,
+  execCorte,
 };

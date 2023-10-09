@@ -14,6 +14,21 @@ const getMeter = async (req = request, res = response) => {
   }
 };
 
+const updateMeterStatus = async (req = request, res = response) => {
+  const { id } = req.params;
+  const { estado } = req.body;
+  console.log(id, estado);
+  try {
+    const meters = await meterService.updateMeterStatus(id, estado);
+    return new Response().success(res, "Medidor actualizado correctamente", {
+      meters: meters,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   getMeter,
+  updateMeterStatus,
 };

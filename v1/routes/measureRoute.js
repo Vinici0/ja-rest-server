@@ -6,6 +6,7 @@ const {
   getMeasurements,
   getMeasurementsByMonthAndYear,
   updateMeasurement,
+  execCorte
 } = require("../../controllers/measureController");
 
 const router = Router();
@@ -13,12 +14,5 @@ const router = Router();
 router.get("/", getMeasurements);
 router.get("/monthAndYear", getMeasurementsByMonthAndYear);
 router.post("/", updateMeasurement);
-
-router.post("/prueba", (req, res) => {
-  const arregloDeObjetos = req.body; // Recupera el arreglo de objetos del cuerpo
-  console.log(arregloDeObjetos);
-  // Haz lo que necesites con el arreglo de objetos
-  res.status(200).json({ mensaje: "Datos recibidos correctamente" });
-});
-
+router.get("/court", execCorte);
 module.exports = router;
