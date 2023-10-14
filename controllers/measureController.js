@@ -38,18 +38,28 @@ const getMeasurementsByMonthAndYear = async (req = request, res = response) => {
 };
 
 const updateMeasurement = async (req, res) => {
-  const { Anio, Mes, LecturaAnterior, LecturaActual, idCliente, Codigo } =
-    req.body;
-
+  const {
+    Anio,
+    Basico,
+    Codigo,
+    idCliente,
+    idMedida,
+    LecturaActual,
+    LecturaAnterior,
+    Mes,
+  } = req.body;
   try {
     const result = await measureService.updateMeasurement(
       Anio,
-      Mes,
-      LecturaAnterior,
-      LecturaActual,
+      Basico,
+      Codigo,
       idCliente,
-      Codigo
+      idMedida,
+      LecturaActual,
+      LecturaAnterior,
+      Mes,
     );
+
 
     return new Response().success(res, "Medida guardada correctamente", {
       measure: result,
@@ -70,9 +80,22 @@ const execCorte = async (req, res) => {
   }
 };
 
+const updateMeasurementForAll = async (req, res) => {
+  const { Anio, Mes } = req.body;
+  try {
+    const result = await measureService.updateMeasurementForAll(Anio, Mes);
+    return new Response().success(res, "Medidas actualizadas correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
+  execCorte,
   getMeasurements,
   getMeasurementsByMonthAndYear,
   updateMeasurement,
-  execCorte,
+  updateMeasurementForAll
 };

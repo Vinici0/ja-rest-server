@@ -273,17 +273,96 @@ BEGIN
         SET @Mes = @Mes - 1;
     END
 
+    -- Actualizar el Basico y Acumulado del mes anterior para todos los códigos
+    UPDATE JA_Medida
+    SET Basico = (
+        SELECT TOP 1 Basico
+        FROM JA_Medida AS M
+        WHERE M.Anio = @Anio AND M.Mes = @Mes AND M.Codigo = JA_Medida.Codigo
+    ),
+    Acumulado = (
+        SELECT TOP 1 Acumulado
+        FROM JA_Medida AS M
+        WHERE M.Anio = @Anio AND M.Mes = @Mes AND M.Codigo = JA_Medida.Codigo
+    )
+    WHERE Anio = @Anio AND Mes = @Mes + 1;
+
     -- Actualizar la LecturaAnterior del nuevo mes para todos los códigos
     UPDATE JA_Medida
     SET LecturaAnterior = (
         SELECT TOP 1 LecturaActual
         FROM JA_Medida AS M
         WHERE M.Anio = @Anio AND M.Mes = @Mes AND M.Codigo = JA_Medida.Codigo
-    )
+    ) 
     WHERE Anio = @Anio AND Mes = @Mes + 1;
+
+    SELECT * FROM JA_Medida WHERE Anio = @Anio AND Mes = @Mes + 1;
 END;
 
 EXEC [dbo].[ActualizarLecturaActualParaTodos] @Anio = 2023, @Mes = 10;
 
 
+---------------------------------------------------------------------------------------
+                    Editar Medida - Comprobado
+---------------------------------------------------------------------------------------
+CREATE PROCEDURE EditarMedida
+(
+    @idMedida INT,
+    @LecturaActual FLOAT,
+    @Excedente FLOAT,
+    @Basico FLOAT,
+    @ExcedenteV FLOAT,
+    @Total FLOAT,
+    @Acumulado FLOAT,
+    @Pago FLOAT,
+    @Saldo FLOAT
+)
+AS
+BEGIN
+    UPDATE JA_Medida
+    SET
+        LecturaActual = @LecturaActual,
+        Excedente = @Excedente,
+        Basico = @Basico,
+        ExcedenteV = @ExcedenteV,
+        Total = @Total,
+        Acumulado = @Acumulado,
+        Pago = @Pago,
+        Saldo = @Saldo
+    WHERE
+        idMedida = @idMedida;
+END;
 
+exec EditarMedida
+    @idMedida = 1,
+    @LecturaActual = 100.00,
+    @Excedente = 100.00,
+    @Basico = 100.00,
+    @ExcedenteV = 100.00,
+    @Total = 100.00,
+    @Acumulado = 100.00,
+    @Pago = 100.00,
+    @Saldo = 100.00;
+
+---------------------------------------------------------------------------------------
+                    Buscar Medida por Anio y Mes - Comprobado
+---------------------------------------------------------------------------------------
+CREATE PROCEDURE BuscarMedidaPorAnioMesCliente
+(
+    @Anio INT,
+    @Mes INT,
+    @Codigo varchar(30)
+)
+AS
+BEGIN
+    SELECT *
+    FROM JA_Medida
+    WHERE Anio = @Anio
+      AND Mes = @Mes
+      AND Codigo = @Codigo;
+END;
+
+exec BuscarMedidaPorAnioMesCliente
+    @Anio = 2023,
+    @Mes = 10,
+    @Codigo = 62528;

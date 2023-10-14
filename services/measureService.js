@@ -5,9 +5,12 @@ const consoleHelper = new Console("User Service");
 
 const getMeasurements = async () => {
   try {
-    const measure = await dbConnection.query("EXEC ObtenerMedidasPorMesYAnio @Anio = 2023, @Mes = 8", {
-      type: sequelize.QueryTypes.SELECT,
-    });
+    const measure = await dbConnection.query(
+      "EXEC ObtenerMedidasPorMesYAnio @Anio = 2023, @Mes = 8",
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
     consoleHelper.success("Medida obtenida correctamente");
     return measure;
   } catch (error) {
@@ -15,7 +18,6 @@ const getMeasurements = async () => {
     throw new Error(error.msg);
   }
 };
-
 
 const getMeasurementsByMonthAndYear = async (Mes, Anio) => {
   try {
@@ -36,68 +38,97 @@ const getMeasurementsByMonthAndYear = async (Mes, Anio) => {
 
 const updateMeasurement = async (
   Anio,
-  Mes,
-  LecturaAnterior,
-  LecturaActual,
+  Basico,
+  Codigo,
   idCliente,
-  Codigo
+  idMedida,
+  LecturaActual,
+  LecturaAnterior,
+  Mes
 ) => {
-  const Excedente = LecturaActual - LecturaAnterior - 15;
-  const Basico = 5.5;
-  let ExcedenteV = 0;
+  try {
+    console.log(
+      Anio,
+      Mes,
+      LecturaAnterior,
+      LecturaActual,
+      idCliente,
+      Codigo,
+      idMedida
+    );
+    let Excedente = LecturaActual - LecturaAnterior;
+    let ExcedenteV = 0;
 
-  if (Excedente >= 0 && Excedente <= 15) {
-    ExcedenteV = 5.5;
-  } else if (Excedente >= 16 && Excedente <= 39) {
-    ExcedenteV = 0.25;
-  } else if (Excedente >= 40 && Excedente <= 49) {
-    ExcedenteV = 0.5;
-  } else if (Excedente >= 50) {
-    ExcedenteV = 1;
+    if (Excedente >= 0 && Excedente <= 15) {
+      Excedente = 0;
+      ExcedenteV = 0;
+    } else if (Excedente >= 16 && Excedente <= 39) {
+      Excedente = Excedente - 15;
+      ExcedenteV = 0.25 * Excedente;
+    } else if (Excedente >= 40 && Excedente <= 49) {
+      Excedente = Excedente - 15;
+      ExcedenteV = 0.5 * Excedente;
+    } else if (Excedente >= 50) {
+      Excedente = Excedente - 15;
+      ExcedenteV = 1 * Excedente;
+    }
+
+    const Total = Basico + ExcedenteV;
+    const Pago = 0;
+    const medida = await dbConnection.query(
+      `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
+      {
+        replacements: { Anio, Mes: Mes - 1, Codigo },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    if (medida.length === 0) {
+      throw new Error("No se encontró la medida anterior");
+    }
+
+    const EditarMedida = await dbConnection.query(
+      `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, Basico = :Basico, ExcedenteV = :ExcedenteV, Total = :Total, Acumulado = :Acumulado, Pago = :Pago, Saldo = :Saldo WHERE idMedida = :idMedida`,
+      {
+        replacements: {
+          LecturaActual,
+          Excedente,
+          Basico: medida[0].Basico,
+          ExcedenteV,
+          Total,
+          Acumulado: medida[0].Acumulado + Total,
+          Pago,
+          Saldo: Total,
+          idMedida: idMedida,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    return {
+      Anio,
+      Mes,
+      LecturaAnterior,
+      LecturaActual,
+      idCliente,
+      Excedente,
+      Basico,
+      ExcedenteV,
+      Total,
+      Acumulado: medida[0].Acumulado + Total,
+      Saldo: Total,
+    };
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
   }
-
-  const Total = Basico + ExcedenteV;
-  const Pago = 0; //TODO: implementar en la base de datos
-  // Aquí obtén el valor de Acumulado y Pago de la base de datos,
-  // dependiendo de la lógica de tu aplicación
-
-  // Inserta los valores en la base de datos
-  // Debes usar el código SQL adecuado para insertar los valores en la tabla JA_Medida
-
-  // Ejemplo de inserción en SQL Server:
-  const values = {
-    Anio,
-    Mes,
-    idCliente,
-    LecturaAnterior,
-    LecturaActual,
-    Excedente,
-    Basico,
-    ExcedenteV,
-    Total,
-    // Acumulado: Saldo,
-    Pago,
-  };
-
-  return {
-    Anio,
-    Mes,
-    LecturaAnterior,
-    LecturaActual,
-    idCliente,
-    Excedente,
-    Basico,
-    ExcedenteV,
-    Total,
-  };
 };
-
 
 const addInterestIfUnpaid = async (Anio, Mes) => {
   try {
     // Obtén la lista de clientes que tienen saldo pendiente en el mes seleccionado
     const unpaidClients = await dbConnection.query(
-      'SELECT DISTINCT idCliente FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes AND Cancelada = 0 AND Saldo > 0',
+      "SELECT DISTINCT idCliente FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes AND Cancelada = 0 AND Saldo > 0",
       {
         replacements: { Anio, Mes },
         type: sequelize.QueryTypes.SELECT,
@@ -113,7 +144,7 @@ const addInterestIfUnpaid = async (Anio, Mes) => {
 
       // Obtén la medida más reciente de ese cliente en el mes seleccionado
       const medidaCliente = await dbConnection.query(
-        'SELECT TOP 1 * FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes AND idCliente = :idCliente ORDER BY LecturaActual DESC',
+        "SELECT TOP 1 * FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes AND idCliente = :idCliente ORDER BY LecturaActual DESC",
         {
           replacements: { Anio, Mes, idCliente },
           type: sequelize.QueryTypes.SELECT,
@@ -132,7 +163,7 @@ const addInterestIfUnpaid = async (Anio, Mes) => {
 
         // Actualiza la medida en la base de datos con el nuevo saldo y total
         await dbConnection.query(
-          'UPDATE JA_Medida SET Saldo = :nuevoSaldo, Total = :nuevoTotal WHERE idMedida = :idMedida',
+          "UPDATE JA_Medida SET Saldo = :nuevoSaldo, Total = :nuevoTotal WHERE idMedida = :idMedida",
           {
             replacements: {
               nuevoSaldo,
@@ -143,7 +174,9 @@ const addInterestIfUnpaid = async (Anio, Mes) => {
           }
         );
 
-        consoleHelper.success(`Interés agregado al cliente ${idCliente} para el mes ${Mes}/${Anio}`);
+        consoleHelper.success(
+          `Interés agregado al cliente ${idCliente} para el mes ${Mes}/${Anio}`
+        );
       }
     }
   } catch (error) {
@@ -156,7 +189,7 @@ const addInterestIfUnpaidV2 = async (Anio, Mes) => {
   try {
     // Obtén la lista de clientes que tienen saldo pendiente en el mes seleccionado
     const unpaidClients = await dbConnection.query(
-      'SELECT DISTINCT idCliente FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes AND Cancelada = 0 AND Saldo > 0',
+      "SELECT DISTINCT idCliente FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes AND Cancelada = 0 AND Saldo > 0",
       {
         replacements: { Anio, Mes },
         type: sequelize.QueryTypes.SELECT,
@@ -172,7 +205,7 @@ const addInterestIfUnpaidV2 = async (Anio, Mes) => {
 
       // Obtén la medida más reciente de ese cliente en el mes seleccionado
       const medidaCliente = await dbConnection.query(
-        'SELECT TOP 1 * FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes AND idCliente = :idCliente ORDER BY LecturaActual DESC',
+        "SELECT TOP 1 * FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes AND idCliente = :idCliente ORDER BY LecturaActual DESC",
         {
           replacements: { Anio, Mes, idCliente },
           type: sequelize.QueryTypes.SELECT,
@@ -191,7 +224,7 @@ const addInterestIfUnpaidV2 = async (Anio, Mes) => {
 
         // Inserta un registro en la tabla RegistroIntereses
         await dbConnection.query(
-          'INSERT INTO RegistroIntereses (idMedida, FechaInteres, TasaInteres, InteresAplicado) VALUES (:idMedida, GETDATE(), :tasaInteres, :interes)',
+          "INSERT INTO RegistroIntereses (idMedida, FechaInteres, TasaInteres, InteresAplicado) VALUES (:idMedida, GETDATE(), :tasaInteres, :interes)",
           {
             replacements: {
               idMedida,
@@ -202,9 +235,32 @@ const addInterestIfUnpaidV2 = async (Anio, Mes) => {
           }
         );
 
-        consoleHelper.success(`Interés agregado al cliente ${idCliente} para el mes ${Mes}/${Anio}`);
+        consoleHelper.success(
+          `Interés agregado al cliente ${idCliente} para el mes ${Mes}/${Anio}`
+        );
       }
     }
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
+
+// EXEC ActualizarLecturaActualParaTodos @Anio = 2023, @Mes = 11
+const updateMeasurementForAll = async (Anio, Mes) => {
+  console.log("Anio", Anio);
+  console.log("Mes", Mes);
+  try {
+    const measure = await dbConnection.query(
+      `EXEC ActualizarLecturaActualParaTodos @Anio = :Anio, @Mes = :Mes`,
+      {
+        replacements: { Anio, Mes },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Medida actualizada correctamente");
+    return measure;
   } catch (error) {
     consoleHelper.error(error.msg);
     throw new Error(error.msg);
@@ -225,9 +281,12 @@ const execCorte = async () => {
 };
 
 
+
+
 module.exports = {
+  execCorte,
   getMeasurements,
   getMeasurementsByMonthAndYear,
   updateMeasurement,
-  execCorte
+  updateMeasurementForAll,
 };
