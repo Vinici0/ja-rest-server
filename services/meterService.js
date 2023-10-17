@@ -39,6 +39,8 @@ const updateMeterStatus = async (idMedidor, estado) => {
 
 
 
+
+
 module.exports = {
   getMeter,
   updateMeterStatus,

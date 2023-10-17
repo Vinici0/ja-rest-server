@@ -1,22 +1,17 @@
 const { request, response } = require("express");
 const getStream = require("get-stream");
 const fs = require("fs");
-const PDFDocument = require("pdfkit");
+const PDFDocument = require("pdfkit-construct");
 const userService = require("../services/reportService");
 const Response = require("../helpers/response");
-
-const logo = (doc) => {
-  const logoX = (doc.page.width - 50) / 2;
-  doc
-    .image("assets/logo2.png", logoX, 0, { width: 70, align: "center" })
-    .fillColor("#000")
-    .fontSize(20)
-    .font("Helvetica-Bold")
-    .text("JUNTOS POR EL AGUA", { align: "center" })
-    .fontSize(10)
-    .text("URBANIZACION EL PORTON", { align: "center" })
-    .moveDown();
-};
+const {
+  logoClientOne,
+  logoClientTwo,
+  generateHeadersClienteOne,
+  generateHeadersClienteTwo,
+} = require("../helpers/pdf-templates");
+const { generateTableClienteOne, generateTableClienteTwo } = require("../helpers/pdf-tables");
+const { getMeasurements } = require("../services/reportService");
 
 const generateFooter = (doc) => {
   doc.fontSize(10).text("Juntos por el agua", 50, 690, {
@@ -25,31 +20,6 @@ const generateFooter = (doc) => {
   });
 };
 
-const generateHeaders = (doc, factura) => {
-  const logoX = (doc.page.width - 50) / 2;
-  logo(doc);
-
-  const inicioPagina = 50;
-  const finPagina = 550;
-
-  doc.moveTo(inicioPagina, 125).lineTo(finPagina, 125).stroke();
-  // Columna izquierda (negrita)
-  doc.font("Helvetica-Bold").text("Nombre:", inicioPagina, 130);
-  doc.font("Helvetica-Bold").text("Direccion:", inicioPagina, 145);
-  doc.font("Helvetica-Bold").text("Manzana:", inicioPagina, 160);
-  // Columna derecha (fuente predeterminada)
-  doc.font("Helvetica").text(factura.Nombre, inicioPagina + 80, 130);
-  doc.font("Helvetica").text("El Porton", inicioPagina + 80, 145);
-  doc.font("Helvetica").text(factura.Manzana, inicioPagina + 80, 160);
-  // Columna del medio (negrita)
-  doc.font("Helvetica-Bold").text("Lote:", inicioPagina + 220, 145);
-  doc.font("Helvetica-Bold").text("Medidor:", inicioPagina + 220, 160);
-
-  // Columna de la mitad derecha (fuente predeterminada)
-  doc.font("Helvetica").text(factura.Lote, inicioPagina + 320, 145);
-  doc.font("Helvetica").text(factura.Codigo, inicioPagina + 320, 160);
-  doc.moveTo(inicioPagina, 175).lineTo(finPagina, 175).stroke();
-};
 const agregarPagosAnteriores = (doc, pagosAnteriores, startX, startY) => {
   doc.fontSize(10).font("Helvetica");
 
@@ -67,104 +37,33 @@ const agregarPagosAnteriores = (doc, pagosAnteriores, startX, startY) => {
   });
 };
 
-const generateTable = (doc, data) => {
-  const titleTable = 50;
-  const tableTop = 230;
-  const fechaX = 50; // Posición X de la fecha
-  const lecturaAnteriorX = 120; // Ajusta la posición X
-  const lecturaActualX = 220; // Ajusta la posición X
-  const consumoX = 320; // Ajusta la posición X
-  const observacionX = 395; // Ajusta la posición X
-  const totalX = 500; // Ajusta la posición X
-  // doc.fillColor("blue");
-  doc
-    .font("Helvetica-Bold")
-    .fontSize(16)
-    .text("Consumo de Agua", titleTable, 200);
-  doc.moveTo(titleTable, 220).lineTo(550, 220).stroke();
-  doc
-    .fontSize(10)
-    .font("Helvetica-Bold")
-    .text("Fecha", fechaX, tableTop) // Agrega la fecha al principio
-    .text("Lectura Anterior", lecturaAnteriorX, tableTop)
-    .text("Lectura Actual", lecturaActualX, tableTop)
-    .text("Consumo", consumoX, tableTop)
-    .text("Observacion", observacionX, tableTop)
-    .text("Total", totalX, tableTop);
-  // doc.fillColor("black");
-  doc.moveTo(titleTable, 245).lineTo(550, 245).stroke();
-  //imprimie la data en cada fila
-  doc
-    .font("Helvetica")
-    .fontSize(10)
-    .text(data.Mes + "/" + data.Anio, fechaX, tableTop + 25)
-    .text(data.LecturaAnterior, lecturaAnteriorX, tableTop + 25)
-    .text(data.LecturaActual, lecturaActualX, tableTop + 25)
-    .text(data.LecturaActual - data.LecturaAnterior, consumoX, tableTop + 25)
-    .text("S/N", observacionX, tableTop + 25)
-    .text("$" + data.Total, totalX, tableTop + 25);
-
-  //pagaos anteriores
-  const pagosAnteriores = [
-    {
-      Mes: 6,
-      Anio: 2021,
-      Saldo: 100,
-      Codigo: "123",
-      Lote: "1",
-      Manzana: "A",
-      Nombre: "Juan",
-    },
-    {
-      Mes: 7,
-      Anio: 2021,
-      Saldo: 150,
-      Codigo: "123",
-      Lote: "1",
-      Manzana: "A",
-      Nombre: "Juan",
-    },
-    {
-      Mes: 8,
-      Anio: 2021,
-      Saldo: 200,
-      Codigo: "123",
-      Lote: "1",
-      Manzana: "A",
-      Nombre: "Juan",
-    },
-    {
-      Mes: 9,
-      Anio: 2021,
-      Saldo: 50,
-      Codigo: "123",
-      Lote: "1",
-      Manzana: "A",
-      Nombre: "Juan",
-    },
-  ];
-
-  // doc.moveTo(titleTable, 500).lineTo(550, 500).stroke();
-  doc
-    .font("Helvetica-Bold")
-    .fontSize(16)
-    .text("Pagos Pendientes", titleTable, 320);
-  doc.moveTo(titleTable, 340).lineTo(550, 340).stroke();
-
-  agregarPagosAnteriores(doc, pagosAnteriores, titleTable, 350);
-};
-
 const generatePdfMeasure = async (data) => {
   try {
     const doc = new PDFDocument();
+    const measurementsPromises = [];
+    
+    for (let i = 0; i < data.length; i += 2) {
+      let measureOne = data[i];
+      measurementsPromises.push(getMeasurements(measureOne.Anio, measureOne.Codigo));
+    }
 
-    for (const item of data) {
-      // Llama a generateHeaders al comienzo de cada página
-      generateHeaders(doc, item);
-      generateTable(doc, item);
-      generateFooter(doc);
+    const measurements = await Promise.all(measurementsPromises);
+
+    for (let i = 0; i < data.length; i += 2) {
+      let measureOne = data[i];
+      let measureTwo = data[i + 1];
+
+      let tableRow = measurements[i / 2];
+
+      generateHeadersClienteOne(doc, measureOne);
+      if (measureTwo) {
+        generateHeadersClienteTwo(doc, measureTwo);
+        generateTableClienteTwo(doc, tableRow);
+      }
+      generateTableClienteOne(doc, tableRow);
+      // generateFooter(doc);
       // Agregar una nueva página para la siguiente iteración (excepto la última)
-      if (item !== data[data.length - 1]) {
+      if (i + 2 < data.length) {
         doc.addPage();
       }
     }
@@ -184,6 +83,7 @@ const generatePdfMeasure = async (data) => {
   }
 };
 
+
 const generateMeterTable = (doc, data) => {
   const titleTable = 50;
   const tableTop = 160;
@@ -195,7 +95,7 @@ const generateMeterTable = (doc, data) => {
   const manzanaX = 395;
   const estadoX = 475;
 
-  logo(doc);
+  logoClientOne(doc);
 
   doc
     .font("Helvetica-Bold")
@@ -264,7 +164,7 @@ const generateMeterTableCourt = (doc, data) => {
   const saldoX = 450;
   const mesesX = 500;
 
-  logo(doc);
+  logoClientOne(doc);
 
   doc
     .font("Helvetica-Bold")
@@ -296,7 +196,7 @@ const generateMeterTableCourt = (doc, data) => {
       // Restaura el valor de tableTop para la nueva página
       tableTop = 20;
       // maxRecordsPerPage = maxRecordsPerPageAfterFirstPage;
-    
+
       // Muestra el encabezado en las páginas posteriores
       doc
         .fontSize(10)
@@ -307,9 +207,8 @@ const generateMeterTableCourt = (doc, data) => {
         .text("Manzana", manzanaX, tableTop)
         .text("Saldo", saldoX, tableTop)
         .text("Meses", mesesX, tableTop);
-
+      9;
     }
-    
 
     rowTop = tableTop + (currentRow + 1) * 25; // Usa la variable rowTop definida fuera del bucle
 
@@ -380,6 +279,7 @@ const showMeasure = async (req, res) => {
   const bodyArray = req.body;
 
   const pdfStream = await generatePdfMeasure(bodyArray);
+
   res
     .writeHead(200, {
       "Content-Length": Buffer.byteLength(pdfStream),
@@ -425,8 +325,125 @@ const showMeasureCourt = async (req, res) => {
     .end(pdfStream);
 };
 
+const calculoIntrest = async (req, res) => {
+  // Datos de entrada
+  const registros = [
+    {
+      Acumulado: 5.5,
+      Anio: 2023,
+      Basico: 5.5,
+      Codigo: "06-642628",
+      Mes: 6,
+      Nombre: "CURIPOMA BELTRAN ALFONSO MARIA",
+      Saldo: 50,
+      Total: 5.5,
+      Usurario: "Administrador",
+      InteresPorMora: 0,
+    },
+    {
+      Acumulado: 5.5,
+      Anio: 2023,
+      Basico: 5.5,
+      Codigo: "06-642628",
+      Mes: 7,
+      Nombre: "CURIPOMA BELTRAN ALFONSO MARIA",
+      Saldo: 0,
+      Total: 5.5,
+      Usurario: "Administrador",
+      InteresPorMora: 0,
+    },
+    {
+      Acumulado: 5.5,
+      Anio: 2023,
+      Basico: 5.5,
+      Codigo: "06-642628",
+      Mes: 8,
+      Nombre: "CURIPOMA BELTRAN ALFONSO MARIA",
+      Saldo: 1,
+      Total: 5.5,
+      Usurario: "Administrador",
+      InteresPorMora: 0,
+    },
+    {
+      Acumulado: 7.2,
+      Anio: 2023,
+      Basico: 5.5,
+      Codigo: "09-312634",
+      Mes: 9,
+      Nombre: "CURIPOMA BELTRAN ALFONSO MARIA",
+      Saldo: 2.7,
+      Total: 7.2,
+      Usurario: "Administrador",
+      InteresPorMora: 0,
+    },
+    {
+      Acumulado: 12.6,
+      Anio: 2023,
+      Basico: 5.5,
+      Codigo: "05-789012",
+      Mes: 10,
+      Nombre: "CURIPOMA BELTRAN ALFONSO MARIA",
+      Saldo: 7.1,
+      Total: 12.6,
+      Usurario: "Administrador",
+      InteresPorMora: 0,
+    },
+    {
+      Acumulado: 18.3,
+      Anio: 2023,
+      Basico: 5.5,
+      Codigo: "11-456789",
+      Mes: 11,
+      Nombre: "CURIPOMA BELTRAN ALFONSO MARIA",
+      Saldo: 12.8,
+      Total: 18.3,
+      Usurario: "Administrador",
+      InteresPorMora: 0,
+    },
+    {
+      Acumulado: 18.3,
+      Anio: 2023,
+      Basico: 5.5,
+      Codigo: "11-456789",
+      Mes: 12,
+      Nombre: "CURIPOMA BELTRAN ALFONSO MARIA",
+      Saldo: 12.8,
+      Total: 18.3,
+      Usurario: "Administrador",
+      InteresPorMora: 0,
+    },
+  ];
+
+  // Función para calcular el interés por mora si el saldo es mayor que cero
+  const calcularInteresPorMora = (registro) => {
+    const mesActual = 12; // Mes actual
+    const mesesAtraso = mesActual - registro.Mes;
+    const tasaBase = 0.01; // Tasa base de interés por mes de atraso
+    const porcentajeInteres = tasaBase + mesesAtraso * 0.01;
+    return `${porcentajeInteres * 100}%`; // Devuelve el porcentaje de interés
+  };
+
+  // Cantidad de interés a ser pasada como parámetro
+  const tasaInteres = 0.01; // Cantidad de interés a ser ajustada según sea necesario
+
+  // Calcular e imprimir el resultado para cada registro
+  registros.forEach((registro, index) => {
+    registros[index].InteresPorMora = calcularInteresPorMora(
+      registro,
+      tasaInteres
+    );
+  });
+
+  console.log(registros);
+
+  res.json({
+    registros,
+  });
+};
+
 module.exports = {
   showMeasure,
   showMeter,
   showMeasureCourt,
+  calculoIntrest,
 };

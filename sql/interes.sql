@@ -12,17 +12,22 @@ END;
 
 SELECT * FROM JA_Medida WHERE idCliente = 1325 and anio = 2023 order by mes asc
 
-donde saldo sea mayor a 0
-Por cada mes de retraso el interes se duplica
-mes,anio, total, InteresPorRetraso
-02,2023, 1000, total * 
-03,2023, 1000, total * 
-04,2023, 1000, total * 
-05,2023, 1000, total * 
-06,2023, 1000, total *  (InteresPorRetraso * 2)
-07,2023, 1000, total * (InteresPorRetraso * 1)
+--------------------------------------------------------------
+-- ObtenerRegistrosPorSaldoMayorACero
+--------------------------------------------------------------
 
-//aactualizar interes por retraso
-UPDATE [dbo].[JA_Medida]
-SET [InteresPorRetraso] = 0
-WHERE idCliente = 1325 and anio = 2023 and mes = 7
+
+CREATE PROCEDURE ObtenerRegistrosPorSaldoMayorACero
+    @Anio INT,
+    @Codigo NVARCHAR(50)
+AS
+BEGIN
+    SELECT jm.Manzana, jm.Lote, jm.Nombre, cl.codigo, COUNT(*) as meses, SUM(jm.saldo) as saldo
+    FROM ja_medida  jm
+    INNER JOIN Cliente cl ON jm.idcliente = cl.idcliente
+    WHERE ISNULL(jm.Saldo, 0) > 0.01 AND jm.Anio = @Anio AND cl.codigo = @Codigo
+    GROUP BY jm.Manzana, jm.Lote, jm.Nombre, cl.codigo
+    HAVING COUNT(ISNULL(jm.Saldo, 0)) >= (SELECT COUNT(*) FROM ja_medida WHERE ISNULL(Saldo, 0) > 0.01)
+END;
+
+EXEC ObtenerRegistrosPorSaldoMayorACero @Anio = 2023, @Codigo = '67187';

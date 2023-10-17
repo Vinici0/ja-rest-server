@@ -15,7 +15,7 @@ const getMeasurements = async (req = request, res = response) => {
       measure: measure,
       total: measure.length,
     });
-    measure;
+
   } catch (error) {
     return new Response().error(res, error.message);
   }
@@ -57,9 +57,8 @@ const updateMeasurement = async (req, res) => {
       idMedida,
       LecturaActual,
       LecturaAnterior,
-      Mes,
+      Mes
     );
-
 
     return new Response().success(res, "Medida guardada correctamente", {
       measure: result,
@@ -92,10 +91,23 @@ const updateMeasurementForAll = async (req, res) => {
   }
 };
 
+const calculoIntrest = async (req, res) => {
+  const { Anio, Codigo, InteresPorMora } = req.body;
+  try {
+    const result = await measureService.calculoIntrest(Anio, Codigo, 1);
+    return new Response().success(res, "Medidas actualizadas correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   execCorte,
   getMeasurements,
   getMeasurementsByMonthAndYear,
   updateMeasurement,
-  updateMeasurementForAll
+  updateMeasurementForAll,
+  calculoIntrest,
 };
