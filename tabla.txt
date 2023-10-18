@@ -173,3 +173,17 @@ const updateMeasurement = async (
     throw new Error(error.msg);
   }
 };
+
+
+        // console.log(
+        //   "medidas[i].Total",
+        //   medidas[i].Total,
+        //   "accumulatedInterest",
+        //   accumulatedInterest,
+        //   "medidas[i].Saldo",
+        //   medidas[i].Saldo,
+        //   "MES " + medidas[i].Mes,
+        //   "ANIO " + medidas[i].Anio,
+        //   "interestFactor",
+        //   interestFactor
+        // );

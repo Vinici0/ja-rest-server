@@ -20,6 +20,23 @@ const login = async (req, res = response) => {
   }
 };
 
+const renewToken = async (req, res = response) => {
+  const { idJaUsuario } = req;
+  try {
+    const { usuario, token } = await userService.renewToken(idJaUsuario);
+    responseAuth.success(res, "Token renovado correctamente", {
+      usuario,
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Hable con el administrador",
+    });
+  }
+};
+
 module.exports = {
   login,
+  renewToken,
 };

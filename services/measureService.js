@@ -1,6 +1,7 @@
 const sequelize = require("sequelize");
 const { dbConnection } = require("../database/config");
 const Console = require("../helpers/console");
+const { calculateAndUpdateMedidas } = require("../helpers/measure-calculate");
 const consoleHelper = new Console("User Service");
 
 const getMeasurements = async () => {
@@ -113,9 +114,6 @@ const updateMeasurement = async (
       }
     );
 
-    console.log(medidas);
-
-    // Ordenar por Anio y mes en JavaScript
     medidas.sort((a, b) => {
       if (a.Anio < b.Anio) {
         return 1;
@@ -133,64 +131,7 @@ const updateMeasurement = async (
       return 0;
     });
 
-    let accumulatedInterest = 0; // Inicializar el interés acumulado
-
-    for (let i = 1; i < medidas.length; i++) {
-      const monthsDifference =
-        (medidas[i - 1].Anio - medidas[i].Anio) * 12 +
-        (medidas[i - 1].Mes - medidas[i].Mes);
-
-      if (monthsDifference > 0) {
-        let Excedente = medidas[i].LecturaActual - medidas[i].LecturaAnterior;
-        let ExcedenteV = 0;
-
-        if (Excedente >= 0 && Excedente <= 15) {
-          Excedente = 0;
-          ExcedenteV = 0;
-        } else if (Excedente >= 16 && Excedente <= 39) {
-          Excedente = Excedente - 15;
-          ExcedenteV = 0.25 * Excedente;
-        } else if (Excedente >= 40 && Excedente <= 49) {
-          Excedente = Excedente - 15;
-          ExcedenteV = 0.5 * Excedente;
-        } else if (Excedente >= 50) {
-          Excedente = Excedente - 15;
-          ExcedenteV = 1 * Excedente;
-        }
-        let interesIncremtent = 0;
-        if (interestFactor === 0) {
-          interesIncremtent = 0.05;
-        } else {
-          interesIncremtent = INTERES_BASE + interestFactor;
-        }
-
-        let totalExcedente = medidas[i].Total + ExcedenteV; // Total más excedente
-        let interest = interesIncremento * totalExcedente; // Cálculo del interés
-        accumulatedInterest += interest; // Acumulación del interés
-        
-        medidas[i].Total += accumulatedInterest; // Actualización del total con el interés acumulado
-        medidas[i].Saldo = medidas[i].Total; // Actualización del saldo con el nuevo total
-        
-        medidas[i].Total = Number(medidas[i].Total.toFixed(2)); // Redondeo del total
-        accumulatedInterest = Number(accumulatedInterest.toFixed(2)); // Redondeo del interés acumulado
-        medidas[i].Saldo = Number(medidas[i].Saldo.toFixed(2)); // Redondeo del saldo
-        
-        console.log(
-          "medidas[i].Total",
-          medidas[i].Total,
-          "interest",
-          interest,
-          "medidas[i].Saldo",
-          medidas[i].Saldo,
-          "MES " + medidas[i].Mes,
-          "ANIO " + medidas[i].Anio,
-          "interestFactor",
-          interestFactor
-        );
-        
-        interestFactor += 0.01; // Incremento del factor de interés en 1%
-      }
-    }
+    await calculateAndUpdateMedidas(medidas, INTERES_BASE, dbConnection, sequelize);
 
     return {
       Anio,
@@ -335,8 +276,6 @@ const addInterestIfUnpaidV2 = async (Anio, Mes) => {
 
 // EXEC ActualizarLecturaActualParaTodos @Anio = 2023, @Mes = 11
 const updateMeasurementForAll = async (Anio, Mes) => {
-  console.log("Anio", Anio);
-  console.log("Mes", Mes);
   try {
     const measure = await dbConnection.query(
       `EXEC ActualizarLecturaActualParaTodos @Anio = :Anio, @Mes = :Mes`,
@@ -362,7 +301,6 @@ const calculoIntrest = async (Anio, Codigo, InteresPorMora) => {
         type: sequelize.QueryTypes.SELECT,
       }
     );
-    console.log(registros);
     const calcularInteresPorMora = (registro, interesPorMora) => {
       const mesActual = 12; // Mes actual
       const mesesAtraso = mesActual - registro.Mes;
