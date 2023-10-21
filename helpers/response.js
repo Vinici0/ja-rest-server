@@ -1,6 +1,15 @@
 class Response {
   // Método para respuestas de éxito
   success(res, msg, data, status = 200) {
+    if (data.token && data.usuario) {
+      return res.status(status).json({
+        ok: true,
+        msg,
+        data: data.usuario,
+        token: data.token,
+      });
+    }
+
     return res.status(status).json({
       ok: true,
       msg,
@@ -16,7 +25,7 @@ class Response {
       data: "",
     });
   }
-  
+
   // Método para respuestas con datos y mensaje personalizado
   custom(res, msg, data, status = 200) {
     return res.status(status).json({

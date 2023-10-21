@@ -1,5 +1,4 @@
 const bcryptjs = require("bcryptjs");
-const bcryptjs = require("bcryptjs");
 const sequelize = require("sequelize");
 
 const { dbConnection } = require("../database/config");
@@ -7,38 +6,39 @@ const { generarJWT } = require("../helpers/generar-jwt");
 const Console = require("../helpers/console");
 
 const consoleHelper = new Console("Auth Service");
-
-const login = async (correo, password) => {
+const login = async (email, password) => {
   try {
     const usuario = await dbConnection.query(
-      "SELECT * FROM Usuario WHERE Correo = :correo",
+      "SELECT * FROM JA_Usuario WHERE email = :email",
       {
         replacements: {
-          correo,
+          email,
         },
         type: sequelize.QueryTypes.SELECT,
       }
     );
 
-    if (!usuario) {
-      throw new Error("Usuario / Password no son correctos - correo");
-    }
-    const validPassword = bcryptjs.compareSync(password, usuario[0].Password);
-    if (!validPassword) {
-      throw new Error("Usuario / Password no son correctos - password");
+    if (!usuario || usuario.length === 0) {
+      throw new Error("Usuario / Password no son correctos");
     }
 
-    const token = await generarJWT(usuario[0].idUsuario);
+    const validPassword = bcryptjs.compareSync(password, usuario[0].password);
+    if (!validPassword) {
+      throw new Error("Usuario / Password no son correctos");
+    }
+
+    const token = await generarJWT(usuario[0].idJaUsuario);
     consoleHelper.success("Login correcto");
     return {
       usuario: usuario[0],
       token,
     };
   } catch (error) {
-    consoleHelper.error(error.msg);
-    throw new Error(error.msg);
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
   }
 };
+
 
 const renewToken = async (idJaUsuario) => {
   try {
@@ -51,8 +51,7 @@ const renewToken = async (idJaUsuario) => {
         type: sequelize.QueryTypes.SELECT,
       }
     );
-
-    const token = await generarJWT(usuario[0].id);
+    const token = await generarJWT(usuario[0].idJaUsuario);
     consoleHelper.success("Token renovado correctamente");
     return {
       usuario: usuario[0],

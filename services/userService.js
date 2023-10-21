@@ -6,7 +6,7 @@ const consoleHelper = new Console("User Service");
 
 const getUsers = async () => {
   try {
-    const users = await dbConnection.query("SELECT * FROM Usuario", {
+    const users = await dbConnection.query("SELECT * FROM JA_Usuario", {
       type: sequelize.QueryTypes.SELECT,
     });
 
@@ -18,22 +18,42 @@ const getUsers = async () => {
   }
 };
 
-const createUser = async ({ nombre, email, password, rol }) => {
+const createUser = async ({ nombre, email, password, role }) => {
   try {
     const salt = bcryptjs.genSaltSync();
     const hashedPassword = bcryptjs.hashSync(password, salt);
+
+    //Que el correo no exista
+    const userExist = await dbConnection.query(
+      "SELECT * FROM JA_Usuario WHERE email = :email",
+      {
+        replacements: {
+          email,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    if (userExist.length > 0) {
+      return {
+        msg: "El correo ya existe",
+        status: 400,
+      };
+    }
+
     const user = await dbConnection.query(
-      "INSERT INTO Usuario (Nombre, Correo, Password, Rol) VALUES (:nombre, :email, :password, :rol)",
+      "EXEC InsertarUsuario :nombre, :email, :password, :role",
       {
         replacements: {
           nombre,
           email,
           password: hashedPassword,
-          rol,
+          role,
         },
-        type: sequelize.QueryTypes.INSERT,
+        type: sequelize.QueryTypes.SELECT,
       }
     );
+
     consoleHelper.success("Usuario creado correctamente");
     return user;
   } catch (error) {
@@ -51,7 +71,7 @@ const updateUser = async (id, dataToUpdate) => {
           password = :password, 
           img = :img, 
           role = :role 
-      WHERE id = :id`,
+      WHERE idJaUsuario = :id`,
       {
         replacements: {
           id,
@@ -68,7 +88,24 @@ const updateUser = async (id, dataToUpdate) => {
   }
 };
 
-const deleteUser = async (id) => {};
+const deleteUser = async (id) => {
+  try {
+    const user = await dbConnection.query(
+      "DELETE FROM JA_Usuario WHERE idJaUsuario = :id",
+      {
+        replacements: {
+          id,
+        },
+        type: sequelize.QueryTypes.DELETE,
+      }
+    );
+    consoleHelper.success("Usuario eliminado correctamente");
+    return user;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
 
 module.exports = {
   getUsers,

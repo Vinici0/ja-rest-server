@@ -18,6 +18,7 @@ class Server {
       reports: "/api/v1/reports",
       meters: "/api/v1/meters",
       customers: "/api/v1/customers",
+      fines: "/api/v1/fines",
     };
 
     // Conectar a base de datos
@@ -62,11 +63,16 @@ class Server {
   }
 
   routes() {
-    this.app.use(this.paths.users, require("../v1/routes/userRoutes.js"));
+    this.app.use(this.paths.auth, require("../v1/routes/authRoute.js"));
+    this.app.use(
+      this.paths.customers,
+      require("../v1/routes/customerRoute.js")
+    );
     this.app.use(this.paths.measures, require("../v1/routes/measureRoute.js"));
-    this.app.use(this.paths.reports, require("../v1/routes/reportRoute.js"));
     this.app.use(this.paths.meters, require("../v1/routes/meterRoute.js"));
-    this.app.use(this.paths.customers, require("../v1/routes/customerRoute.js"));
+    this.app.use(this.paths.reports, require("../v1/routes/reportRoute.js"));
+    this.app.use(this.paths.users, require("../v1/routes/userRoutes.js"));
+    this.app.use(this.paths.fines, require("../v1/routes/fineRoute.js"));
   }
 
   listen() {

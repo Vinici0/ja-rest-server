@@ -1,6 +1,7 @@
 const { request, response } = require("express");
 const userService = require("../services/userService");
 const Response = require("../helpers/response");
+const { generarJWT } = require("../helpers/generar-jwt");
 
 const responseUsuario = new Response();
 
@@ -19,16 +20,19 @@ const getUsers = async (req, res) => {
 
 const createUser = async (req, res = response) => {
   try {
-    const { nombre, email, password, rol } = req.body;
+    const { nombre, email, password, role } = req.body;
     const usuario = await userService.createUser({
       nombre,
       email,
       password,
-      rol,
+      role,
     });
-    responseUsuario.success(res, "Usuario creado correctamente", usuario, 201);
+
+    const token = await generarJWT(usuario.idJaUsuario);
+
+    responseUsuario.success(res, "Usuario creado correctamente", {  usuario, token }, 201);
   } catch (error) {
-    responseUsuario.error(res, error.msg, error.status || 500);
+    responseUsuario.error(res, usuario.msg, usuario.status || 500);
   }
 };
 

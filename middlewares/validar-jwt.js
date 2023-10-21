@@ -13,7 +13,6 @@ const validateJWT = (req, res, next) => {
 
   try {
     const { idJaUsuario } = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
-
     req.idJaUsuario = idJaUsuario;
 
     next();
