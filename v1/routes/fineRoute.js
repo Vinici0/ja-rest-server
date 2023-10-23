@@ -3,11 +3,16 @@ const { check } = require("express-validator");
 const { validarCampos } = require("../../middlewares/validar-campos");
 
 const {
-  getFines,
   createFine,
+  createFineDetail,
   deleteFine,
+  deleteFineDetail,
   getFineById,
+  getFinesDetails,
+  getFines,
+  togglePaymentStatus,
   updateFine,
+  updateFineDetail,
 } = require("../../controllers/fineController");
 
 const router = Router();

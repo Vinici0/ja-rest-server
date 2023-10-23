@@ -58,9 +58,19 @@ const generatePdfMeasure = async (data) => {
       generateHeadersClienteOne(doc, measureOne);
       if (measureTwo) {
         generateHeadersClienteTwo(doc, measureTwo);
-        generateTableClienteTwo(doc, tableRow);
+        if (tableRow && tableRow.length > 0) {
+          generateTableClienteTwo(doc, tableRow);
+        } else {
+          // Lógica para manejar el caso en el que no hay datos para la tabla
+          // Puede ser un mensaje o un aviso apropiado.
+        }
       }
-      generateTableClienteOne(doc, tableRow);
+      if (tableRow && tableRow.length > 0) {
+        generateTableClienteOne(doc, tableRow);
+      } else {
+        // Lógica para manejar el caso en el que no hay datos para la tabla
+        // Puede ser un mensaje o un aviso apropiado.
+      }
       // generateFooter(doc);
       // Agregar una nueva página para la siguiente iteración (excepto la última)
       if (i + 2 < data.length) {
@@ -82,6 +92,11 @@ const generatePdfMeasure = async (data) => {
     return null;
   }
 };
+
+
+
+
+
 
 
 const generateMeterTable = (doc, data) => {

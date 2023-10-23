@@ -43,75 +43,85 @@ const logoClientTwo = (doc) => {
 };
 
 const generateHeadersClienteOne = (doc, factura) => {
-  logoClientOne(doc);
-  logoClientTwo(doc);
-  const inicioPagina = 50;
-  const finPagina = 550;
-  const headerY = 75;
-  const defaultFont = "Helvetica";
-  const boldFont = "Helvetica-Bold";
-  const leftColumnX = inicioPagina;
-  const middleColumnX = inicioPagina + 220;
-  const rightColumnX = inicioPagina + 320;
-  const firstRowY = 85;
-  const secondRowY = 100;
-  const thirdRowY = 115;
-  const separatorY = 130;
+  try {
+    logoClientOne(doc);
+    logoClientTwo(doc);
+    const inicioPagina = 50;
+    const finPagina = 550;
+    const headerY = 75;
+    const defaultFont = "Helvetica";
+    const boldFont = "Helvetica-Bold";
+    const leftColumnX = inicioPagina;
+    const middleColumnX = inicioPagina + 220;
+    const rightColumnX = inicioPagina + 320;
+    const firstRowY = 85;
+    const secondRowY = 100;
+    const thirdRowY = 115;
+    const separatorY = 130;
 
-  doc.moveTo(inicioPagina, headerY).lineTo(finPagina, headerY).stroke();
-  // Columna izquierda (negrita)
-  doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY);
-  doc.font(boldFont).text("Direccion:", leftColumnX, secondRowY);
-  doc.font(boldFont).text("Manzana:", leftColumnX, thirdRowY);
-  // Columna derecha (fuente predeterminada)
-  doc.font(defaultFont).text(factura.Nombre, leftColumnX + 80, firstRowY);
-  doc.font(defaultFont).text("El Porton", leftColumnX + 80, secondRowY);
-  doc.font(defaultFont).text(factura.Manzana, leftColumnX + 80, thirdRowY);
-  // Columna del medio (negrita)
-  doc.font(boldFont).text("Lote:", middleColumnX, secondRowY);
-  doc.font(boldFont).text("Medidor:", middleColumnX, thirdRowY);
+    doc.moveTo(inicioPagina, headerY).lineTo(finPagina, headerY).stroke();
+    // Columna izquierda (negrita)
+    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY);
+    doc.font(boldFont).text("Direccion:", leftColumnX, secondRowY);
+    doc.font(boldFont).text("Manzana:", leftColumnX, thirdRowY);
+    // Columna derecha (fuente predeterminada)
+    doc.font(defaultFont).text(factura.Nombre, leftColumnX + 80, firstRowY);
+    doc.font(defaultFont).text("El Porton", leftColumnX + 80, secondRowY);
+    doc.font(defaultFont).text(factura.Manzana, leftColumnX + 80, thirdRowY);
+    // Columna del medio (negrita)
+    doc.font(boldFont).text("Lote:", middleColumnX, secondRowY);
+    doc.font(boldFont).text("Medidor:", middleColumnX, thirdRowY);
 
-  // Columna de la mitad derecha (fuente predeterminada)
-  doc.font(defaultFont).text(factura.Lote, rightColumnX, secondRowY);
-  doc.font(defaultFont).text(factura.Codigo, rightColumnX, thirdRowY);
-  doc.moveTo(inicioPagina, separatorY).lineTo(finPagina, separatorY).stroke();
+    // Columna de la mitad derecha (fuente predeterminada)
+    doc.font(defaultFont).text(factura.Lote, rightColumnX, secondRowY);
+    doc.font(defaultFont).text(factura.Codigo, rightColumnX, thirdRowY);
+    doc.moveTo(inicioPagina, separatorY).lineTo(finPagina, separatorY).stroke();
+  } catch (error) {
+    // Manejo de errores
+    console.error("Ha ocurrido un error:", error);
+    // O puedes manejar el error de otra manera más adecuada para tu caso
+  }
 };
 
 const generateHeadersClienteTwo = (doc, factura) => {
-  const logoY = 200; // Ajusta esto según la posición en Y donde deseas que comience el encabezado
-  const inicioPagina = 50;
-  const finPagina = 550;
-  const headerY = logoY + 270; // Ajusta esto según la posición en Y donde deseas que comience el encabezado
-  const defaultFont = "Helvetica";
-  const boldFont = "Helvetica-Bold";
-  const leftColumnX = inicioPagina;
-  const middleColumnX = inicioPagina + 220;
-  const rightColumnX = inicioPagina + 320;
-  const firstRowY = headerY + 10;
-  const secondRowY = headerY + 25;
-  const thirdRowY = headerY + 40;
-  const separatorY = headerY + 55;
+  try {
+    const logoY = 200; // Ajusta esto según la posición en Y donde deseas que comience el encabezado
+    const inicioPagina = 50;
+    const finPagina = 550;
+    const headerY = logoY + 270; // Ajusta esto según la posición en Y donde deseas que comience el encabezado
+    const defaultFont = "Helvetica";
+    const boldFont = "Helvetica-Bold";
+    const leftColumnX = inicioPagina;
+    const middleColumnX = inicioPagina + 220;
+    const rightColumnX = inicioPagina + 320;
+    const firstRowY = headerY + 10;
+    const secondRowY = headerY + 25;
+    const thirdRowY = headerY + 40;
+    const separatorY = headerY + 55;
 
-  doc.moveTo(inicioPagina, headerY).lineTo(finPagina, headerY).stroke();
-  // Columna izquierda (negrita)
-  doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY);
-  doc.font(boldFont).text("Direccion:", leftColumnX, secondRowY);
-  doc.font(boldFont).text("Manzana:", leftColumnX, thirdRowY);
-  // Columna derecha (fuente predeterminada)
-  doc.font(defaultFont).text(factura.Nombre, leftColumnX + 80, firstRowY);
-  doc.font(defaultFont).text("El Porton", leftColumnX + 80, secondRowY);
-  doc.font(defaultFont).text(factura.Manzana, leftColumnX + 80, thirdRowY);
-  // Columna del medio (negrita)
-  doc.font(boldFont).text("Lote:", middleColumnX, secondRowY);
-  doc.font(boldFont).text("Medidor:", middleColumnX, thirdRowY);
+    doc.moveTo(inicioPagina, headerY).lineTo(finPagina, headerY).stroke();
+    // Columna izquierda (negrita)
+    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY);
+    doc.font(boldFont).text("Direccion:", leftColumnX, secondRowY);
+    doc.font(boldFont).text("Manzana:", leftColumnX, thirdRowY);
+    // Columna derecha (fuente predeterminada)
+    doc.font(defaultFont).text(factura.Nombre, leftColumnX + 80, firstRowY);
+    doc.font(defaultFont).text("El Porton", leftColumnX + 80, secondRowY);
+    doc.font(defaultFont).text(factura.Manzana, leftColumnX + 80, thirdRowY);
+    // Columna del medio (negrita)
+    doc.font(boldFont).text("Lote:", middleColumnX, secondRowY);
+    doc.font(boldFont).text("Medidor:", middleColumnX, thirdRowY);
 
-  // Columna de la mitad derecha (fuente predeterminada)
-  doc.font(defaultFont).text(factura.Lote, rightColumnX, secondRowY);
-  doc.font(defaultFont).text(factura.Codigo, rightColumnX, thirdRowY);
-  doc.moveTo(inicioPagina, separatorY).lineTo(finPagina, separatorY).stroke();
+    // Columna de la mitad derecha (fuente predeterminada)
+    doc.font(defaultFont).text(factura.Lote, rightColumnX, secondRowY);
+    doc.font(defaultFont).text(factura.Codigo, rightColumnX, thirdRowY);
+    doc.moveTo(inicioPagina, separatorY).lineTo(finPagina, separatorY).stroke();
+  } catch (error) {
+    // Manejo de errores
+    console.error("Ha ocurrido un error:", error);
+    // O puedes manejar el error de otra manera más adecuada para tu caso
+  }
 };
-
-
 
 module.exports = {
   logoClientOne,

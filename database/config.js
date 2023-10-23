@@ -1,8 +1,8 @@
 const sequelize = require("sequelize");
 
-const dbConnection = new sequelize("JUNTADEAGUAELPORTON", "Maria2", "root", {
-  host: "localhost", // Cambia el host si es necesario
-  dialect: "mssql", // Utiliza 'mssql' para SQL Server
+const dbConnection = new sequelize("JUNTADEAGUAELPORTON_ANGULAR", "rest_server_v2", "root", {
+  host: "192.168.3.21", 
+  dialect: "mssql", 
 });
 
 module.exports = {

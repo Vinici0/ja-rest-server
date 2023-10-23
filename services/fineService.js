@@ -98,10 +98,14 @@ const deleteFine = async (idMulta) => {
   }
 };
 
+/* 
+    Fine Details
+*/
 const createFineDetail = async (fineDetail) => {
   try {
+    console.log(fineDetail);
     const newFineDetail = await dbConnection.query(
-      `INSERT INTO JA_MultaDetalle (id_cliente, id_multa, valor_pagar, date_fine, descripcion, tipo_multa) VALUES (:id_cliente, :id_multa, :valor_pagar, :date_fine, :descripcion, :tipo_multa)`,
+      `INSERT INTO JA_MultaDetalle (id_cliente, id_multa, valor_pagar, date_fine, descripcion) VALUES (:id_cliente, :id_multa, :valor_pagar, :date_fine, :descripcion)`,
       {
         replacements: {
           id_cliente: fineDetail.id_cliente,
@@ -125,8 +129,10 @@ const createFineDetail = async (fineDetail) => {
 
 const updateFineDetail = async (idMultaDetalle, fineDetail) => {
   try {
+    // const date_fine = new Date(fineDetail.date_fine).toISOString().substring(0, 10);
+    // console.log(date_fine);
     const updatedFineDetail = await dbConnection.query(
-      `UPDATE JA_MultaDetalle SET id_cliente = :id_cliente, id_multa = :id_multa, valor_pagar = :valor_pagar, date_fine = :date_fine, descripcion = :descripcion, tipo_multa = :tipo_multa WHERE idMultaDetalle = :idMultaDetalle`,
+      `UPDATE JA_MultaDetalle SET id_cliente = :id_cliente, id_multa = :id_multa, valor_pagar = :valor_pagar, date_fine = :date_fine, descripcion = :descripcion WHERE idMultaDetalle = :idMultaDetalle`,
       {
         replacements: {
           id_cliente: fineDetail.id_cliente,
@@ -134,7 +140,6 @@ const updateFineDetail = async (idMultaDetalle, fineDetail) => {
           valor_pagar: fineDetail.valor_pagar,
           date_fine: fineDetail.date_fine,
           descripcion: fineDetail.descripcion,
-          tipo_multa: fineDetail.tipo_multa,
           idMultaDetalle,
         },
         type: sequelize.QueryTypes.UPDATE,
@@ -151,6 +156,8 @@ const updateFineDetail = async (idMultaDetalle, fineDetail) => {
 
 const togglePaymentStatus = async (idMultaDetalle, pagado) => {
   try {
+    console.log("togglePaymentStatus");
+    console.log(idMultaDetalle, pagado);
     const updatedPaymentStatus = await dbConnection.query(
       `UPDATE JA_MultaDetalle SET pagado = :pagado WHERE idMultaDetalle = :idMultaDetalle`,
       {
@@ -173,11 +180,12 @@ const togglePaymentStatus = async (idMultaDetalle, pagado) => {
 const getFineDetails = async () => {
   try {
     const fineDetails = await dbConnection.query(
-      "SELECT * FROM JA_MultaDetalle INNER JOIN Cliente ON JA_MultaDetalle.id_cliente = Cliente.idCliente",
+      "SELECT JA_MultaDetalle.id_cliente,date_fine,descripcion,pagado,valor_pagar,idMultaDetalle,nombre, ruc,typeFine  FROM JA_MultaDetalle INNER JOIN Cliente ON JA_MultaDetalle.id_cliente = Cliente.idCliente INNER JOIN JA_Multa ON JA_MultaDetalle.id_multa = JA_Multa.idMulta",
       {
         type: sequelize.QueryTypes.SELECT,
       }
     );
+    console.log(fineDetails);
     consoleHelper.success("Detalles de multas obtenidos correctamente");
     return fineDetails;
   } catch (error) {
@@ -186,7 +194,49 @@ const getFineDetails = async () => {
   }
 };
 
+const deleteFineDetail = async (idMultaDetalle) => {
+  try {
+    const deletedFineDetail = await dbConnection.query(
+      `DELETE FROM JA_MultaDetalle WHERE idMultaDetalle = :idMultaDetalle`,
+      {
+        replacements: {
+          idMultaDetalle,
+        },
+        type: sequelize.QueryTypes.DELETE,
+      }
+    );
+
+    consoleHelper.success("Detalle de multa eliminada correctamente");
+    return deletedFineDetail;
+  } catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
+};
+
+//Obtener por id fineDetail
+const getFineDetailById = async (idMultaDetalle) => {
+  try {
+    const fineDetail = await dbConnection.query(
+      "SELECT JA_MultaDetalle.idMultaDetalle, Cliente.Nombre, Cliente.Ruc, Cliente.Telefono, JA_Multa.typeFine, JA_Multa.cost, JA_MultaDetalle.descripcion, JA_MultaDetalle.date_fine, JA_MultaDetalle.id_cliente, JA_MultaDetalle.id_multa, JA_MultaDetalle.valor_pagar FROM JA_MultaDetalle INNER JOIN Cliente ON JA_MultaDetalle.id_cliente = Cliente.idCliente INNER JOIN JA_Multa ON JA_MultaDetalle.id_multa = JA_Multa.idMulta WHERE JA_MultaDetalle.idMultaDetalle = :idMultaDetalle",
+      {
+        replacements: {
+          idMultaDetalle,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    console.log(fineDetail);
+    consoleHelper.success("Detalle de multa obtenida correctamente");
+    return fineDetail;
+  } catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
+};
+
 module.exports = {
+  deleteFineDetail,
   createFine,
   createFineDetail,
   deleteFine,
@@ -196,4 +246,5 @@ module.exports = {
   togglePaymentStatus,
   updateFine,
   updateFineDetail,
+  getFineDetailById,
 };

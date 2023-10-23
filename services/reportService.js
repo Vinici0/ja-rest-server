@@ -6,7 +6,7 @@ const getMeasurements = async (Anio, Codigo) => {
     const medidaCliente = await dbConnection.query(
       "SELECT * FROM JA_Medida WHERE Anio = :Anio AND Codigo = :Codigo AND Saldo > 0 ORDER BY Mes DESC",
       {
-        replacements: { Anio,Codigo },
+        replacements: { Anio, Codigo },
         type: sequelize.QueryTypes.SELECT,
       }
     );
@@ -17,6 +17,23 @@ const getMeasurements = async (Anio, Codigo) => {
   }
 };
 
+const getDetatailFinesByClient = async (id_cliente) => {
+  try {
+    const detalleMultas = await dbConnection.query(
+      "SELECT * FROM JA_MultaDetalle WHERE id_cliente = :id_cliente",
+      {
+        replacements: { id_cliente},
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    return detalleMultas;
+  } catch (error) {
+    // consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 module.exports = {
   getMeasurements,
+  getDetatailFinesByClient,
 };

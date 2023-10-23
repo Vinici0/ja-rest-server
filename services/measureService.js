@@ -47,6 +47,7 @@ const updateMeasurement = async (
   LecturaAnterior,
   Mes
 ) => {
+ 
   try {
     const INTERES_BASE = 0.05;
     let interestFactor = 0.0; // Factor de interés inicial
@@ -73,7 +74,7 @@ const updateMeasurement = async (
 
     const Total = Basico + ExcedenteV;
     const Pago = 0;
-
+console.log(Anio,  Mes - 1, Codigo );
     const medida = await dbConnection.query(
       `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
       {
@@ -81,6 +82,8 @@ const updateMeasurement = async (
         type: sequelize.QueryTypes.SELECT,
       }
     );
+
+    console.log("medida", medida);
 
     //TODO: Resolver el problema de la medida anterior cuando es el primer mes del Anio
     if (medida.length === 0) {
