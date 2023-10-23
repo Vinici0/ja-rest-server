@@ -14,6 +14,17 @@ const getEmpresaById = async (req = request, res = response) => {
   }
 };
 
+const getEmpresa = async (req = request, res = response) => {
+  try {
+    const empresa = await configService.getEmpresa();
+    return new Response().success(res, "Empresa obtenida correctamente", {
+      empresa: empresa,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 const updateEmpresa = async (req = request, res = response) => {
   const { id } = req.params;
   const { body } = req;
@@ -42,6 +53,14 @@ const updateTabla = async (req = request, res = response) => {
   const { id } = req.params;
   const { body } = req;
   try {
+    if (
+      body.Desde < 0 ||
+      body.Hasta < 0 ||
+      body.Basico < 0 ||
+      body.ValorExc < 0
+    )
+      throw new Error("Ningún valor puede ser menor a 0");
+
     const tabla = await configService.updateTabla(id, body);
     return new Response().success(res, "Tabla actualizada correctamente", {
       tabla: tabla,
@@ -82,4 +101,5 @@ module.exports = {
   updateTabla,
   getInteres,
   updateInteres,
+  getEmpresa
 };

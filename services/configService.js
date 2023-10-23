@@ -20,6 +20,18 @@ const getEmpresaById = async (idEmpresa) => {
   }
 };
 
+const getEmpresa = async () => {
+  try {
+    const empresa = await dbConnection.query("SELECT * FROM JA_Empresa", {
+      type: sequelize.QueryTypes.SELECT,
+    });
+    return empresa;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 const updateEmpresa = async (idEmpresa, data) => {
   try {
     const empresa = await dbConnection.query(
@@ -119,4 +131,5 @@ module.exports = {
   updateTabla,
   getInteres,
   updateInteres,
+  getEmpresa
 };

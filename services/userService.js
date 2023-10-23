@@ -18,6 +18,25 @@ const getUsers = async () => {
   }
 };
 
+const getUserById = async (id) => {
+  try {
+    const user = await dbConnection.query(
+      "SELECT * FROM JA_Usuario WHERE idJaUsuario = :id",
+      {
+        replacements: {
+          id,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Usuario obtenido correctamente");
+    return user;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 const createUser = async ({ nombre, email, password, role }) => {
   try {
     const salt = bcryptjs.genSaltSync();
@@ -112,4 +131,5 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  getUserById
 };

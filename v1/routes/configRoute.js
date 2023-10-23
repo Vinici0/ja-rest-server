@@ -10,11 +10,14 @@ const {
   updateTabla,
   getInteres,
   updateInteres,
+  getEmpresa
 } = require("../../controllers/configController");
 
 const router = Router();
 
 router.get("/empresa/:id", getEmpresaById);
+
+router.get("/empresa", getEmpresa);
 
 router.put(
   "/empresa/:id",

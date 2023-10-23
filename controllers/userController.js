@@ -18,6 +18,16 @@ const getUsers = async (req, res) => {
   }
 };
 
+const getUserById = async (req, res = response) => {
+  try {
+    const { id } = req.params;
+    const usuario = await userService.getUserById(id);
+    responseUsuario.success(res, "Usuario obtenido correctamente", usuario);
+  } catch (error) {
+    responseUsuario.error(res, error.msg, error.status || 500);
+  }
+};
+
 const createUser = async (req, res = response) => {
   try {
     const { nombre, email, password, role } = req.body;
@@ -30,7 +40,12 @@ const createUser = async (req, res = response) => {
 
     const token = await generarJWT(usuario.idJaUsuario);
 
-    responseUsuario.success(res, "Usuario creado correctamente", {  usuario, token }, 201);
+    responseUsuario.success(
+      res,
+      "Usuario creado correctamente",
+      { usuario, token },
+      201
+    );
   } catch (error) {
     responseUsuario.error(res, usuario.msg, usuario.status || 500);
   }
@@ -63,4 +78,5 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  getUserById
 };
