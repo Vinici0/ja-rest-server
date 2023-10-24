@@ -10,7 +10,7 @@ const {
   updateTabla,
   getInteres,
   updateInteres,
-  getEmpresa
+  getEmpresa,
 } = require("../../controllers/configController");
 
 const router = Router();
@@ -21,12 +21,7 @@ router.get("/empresa", getEmpresa);
 
 router.put(
   "/empresa/:id",
-  [
-    check("nombre", "El nombre es obligatorio").not().isEmpty(),
-    check("direccion", "La dirección es obligatoria").not().isEmpty(),
-    check("telefono", "El teléfono es obligatorio").not().isEmpty(),
-    validarCampos,
-  ],
+
   updateEmpresa
 );
 

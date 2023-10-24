@@ -10,8 +10,14 @@ const {
   generateHeadersClienteOne,
   generateHeadersClienteTwo,
 } = require("../helpers/pdf-templates");
-const { generateTableClienteOne, generateTableClienteTwo } = require("../helpers/pdf-tables");
-const { getMeasurements } = require("../services/reportService");
+const {
+  generateTableClienteOne,
+  generateTableClienteTwo,
+} = require("../helpers/pdf-tables");
+const {
+  getMeasurements,
+  getInteresBase,
+} = require("../services/reportService");
 
 const generateFooter = (doc) => {
   doc.fontSize(10).text("Juntos por el agua", 50, 690, {
@@ -41,38 +47,66 @@ const generatePdfMeasure = async (data) => {
   try {
     const doc = new PDFDocument();
     const measurementsPromises = [];
-    
+    const multasPromises = [];
+    console.log(
+      "const INTERES_BASE = await getInteresBase()[0].interes / 100;"
+    );
+    const INTERES_BASE = await getInteresBase();
+    console.log(INTERES_BASE);
     for (let i = 0; i < data.length; i += 2) {
       let measureOne = data[i];
-      measurementsPromises.push(getMeasurements(measureOne.Anio, measureOne.Codigo));
+      let measureTwo = data[i + 1]; // Asegúrate de verificar si measureTwo no es undefined antes de usarlo
+
+      measurementsPromises.push(
+        getMeasurements(measureOne.Anio, measureOne.Codigo)
+      );
+      if (measureTwo) {
+        measurementsPromises.push(
+          getMeasurements(measureTwo.Anio, measureTwo.Codigo)
+        );
+      }
+
+      multasPromises.push(userService.getFineByClient(measureOne.idCliente));
+      if (measureTwo) {
+        multasPromises.push(userService.getFineByClient(measureTwo.idCliente));
+      }
     }
 
     const measurements = await Promise.all(measurementsPromises);
+    const multas = await Promise.all(multasPromises);
 
     for (let i = 0; i < data.length; i += 2) {
       let measureOne = data[i];
       let measureTwo = data[i + 1];
 
-      let tableRow = measurements[i / 2];
+      let tableRowOne = measurements[i];
+      let tableRowTwo = measurements[i + 1];
+
+      let multasClienteOne = multas[i];
+      let multasClienteTwo = multas[i + 1];
 
       generateHeadersClienteOne(doc, measureOne);
       if (measureTwo) {
         generateHeadersClienteTwo(doc, measureTwo);
-        if (tableRow && tableRow.length > 0) {
-          generateTableClienteTwo(doc, tableRow);
+        if (tableRowTwo && tableRowTwo.length > 0) {
+          generateTableClienteTwo(
+            doc,
+            tableRowTwo,
+            INTERES_BASE,
+            multasClienteTwo /* multas */
+          );
         } else {
-          // Lógica para manejar el caso en el que no hay datos para la tabla
-          // Puede ser un mensaje o un aviso apropiado.
         }
       }
-      if (tableRow && tableRow.length > 0) {
-        generateTableClienteOne(doc, tableRow);
+      if (tableRowOne && tableRowOne.length > 0) {
+        generateTableClienteOne(
+          doc,
+          tableRowOne,
+          INTERES_BASE,
+          multasClienteOne /* multas */
+        );
       } else {
-        // Lógica para manejar el caso en el que no hay datos para la tabla
-        // Puede ser un mensaje o un aviso apropiado.
       }
-      // generateFooter(doc);
-      // Agregar una nueva página para la siguiente iteración (excepto la última)
       if (i + 2 < data.length) {
         doc.addPage();
       }
@@ -92,12 +126,6 @@ const generatePdfMeasure = async (data) => {
     return null;
   }
 };
-
-
-
-
-
-
 
 const generateMeterTable = (doc, data) => {
   const titleTable = 50;

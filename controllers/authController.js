@@ -13,6 +13,7 @@ const login = async (req, res) => {
       usuario,
       token,
     });
+    
   } catch (error) {
     console.log(error);
     if (error.message === "Usuario / Password no son correctos") {

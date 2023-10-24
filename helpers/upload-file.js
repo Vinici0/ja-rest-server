@@ -8,10 +8,10 @@ const subirArchivo = (
 ) => {
   return new Promise((resolve, reject) => {
     const { archivo } = files;
+    console.log(archivo);
     const nombreCortado = archivo.name.split(".");
     const extension = nombreCortado[nombreCortado.length - 1];
 
-    // Validar la extension
     if (!extensionesValidas.includes(extension)) {
       return reject(
         `La extensión ${extension} no es permitida - ${extensionesValidas}`

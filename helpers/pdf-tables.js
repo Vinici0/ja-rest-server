@@ -1,8 +1,10 @@
 const MAX_ROWS = 4;
-let INTERES = 0.02;
 
-const generateTableClienteOne = async (doc, data) => {
+const generateTableClienteOne = async (doc, data, INTERES_BASE, multas = []) => {
   try {
+    let INTERES = INTERES_BASE;
+    let interesIcrement = 0;
+
     const titleTableX = 50;
     let tableTop = 180;
     const fechaX = 50;
@@ -54,8 +56,22 @@ const generateTableClienteOne = async (doc, data) => {
             rowData[i].LecturaActual - rowData[i].LecturaAnterior,
             consumoX,
             currentRow
+          );
+
+        if (i === 0) {
+          interesIcrement = 0;
+        } else if (i === 1) {
+          interesIcrement = INTERES_BASE;
+        } else {
+          interesIcrement = INTERES_BASE = INTERES_BASE + 0.01;
+        }
+
+        doc
+          .text(
+            (interesIcrement * 100).toFixed(2) + "%",
+            observacionX,
+            currentRow
           )
-          .text(INTERES * 100 + i + "%", observacionX, currentRow)
           .text("$" + rowData[i].Total, subTotalX, currentRow)
           .text(
             "$" + (INTERES / rowData[i].Total + rowData[i].Total).toFixed(2),
@@ -72,13 +88,13 @@ const generateTableClienteOne = async (doc, data) => {
     const detallex = 300;
     const detallerValue = 400;
     const DETALLE_TEXT = "AGUA:";
-    const SANAMIENTO_TEXT = "SERVICIO DE SANAMIENTO:";
-    const COSTO_BASICO_TEXT = "COSTO BÁSICO:";
+    const SANAMIENTO_TEXT = `SERVICIO DE SANAMIENTO (${rowData.length}):`;
+    const MULTA_TEXT = `TOTAL MULTAS (${multas.length}):`;
     const DETALLE_POSITION_Y = currentRow + 15;
     const SANAMIENTO_POSITION_Y = currentRow + 30;
-    const COSTO_BASICO_POSITION_Y = currentRow + 45;
+    const MULTA_POSITION_Y = currentRow + 45;
     const sanamientoValue = 30; // Valor de ejemplo para "Sanamiento"
-    const costoBasicoValue = 20; // Valor de ejemplo para "Costo Básico"
+    const multaValue = multas.map((multa) => multa.valor_pagar).reduce((a, b) => a + b, 0);
 
     doc
       .fontSize(fontSizeDetaller)
@@ -87,16 +103,16 @@ const generateTableClienteOne = async (doc, data) => {
       .text("$" + total.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
-        `$ ${rowData[0] / 2 === 2.75 ? 1.5 : 3.00}`,
+        `$ ${rowData[0] / 2 === 2.75 ? 1.5 : 3.0}`,
 
         detallerValue + 100,
         SANAMIENTO_POSITION_Y
       )
-      .text(COSTO_BASICO_TEXT, detallex, COSTO_BASICO_POSITION_Y)
+      .text(MULTA_TEXT, detallex, MULTA_POSITION_Y)
       .text(
-        "$" + costoBasicoValue,
+        "$" + multaValue,
         detallerValue + 100,
-        COSTO_BASICO_POSITION_Y
+        MULTA_POSITION_Y
       );
 
     // Agregar el cuadro de texto
@@ -125,8 +141,9 @@ const generateTableClienteOne = async (doc, data) => {
   }
 };
 
-const generateTableClienteTwo = async (doc, data) => {
+const generateTableClienteTwo = async (doc, data, INTERES_BASE, multas = []) => {
   try {
+    let INTERES = INTERES_BASE;
     const titleTableX = 50;
     let tableTop = 570;
     const fechaX = 50;

@@ -16,11 +16,11 @@ const cargarArchivo = async (req, res = response) => {
 
 const actualizarImagen = async (req, res = response) => {
   const { id, coleccion } = req.params;
-
+  console.log(req.params);
   let modelo;
 
   switch (coleccion) {
-    case "users":
+    case "user":
       modelo = await userService.getUserById(id);
       modelo = modelo[0];
       if (!modelo) {
@@ -33,7 +33,7 @@ const actualizarImagen = async (req, res = response) => {
 
     case "company":
       modelo = await configService.getEmpresaById(id);
-        modelo = modelo[0];
+      modelo = modelo[0];
       if (!modelo) {
         return res.status(400).json({
           msg: `No existe un producto con el id ${id}`,
@@ -63,35 +63,38 @@ const actualizarImagen = async (req, res = response) => {
   const nombre = await subirArchivo(req.files, undefined, coleccion);
   modelo.img = nombre;
 
-  await modelo.save();
+  if (coleccion === "users") await userService.updateUser(modelo);
+  else if (coleccion === "company") {
+    console.log(modelo);
+    await configService.updateEmpresa(id, modelo);
+  }
 
   res.json(modelo);
 };
 
 const mostrarImagen = async (req, res = response) => {
   const { id, coleccion } = req.params;
-
   let modelo;
 
   switch (coleccion) {
-    case "usuarios":
-      modelo = await Usuario.findById(id);
+    case "user":
+      modelo = await userService.getUserById(id);
+      modelo = modelo[0];
       if (!modelo) {
         return res.status(400).json({
           msg: `No existe un usuario con el id ${id}`,
         });
       }
-
       break;
 
-    case "productos":
-      modelo = await Producto.findById(id);
+    case "company":
+      modelo = await configService.getEmpresaById(id);
+      modelo = modelo[0];
       if (!modelo) {
         return res.status(400).json({
-          msg: `No existe un producto con el id ${id}`,
+          msg: `No existe un empresa con el id ${id}`,
         });
       }
-
       break;
 
     default:
@@ -107,7 +110,9 @@ const mostrarImagen = async (req, res = response) => {
       coleccion,
       modelo.img
     );
+
     if (fs.existsSync(pathImagen)) {
+      console.log("Existe");
       return res.sendFile(pathImagen);
     }
   }

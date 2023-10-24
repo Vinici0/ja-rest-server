@@ -6,12 +6,12 @@ const { generarJWT } = require("../helpers/generar-jwt");
 const responseUsuario = new Response();
 
 const getUsers = async (req, res) => {
+
   const { limite = 5, desde = 0 } = req.query;
   try {
-    const { total, usuarios } = await userService.getUsers();
+    const usuarios  = await userService.getUsers();
     responseUsuario.success(res, "Usuarios obtenidos correctamente", {
-      total,
-      usuarios: usuarios.slice(Number(desde), Number(limite) + Number(desde)),
+      usuarios: usuarios
     });
   } catch (error) {
     responseUsuario.error(res, error.msg, error.status || 500);

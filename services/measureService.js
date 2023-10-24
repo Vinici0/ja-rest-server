@@ -47,9 +47,22 @@ const updateMeasurement = async (
   LecturaAnterior,
   Mes
 ) => {
- 
   try {
-    const INTERES_BASE = 0.05;
+    const ja_tabla = await dbConnection.query(
+      `SELECT * FROM JA_Tabla ORDER BY idTabla`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    const interes = await dbConnection.query(
+      `SELECT * FROM JA_Interes ORDER BY idInteres DESC`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    const INTERES_BASE = interes[0].Interes / 100;
     let interestFactor = 0.0; // Factor de interés inicial
     //si lectura actual es menor a la anterior no se puede guardar
     if (LecturaActual < LecturaAnterior) {
@@ -58,23 +71,29 @@ const updateMeasurement = async (
     let Excedente = LecturaActual - LecturaAnterior;
     let ExcedenteV = 0;
 
-    if (Excedente >= 0 && Excedente <= 15) {
+    if (Excedente >= ja_tabla[0].Desde && Excedente <= ja_tabla[0].Hasta) {
       Excedente = 0;
       ExcedenteV = 0;
-    } else if (Excedente >= 16 && Excedente <= 39) {
+    } else if (
+      Excedente >= ja_tabla[1].Desde &&
+      Excedente <= ja_tabla[1].Hasta
+    ) {
       Excedente = Excedente - 15;
-      ExcedenteV = 0.25 * Excedente;
-    } else if (Excedente >= 40 && Excedente <= 49) {
+      ExcedenteV = ja_tabla[1].ValorExc * Excedente;
+    } else if (
+      Excedente >= ja_tabla[2].Desde &&
+      Excedente <= ja_tabla[2].Hasta
+    ) {
       Excedente = Excedente - 15;
-      ExcedenteV = 0.5 * Excedente;
-    } else if (Excedente >= 50) {
+      ExcedenteV = ja_tabla[2].ValorExc * Excedente;
+    } else if (Excedente >= ja_tabla[3].Desde) {
       Excedente = Excedente - 15;
-      ExcedenteV = 1 * Excedente;
+      ExcedenteV = ja_tabla[3].ValorExc * Excedente;
     }
 
     const Total = Basico + ExcedenteV;
     const Pago = 0;
-console.log(Anio,  Mes - 1, Codigo );
+    console.log(Anio, Mes - 1, Codigo);
     const medida = await dbConnection.query(
       `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
       {
@@ -134,7 +153,12 @@ console.log(Anio,  Mes - 1, Codigo );
       return 0;
     });
 
-    await calculateAndUpdateMedidas(medidas, INTERES_BASE, dbConnection, sequelize);
+    await calculateAndUpdateMedidas(
+      medidas,
+      INTERES_BASE,
+      dbConnection,
+      sequelize
+    );
 
     return {
       Anio,

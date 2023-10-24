@@ -33,9 +33,10 @@ const getEmpresa = async () => {
 };
 
 const updateEmpresa = async (idEmpresa, data) => {
+  console.log(idEmpresa, data);
   try {
     const empresa = await dbConnection.query(
-      "UPDATE JA_Empresa SET nombreEmpresa = :nombreEmpresa, rucEmpresa = :rucEmpresa, direccionEmpresa = :direccionEmpresa, telefonoEmpresa = :telefonoEmpresa, emailEmpresa = :emailEmpresa, imgEmpresa = :imgEmpresa, mensajeEmpresa = :mensajeEmpresa WHERE idEmpresa = :idEmpresa",
+      "UPDATE JA_Empresa SET nombreEmpresa = :nombreEmpresa, rucEmpresa = :rucEmpresa, direccionEmpresa = :direccionEmpresa, telefonoEmpresa = :telefonoEmpresa, emailEmpresa = :emailEmpresa, img = :img, mensajeEmpresa = :mensajeEmpresa WHERE idEmpresa = :idEmpresa",
       {
         replacements: {
           idEmpresa,
@@ -44,7 +45,7 @@ const updateEmpresa = async (idEmpresa, data) => {
           direccionEmpresa: data.direccionEmpresa,
           telefonoEmpresa: data.telefonoEmpresa,
           emailEmpresa: data.emailEmpresa,
-          imgEmpresa: data.imgEmpresa,
+          img: data.img,
           mensajeEmpresa: data.mensajeEmpresa,
         },
         type: sequelize.QueryTypes.UPDATE,
@@ -107,12 +108,11 @@ const getInteres = async () => {
 const updateInteres = async (idInteres, data) => {
   try {
     const interes = await dbConnection.query(
-      "UPDATE JA_Interes SET interes = :interes, descripcion = :descripcion WHERE idInteres = :idInteres",
+      "UPDATE JA_Interes SET interes = :interes WHERE idInteres = :idInteres",
       {
         replacements: {
           idInteres,
           interes: data.interes,
-          descripcion: data.descripcion,
         },
         type: sequelize.QueryTypes.UPDATE,
       }

@@ -8,13 +8,11 @@ const {
   updateUser,
   deleteUser,
 } = require("../../controllers/userController");
-const { validateJWT, validateAdminRole } = require("../../middlewares/validar-jwt");
 
-// const {
-//   validarJWT,
-//   varlidarADMIN_ROLE,
-//   varlidarADMIN_ROLE_o_MismoUsuario,
-// } = require("../../middlewares/validar-jwt");
+const {
+  validateJWT,
+  validateAdminRole,
+} = require("../../middlewares/validar-jwt");
 
 const router = Router();
 
