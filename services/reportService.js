@@ -48,7 +48,7 @@ const getInteresBase = async () => {
 const getFineByClient = async (id_cliente) => {
   try {
     const multaCliente = await dbConnection.query(
-      "SELECT * FROM JA_MultaDetalle WHERE id_cliente = :id_cliente",
+      "SELECT * FROM JA_MultaDetalle WHERE id_cliente = :id_cliente and pagado = 0",
       {
         replacements: { id_cliente },
         type: sequelize.QueryTypes.SELECT,

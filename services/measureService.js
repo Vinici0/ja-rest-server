@@ -364,6 +364,7 @@ const execCorte = async () => {
   }
 };
 
+
 module.exports = {
   execCorte,
   getMeasurements,

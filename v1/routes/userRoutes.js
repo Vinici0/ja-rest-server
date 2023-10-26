@@ -4,6 +4,7 @@ const { validarCampos } = require("../../middlewares/validar-campos");
 
 const {
   getUsers,
+  getUserById,
   createUser,
   updateUser,
   deleteUser,
@@ -17,6 +18,8 @@ const {
 const router = Router();
 
 router.get("/", getUsers);
+
+router.get("/:id", getUserById);
 
 router.post(
   "/",
@@ -42,6 +45,6 @@ router.put(
   updateUser
 );
 
-router.delete("/:id", [validateJWT, validateAdminRole], deleteUser);
+router.delete("/:id", deleteUser);
 
 module.exports = router;

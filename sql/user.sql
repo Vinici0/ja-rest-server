@@ -10,6 +10,10 @@ CREATE TABLE JA_Usuario (
     fecha_ingreso DATETIME NOT NULL DEFAULT GETDATE(),
 );
 
+select * from JA_Usuario;
+-- Update role user
+UPDATE JA_Usuario SET role = 'ADMIN_ROLE' WHERE idJaUsuario = 1;
+
 
 CREATE PROCEDURE InsertarUsuario
     @Nombre NVARCHAR(255),

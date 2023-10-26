@@ -30,6 +30,7 @@ const getUserById = async (id) => {
       }
     );
     consoleHelper.success("Usuario obtenido correctamente");
+    console.log(user);
     return user;
   } catch (error) {
     consoleHelper.error(error.msg);
@@ -87,14 +88,16 @@ const updateUser = async (id, dataToUpdate) => {
       `UPDATE JA_Usuario 
       SET nombre = :nombre, 
           email = :email, 
-          password = :password, 
           img = :img, 
           role = :role 
       WHERE idJaUsuario = :id`,
       {
         replacements: {
+          nombre: dataToUpdate.nombre,
+          email: dataToUpdate.email,
+          img: dataToUpdate.img,
+          role: dataToUpdate.role,
           id,
-          ...dataToUpdate,
         },
         type: sequelize.QueryTypes.UPDATE,
       }
@@ -109,6 +112,7 @@ const updateUser = async (id, dataToUpdate) => {
 
 const deleteUser = async (id) => {
   try {
+    console.log(id);
     const user = await dbConnection.query(
       "DELETE FROM JA_Usuario WHERE idJaUsuario = :id",
       {
@@ -131,5 +135,5 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
-  getUserById
+  getUserById,
 };
