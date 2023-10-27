@@ -94,6 +94,57 @@ const updateInteres = async (req = request, res = response) => {
   }
 };
 
+/* 
+    getClientPais,
+    getClienteCiudad,
+    getClienteTipoRuc,
+    getClienteTipo,
+*/
+
+const getClienteTipo = async (req = request, res = response) => {
+  try {
+    const tipo = await configService.getClienteTipo();
+    return new Response().success(res, "Tipo obtenido correctamente", {
+      tipo: tipo,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
+const getClienteTipoRuc = async (req = request, res = response) => {
+  try {
+    const tipoRuc = await configService.getClienteTipoRuc();
+    return new Response().success(res, "Tipo obtenido correctamente", {
+      tipoRuc: tipoRuc,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
+const getClienteCiudad = async (req = request, res = response) => {
+  try {
+    const ciudad = await configService.getClienteCiudad();
+    return new Response().success(res, "Ciudad obtenido correctamente", {
+      ciudad: ciudad,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
+const getClientPais = async (req = request, res = response) => {
+  try {
+    const pais = await configService.getClientPais();
+    return new Response().success(res, "Pais obtenido correctamente", {
+      pais: pais,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   getEmpresaById,
   updateEmpresa,
@@ -101,5 +152,9 @@ module.exports = {
   updateTabla,
   getInteres,
   updateInteres,
-  getEmpresa
+  getEmpresa,
+  getClientPais,
+  getClienteCiudad,
+  getClienteTipoRuc,
+  getClienteTipo,
 };

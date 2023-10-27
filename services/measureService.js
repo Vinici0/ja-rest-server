@@ -2,7 +2,7 @@ const sequelize = require("sequelize");
 const { dbConnection } = require("../database/config");
 const Console = require("../helpers/console");
 const { calculateAndUpdateMedidas } = require("../helpers/measure-calculate");
-const consoleHelper = new Console("User Service");
+const consoleHelper = new Console("Measure Service");
 
 const getMeasurements = async () => {
   try {

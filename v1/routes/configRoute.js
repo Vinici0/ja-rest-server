@@ -11,10 +11,15 @@ const {
   getInteres,
   updateInteres,
   getEmpresa,
+  getClientPais,
+  getClienteCiudad,
+  getClienteTipoRuc,
+  getClienteTipo,
 } = require("../../controllers/configController");
 
 const router = Router();
 
+/* Empresa */
 router.get("/empresa/:id", getEmpresaById);
 
 router.get("/empresa", getEmpresa);
@@ -25,6 +30,7 @@ router.put(
   updateEmpresa
 );
 
+/* Tabla */
 router.get("/tabla", getTabla);
 
 router.put(
@@ -39,6 +45,8 @@ router.put(
   updateTabla
 );
 
+
+/* Interes */
 router.get("/interes", getInteres);
 
 router.put(
@@ -51,12 +59,16 @@ router.put(
   updateInteres
 );
 
-module.exports = router;
+/* Pais */
+router.get("/pais", getClientPais);
 
-/* 
-    localhost:3000/api/config/empresa/1
-    localhost:3000/api/config/tabla
-    localhost:3000/api/config/interes
-    localhost:3000/api/config/tabla/1
-    localhost:3000/api/config/interes/1
-*/
+/* Ciudad */
+router.get("/ciudad", getClienteCiudad);
+
+/* Tipo Ruc */
+router.get("/tipoRuc", getClienteTipoRuc);
+
+/* Cliente Tipo */
+router.get("/tipo", getClienteTipo);
+
+module.exports = router;

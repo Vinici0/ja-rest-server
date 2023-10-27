@@ -1,11 +1,11 @@
 const sequelize = require("sequelize");
 const { dbConnection } = require("../database/config");
 const Console = require("../helpers/console");
-const consoleHelper = new Console("User Service");
+const consoleHelper = new Console("Customer Service");
 
 const getAllClients = async () => {
   try {
-    const clients = await dbConnection.query("EXEC ja_ListarTodosClientes", {
+    const clients = await dbConnection.query("select * from cliente ORDER BY FechaIngreso DESC", {
       type: sequelize.QueryTypes.SELECT,
     });
     consoleHelper.success("Clientes obtenidos correctamente");
