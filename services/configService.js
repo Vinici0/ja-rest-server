@@ -124,6 +124,66 @@ const updateInteres = async (idInteres, data) => {
   }
 };
 
+const getClientPais = async () => {
+  try {
+    const client = await dbConnection.query(
+      "SELECT * FROM ClientePais where pais = 'Ecuador'",
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    return client;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
+const getClienteCiudad = async () => {
+  try {
+    const client = await dbConnection.query(
+      "SELECT * FROM ClienteCiudad ORDER BY ciudad",
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    return client;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
+const getClienteTipoRuc = async () => {
+  try {
+    const client = await dbConnection.query(
+      "SELECT * FROM ClienteTipoRuc ORDER BY TipoRuc ",
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    return client;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
+const getClienteTipo = async () => {
+  try {
+    const client = await dbConnection.query(
+      "SELECT * FROM ClienteTipo ORDER BY TipoCliente ",
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    return client;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 module.exports = {
   getEmpresaById,
   updateEmpresa,
@@ -131,5 +191,9 @@ module.exports = {
   updateTabla,
   getInteres,
   updateInteres,
-  getEmpresa
+  getEmpresa,
+  getClientPais,
+  getClienteCiudad,
+  getClienteTipoRuc,
+  getClienteTipo,
 };

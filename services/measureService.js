@@ -62,7 +62,7 @@ const updateMeasurement = async (
       }
     );
 
-    const INTERES_BASE = interes[0].Interes / 100;
+    let INTERES_BASE = interes[0].interes / 100;
     let interestFactor = 0.0; // Factor de interés inicial
     //si lectura actual es menor a la anterior no se puede guardar
     if (LecturaActual < LecturaAnterior) {
@@ -93,7 +93,6 @@ const updateMeasurement = async (
 
     const Total = Basico + ExcedenteV;
     const Pago = 0;
-    console.log(Anio, Mes - 1, Codigo);
     const medida = await dbConnection.query(
       `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
       {
@@ -153,11 +152,14 @@ const updateMeasurement = async (
       return 0;
     });
 
+    console.log("INTERES_BASE", INTERES_BASE);
+
     await calculateAndUpdateMedidas(
       medidas,
       INTERES_BASE,
       dbConnection,
-      sequelize
+      sequelize,
+      ja_tabla
     );
 
     return {
@@ -363,7 +365,6 @@ const execCorte = async () => {
     throw new Error(error.msg);
   }
 };
-
 
 module.exports = {
   execCorte,

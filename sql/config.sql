@@ -18,3 +18,7 @@ create table ja_interes (
 )
 
 insert into ja_interes (interes, descripcion) values (3, 'Sin interes')
+
+-- Altarando una tabla
+ALTER TABLE ja_medida
+ADD Alcantarillado DECIMAL (8, 2);

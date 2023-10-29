@@ -26,7 +26,21 @@ const getClientById = async (req = request, res = response) => {
   }
 };
 
+/* createClient */
+const createClient = async (req = request, res = response) => {
+  const { body } = req;
+  try {
+    const client = await meterService.createClient(body);
+    return new Response().success(res, "Cliente creado correctamente", {
+      client: client,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   getAllClients,
   getClientById,
+  createClient,
 };

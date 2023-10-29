@@ -94,13 +94,7 @@ const updateInteres = async (req = request, res = response) => {
   }
 };
 
-/* 
-    getClientPais,
-    getClienteCiudad,
-    getClienteTipoRuc,
-    getClienteTipo,
-*/
-
+/* Datos categoricos */
 const getClienteTipo = async (req = request, res = response) => {
   try {
     const tipo = await configService.getClienteTipo();

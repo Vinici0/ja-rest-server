@@ -4,6 +4,7 @@ const fs = require("fs");
 const PDFDocument = require("pdfkit-construct");
 const userService = require("../services/reportService");
 const Response = require("../helpers/response");
+
 const {
   logoClientOne,
   logoClientTwo,
@@ -18,6 +19,8 @@ const {
   getMeasurements,
   getInteresBase,
 } = require("../services/reportService");
+
+const configService = require("../services/configService");
 
 const generateFooter = (doc) => {
   doc.fontSize(10).text("Juntos por el agua", 50, 690, {
@@ -52,6 +55,7 @@ const generatePdfMeasure = async (data) => {
       "const INTERES_BASE = await getInteresBase()[0].interes / 100;"
     );
     const INTERES_BASE = await getInteresBase();
+    const ja_table = await configService.getTabla();
     console.log(INTERES_BASE);
     for (let i = 0; i < data.length; i += 2) {
       let measureOne = data[i];
@@ -93,7 +97,8 @@ const generatePdfMeasure = async (data) => {
             doc,
             tableRowTwo,
             INTERES_BASE,
-            multasClienteTwo /* multas */
+            multasClienteTwo /* multas */,
+            ja_table
           );
         } else {
         }
@@ -103,7 +108,8 @@ const generatePdfMeasure = async (data) => {
           doc,
           tableRowOne,
           INTERES_BASE,
-          multasClienteOne /* multas */
+          multasClienteOne /* multas */,
+          ja_table
         );
       } else {
       }
