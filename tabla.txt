@@ -1,189 +1,111 @@
-const updateMeasurement = async (
-  Anio,
-  Basico,
-  Codigo,
-  idCliente,
-  idMedida,
-  LecturaActual,
-  LecturaAnterior,
-  Mes
-) => {
+const generatePdfMeasure = async (data) => {
   try {
-    const INTERES_BASE = 0.05;
-    let interestFactor = 0.0; // Factor de interés inicial
-    //si lectura actual es menor a la anterior no se puede guardar
-    if (LecturaActual < LecturaAnterior) {
-      throw new Error("La lectura actual no puede ser menor a la anterior");
-    }
-    let Excedente = LecturaActual - LecturaAnterior;
-    let ExcedenteV = 0;
+    const doc = new PDFDocument();
+    const measurementsPromises = [];
+    const multasPromises = [];
+    const INTERES_BASE = await getInteresBase();
+    const ja_table = await configService.getTabla();
 
-    if (Excedente >= 0 && Excedente <= 15) {
-      Excedente = 0;
-      ExcedenteV = 0;
-    } else if (Excedente >= 16 && Excedente <= 39) {
-      Excedente = Excedente - 15;
-      ExcedenteV = 0.25 * Excedente;
-    } else if (Excedente >= 40 && Excedente <= 49) {
-      Excedente = Excedente - 15;
-      ExcedenteV = 0.5 * Excedente;
-    } else if (Excedente >= 50) {
-      Excedente = Excedente - 15;
-      ExcedenteV = 1 * Excedente;
-    }
+    let treeCounter = 0; // contador para generateHeadersClienteTree
 
-    const Total = Basico + ExcedenteV;
-    const Pago = 0;
+    for (let i = 0; i < data.length; i += 2) {
+      let measureOne = data[i];
+      let measureTwo = data[i + 1];
 
-    const medida = await dbConnection.query(
-      `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
-      {
-        replacements: { Anio, Mes: Mes - 1, Codigo },
-        type: sequelize.QueryTypes.SELECT,
+      measurementsPromises.push(getMeasurements(measureOne.Codigo));
+      if (measureTwo) {
+        measurementsPromises.push(getMeasurements(measureTwo.Codigo));
       }
-    );
 
-    //TODO: Resolver el problema de la medida anterior cuando es el primer mes del Anio
-    if (medida.length === 0) {
-      throw new Error("No se encontró la medida anterior");
+      multasPromises.push(userService.getFineByClient(measureOne.idCliente));
+      if (measureTwo) {
+        multasPromises.push(userService.getFineByClient(measureTwo.idCliente));
+      }
     }
 
-    const EditarMedida = await dbConnection.query(
-      `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, Basico = :Basico, ExcedenteV = :ExcedenteV, Total = :Total, Acumulado = :Acumulado, Pago = :Pago, Saldo = :Saldo WHERE idMedida = :idMedida`,
-      {
-        replacements: {
-          LecturaActual,
-          Excedente,
-          Basico: medida[0].Basico,
-          ExcedenteV,
-          Total,
-          Acumulado: medida[0].Acumulado + Total,
-          Pago,
-          Saldo: Total,
-          idMedida: idMedida,
-        },
-        type: sequelize.QueryTypes.UPDATE,
-      }
-    );
+    const measurementsResults = await Promise.all(measurementsPromises);
+    const multasResults = await Promise.all(multasPromises);
 
-    //traer todas las medidas del cliente deode saldos sean mayores a 0
-    const medidas = await dbConnection.query(
-      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Mes DESC`,
-      {
-        replacements: { Codigo: Codigo },
-        type: sequelize.QueryTypes.SELECT,
-      }
-    );
+    let measurementsIndex = 0;
+    let multasIndex = 0;
 
-    console.log(medidas);
+    for (let i = 0; i < data.length; i += 2) {
+      if (measurementsResults[measurementsIndex].length > 4) {
+        generateHeadersClienteTree(doc, data[i]);
+        treeCounter++;
 
-    // Ordenar por Anio y mes en JavaScript
-    medidas.sort((a, b) => {
-      if (a.Anio < b.Anio) {
-        return 1;
-      }
-      if (a.Anio > b.Anio) {
-        return -1;
-      }
-      // Si los Anios son iguales, ordenar por Mes
-      if (a.Mes < b.Mes) {
-        return 1;
-      }
-      if (a.Mes > b.Mes) {
-        return -1;
-      }
-      return 0;
-    });
+        generateTableClienteTree(
+          doc,
+          measurementsResults[measurementsIndex],
+          INTERES_BASE,
+          multasResults.slice(multasIndex, multasIndex + 2),
+          ja_table
+        );
 
-    let accumulatedInterest = 0; // Inicializar el interés acumulado
+        measurementsIndex += 1;
+        multasIndex += 2;
 
-    for (let i = 1; i < medidas.length; i++) {
-      const monthsDifference =
-        (medidas[i - 1].Anio - medidas[i].Anio) * 12 +
-        (medidas[i - 1].Mes - medidas[i].Mes);
-
-      if (monthsDifference > 0) {
-        let Excedente = medidas[i].LecturaActual - medidas[i].LecturaAnterior;
-        let ExcedenteV = 0;
-
-        if (Excedente >= 0 && Excedente <= 15) {
-          Excedente = 0;
-          ExcedenteV = 0;
-        } else if (Excedente >= 16 && Excedente <= 39) {
-          Excedente = Excedente - 15;
-          ExcedenteV = 0.25 * Excedente;
-        } else if (Excedente >= 40 && Excedente <= 49) {
-          Excedente = Excedente - 15;
-          ExcedenteV = 0.5 * Excedente;
-        } else if (Excedente >= 50) {
-          Excedente = Excedente - 15;
-          ExcedenteV = 1 * Excedente;
+        if (i + 2 < data.length) {
+          doc.addPage();
         }
-        let interesIncremtent = 0;
-        if (interestFactor === 0) {
-          interesIncremtent = 0.05;
-        } else {
-          interesIncremtent = INTERES_BASE + interestFactor;
+      } else {
+        let measureOne = data[i];
+        let measureTwo = data[i + 1];
+
+        let tableRowOne = measurementsResults[measurementsIndex];
+        let tableRowTwo = measureTwo ? measurementsResults[measurementsIndex + 1] : [];
+
+        let multasClienteOne = multasResults[multasIndex];
+        let multasClienteTwo = measureTwo ? multasResults[multasIndex + 1] : [];
+
+        if (treeCounter > 0) {
+          measurementsIndex += treeCounter;
+          multasIndex += 2 * treeCounter;
+          treeCounter = 0;
         }
 
-        let totalExcedente = medidas[i].Total + ExcedenteV; //Imprime el total mas el excedente incluido
-        // console.log(totalExcedente + ' :totalExcedente ' + medidas[i].Total + ' :medidas[i].Total ' + ExcedenteV + ' :ExcedenteV ' + interesIncremtent + ' :interesIncremtent ' );
-        let interest = interesIncremtent * totalExcedente;
-        accumulatedInterest += interest;
-
-        medidas[i].Total += accumulatedInterest;
-        medidas[i].Saldo = medidas[i].Total;
-
-        medidas[i].Total = Number(medidas[i].Total.toFixed(2));
-        accumulatedInterest = Number(accumulatedInterest.toFixed(2));
-        medidas[i].Saldo = Number(medidas[i].Saldo.toFixed(2));
-
-        // console.log(
-        //   "medidas[i].Total",
-        //   medidas[i].Total,
-        //   "accumulatedInterest",
-        //   accumulatedInterest,
-        //   "medidas[i].Saldo",
-        //   medidas[i].Saldo,
-        //   "MES " + medidas[i].Mes,
-        //   "ANIO " + medidas[i].Anio,
-        //   "interestFactor",
-        //   interestFactor
-        // );
-
-        interestFactor += 0.01;
+        generateHeadersClienteOne(doc, measureOne);
+        if (measureTwo) {
+          generateHeadersClienteTwo(doc, measureTwo);
+          if (tableRowTwo && tableRowTwo.length > 0) {
+            generateTableClienteTwo(
+              doc,
+              tableRowTwo,
+              INTERES_BASE,
+              multasClienteTwo,
+              ja_table
+            );
+          }
+        }
+        if (tableRowOne && tableRowOne.length > 0) {
+          generateTableClienteOne(
+            doc,
+            tableRowOne,
+            INTERES_BASE,
+            multasClienteOne,
+            ja_table
+          );
+        }
+        if (i + 2 < data.length) {
+          doc.addPage();
+        }
+        measurementsIndex += 2;
+        multasIndex += 2;
       }
     }
 
-    return {
-      Anio,
-      Mes,
-      LecturaAnterior,
-      LecturaActual,
-      idCliente,
-      Excedente,
-      Basico,
-      ExcedenteV,
-      Total,
-      Acumulado: medida[0].Acumulado + Total,
-      Saldo: Total,
-    };
+    if (process.env.NODE_ENV === "development") {
+      doc.pipe(fs.createWriteStream(`${__dirname}/../file.pdf`));
+    }
+
+    doc.end();
+
+    // Convertir el PDF a un buffer y devolverlo
+    const pdfStream = await getStream.buffer(doc);
+
+    return pdfStream;
   } catch (error) {
-    consoleHelper.error(error.msg);
-    throw new Error(error.msg);
+    console.error("Error en la generación del PDF:", error);
+    return null;
   }
 };
-
-
-        // console.log(
-        //   "medidas[i].Total",
-        //   medidas[i].Total,
-        //   "accumulatedInterest",
-        //   accumulatedInterest,
-        //   "medidas[i].Saldo",
-        //   medidas[i].Saldo,
-        //   "MES " + medidas[i].Mes,
-        //   "ANIO " + medidas[i].Anio,
-        //   "interestFactor",
-        //   interestFactor
-        // );

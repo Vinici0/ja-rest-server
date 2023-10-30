@@ -29,7 +29,7 @@ const getMeasurementsByMonthAndYear = async (Mes, Anio) => {
         type: sequelize.QueryTypes.SELECT,
       }
     );
-    console.log(measure);
+
     consoleHelper.success("Medida obtenida correctamente");
     return measure;
   } catch (error) {
@@ -102,15 +102,12 @@ const updateMeasurement = async (
       }
     );
 
-    console.log("medida", medida);
-
-    //TODO: Resolver el problema de la medida anterior cuando es el primer mes del Anio
     if (medida.length === 0) {
       throw new Error("No se encontró la medida anterior");
     }
-
+    let Alcantarillado = 3
     const EditarMedida = await dbConnection.query(
-      `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, Basico = :Basico, ExcedenteV = :ExcedenteV, Total = :Total, Acumulado = :Acumulado, Pago = :Pago, Saldo = :Saldo WHERE idMedida = :idMedida`,
+      `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, Basico = :Basico, ExcedenteV = :ExcedenteV, Total = :Total, Acumulado = :Acumulado, Pago = :Pago, Saldo = :Saldo, Alcantarillado = :Alcantarillado WHERE idMedida = :idMedida`,
       {
         replacements: {
           LecturaActual,
@@ -120,7 +117,8 @@ const updateMeasurement = async (
           Total,
           Acumulado: medida[0].Acumulado + Total,
           Pago,
-          Saldo: Total,
+          Saldo: Total + Alcantarillado,
+          Alcantarillado,
           idMedida: idMedida,
         },
         type: sequelize.QueryTypes.UPDATE,
@@ -206,7 +204,7 @@ const updateAllMeasurements = async () => {
       type: sequelize.QueryTypes.SELECT,
     }
   );
-    console.log(getAllMedidas);
+    
   for (const medida of getAllMedidas) {
     const { codigo } = medida;
     
@@ -235,6 +233,7 @@ const updateAllMeasurements = async () => {
       return 0;
     });
 
+    //aqui no es
     await calculateAndUpdateMedidas(
       getAllMedidasByCodigo,
       INTERES_BASE,
@@ -433,6 +432,14 @@ const execCorte = async () => {
     throw new Error(error.msg);
   }
 };
+
+const createMeasure = async () => {
+  try {
+      // const 
+  } catch (error) {
+    
+  }
+}
 
 module.exports = {
   execCorte,

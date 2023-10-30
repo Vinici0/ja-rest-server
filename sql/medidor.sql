@@ -7,12 +7,8 @@ CREATE TABLE JA_Medidor
     Codigo VARCHAR(50),
     Lote VARCHAR(50),
     Manzana VARCHAR(50),
+    Estado BIT DEFAULT 0
 );
-
-ALTER TABLE JA_Medidor ADD estado BIT DEFAULT 1;
-
-
-UPDATE JA_Medidor SET estado = 1 WHERE estado IS NULL;
 
 
 
@@ -27,7 +23,9 @@ BEGIN
         Nombre VARCHAR(255),
         Codigo VARCHAR(50),
         Lote VARCHAR(50),
-        Manzana VARCHAR(50)
+        Manzana VARCHAR(50),
+        Estado BIT DEFAULT 0
+
     );
 END;
 

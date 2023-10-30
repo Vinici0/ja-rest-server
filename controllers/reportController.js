@@ -10,10 +10,12 @@ const {
   logoClientTwo,
   generateHeadersClienteOne,
   generateHeadersClienteTwo,
+  generateHeadersClienteTree,
 } = require("../helpers/pdf-templates");
 const {
   generateTableClienteOne,
   generateTableClienteTwo,
+  generateTableClienteTree,
 } = require("../helpers/pdf-tables");
 const {
   getMeasurements,
@@ -21,6 +23,7 @@ const {
 } = require("../services/reportService");
 
 const configService = require("../services/configService");
+const measureService = require("../services/measureService");
 
 const generateFooter = (doc) => {
   doc.fontSize(10).text("Juntos por el agua", 50, 690, {
@@ -51,23 +54,16 @@ const generatePdfMeasure = async (data) => {
     const doc = new PDFDocument();
     const measurementsPromises = [];
     const multasPromises = [];
-    console.log(
-      "const INTERES_BASE = await getInteresBase()[0].interes / 100;"
-    );
     const INTERES_BASE = await getInteresBase();
     const ja_table = await configService.getTabla();
-    console.log(INTERES_BASE);
+
     for (let i = 0; i < data.length; i += 2) {
       let measureOne = data[i];
-      let measureTwo = data[i + 1]; // Asegúrate de verificar si measureTwo no es undefined antes de usarlo
+      let measureTwo = data[i + 1];
 
-      measurementsPromises.push(
-        getMeasurements(measureOne.Anio, measureOne.Codigo)
-      );
+      measurementsPromises.push(getMeasurements(measureOne.Codigo));
       if (measureTwo) {
-        measurementsPromises.push(
-          getMeasurements(measureTwo.Anio, measureTwo.Codigo)
-        );
+        measurementsPromises.push(getMeasurements(measureTwo.Codigo));
       }
 
       multasPromises.push(userService.getFineByClient(measureOne.idCliente));
@@ -76,45 +72,67 @@ const generatePdfMeasure = async (data) => {
       }
     }
 
-    const measurements = await Promise.all(measurementsPromises);
-    const multas = await Promise.all(multasPromises);
+    const measurementsResults = await Promise.all(measurementsPromises);
+    const multasResults = await Promise.all(multasPromises);
+
+    let measurementsIndex = 0;
+    let multasIndex = 0;
 
     for (let i = 0; i < data.length; i += 2) {
-      let measureOne = data[i];
-      let measureTwo = data[i + 1];
+      if (measurementsResults[measurementsIndex].length > 4) {
+        generateHeadersClienteTree(doc, data[i]);
 
-      let tableRowOne = measurements[i];
-      let tableRowTwo = measurements[i + 1];
-
-      let multasClienteOne = multas[i];
-      let multasClienteTwo = multas[i + 1];
-
-      generateHeadersClienteOne(doc, measureOne);
-      if (measureTwo) {
-        generateHeadersClienteTwo(doc, measureTwo);
-        if (tableRowTwo && tableRowTwo.length > 0) {
-          generateTableClienteTwo(
-            doc,
-            tableRowTwo,
-            INTERES_BASE,
-            multasClienteTwo /* multas */,
-            ja_table
-          );
-        } else {
-        }
-      }
-      if (tableRowOne && tableRowOne.length > 0) {
-        generateTableClienteOne(
+        generateTableClienteTree(
           doc,
-          tableRowOne,
+          measurementsResults[measurementsIndex],
           INTERES_BASE,
-          multasClienteOne /* multas */,
+          multasResults.slice(multasIndex, multasIndex + 2),
           ja_table
         );
+
+        measurementsIndex += 1;
+        multasIndex += 2;
+
+        if (i + 2 < data.length) {
+          doc.addPage();
+        }
       } else {
-      }
-      if (i + 2 < data.length) {
-        doc.addPage();
+        let measureOne = data[i];
+        let measureTwo = data[i + 1];
+
+        let tableRowOne = measurementsResults[measurementsIndex];
+        let tableRowTwo = measurementsResults[measurementsIndex + 1];
+
+        let multasClienteOne = multasResults[multasIndex];
+        let multasClienteTwo = multasResults[multasIndex + 1];
+
+        generateHeadersClienteOne(doc, measureOne);
+        if (measureTwo) {
+          generateHeadersClienteTwo(doc, measureTwo);
+          if (tableRowTwo && tableRowTwo.length > 0) {
+            generateTableClienteTwo(
+              doc,
+              tableRowTwo,
+              INTERES_BASE,
+              multasClienteTwo,
+              ja_table
+            );
+          }
+        }
+        if (tableRowOne && tableRowOne.length > 0) {
+          generateTableClienteOne(
+            doc,
+            tableRowOne,
+            INTERES_BASE,
+            multasClienteOne,
+            ja_table
+          );
+        }
+        if (i + 2 < data.length) {
+          doc.addPage();
+        }
+        measurementsIndex += 2;
+        multasIndex += 2;
       }
     }
 
@@ -129,6 +147,7 @@ const generatePdfMeasure = async (data) => {
 
     return pdfStream;
   } catch (error) {
+    console.error("Error en la generación del PDF:", error);
     return null;
   }
 };
@@ -201,83 +220,107 @@ const generateMeterTable = (doc, data) => {
   });
 };
 
-const generateMeterTableCourt = (doc, data) => {
-  const titleTable = 50;
-  let tableTop = 160;
-  let maxRecordsPerPage = 20; // Número máximo de registros por página
-  let rowTop = 0; // Declaración de rowTop fuera del bucle
+const generateMeterTableCourt = (doc, data = [], maxRecordsPerPage) => {
+  let tableTop = 120;
   const codigoX = 50;
   const nombreX = 110;
   const loteX = 355;
   const manzanaX = 395;
   const saldoX = 450;
   const mesesX = 500;
-
-  logoClientOne(doc);
-
-  doc
-    .font("Helvetica-Bold")
-    .fontSize(16)
-    .text("CORTE DE MEDIDORES", titleTable, 127);
+  const headerTop = 100;
 
   let currentPage = 1;
   let currentRow = 0;
-  let isLastPage = false;
 
-  // Muestra el encabezado en la primera página
+  // Imprimir el logo en la primera página
+  if (currentPage === 1) {
+    logoClientOne(doc);
+  }
+
+  // Mostrar el encabezado en todas las páginas
   doc
     .fontSize(10)
     .font("Helvetica-Bold")
-    .text("Código", codigoX, tableTop)
-    .text("Nombre", nombreX, tableTop)
-    .text("Lote", loteX, tableTop)
-    .text("Manzana", manzanaX, tableTop)
-    .text("Saldo", saldoX, tableTop)
-    .text("Meses", mesesX, tableTop);
+    .text("Código", codigoX, headerTop)
+    .text("Nombre", nombreX, headerTop)
+    .text("Lote", loteX, headerTop)
+    .text("Manzana", manzanaX, headerTop)
+    .text("Saldo", saldoX, headerTop)
+    .text("Meses", mesesX, headerTop);
 
-  data.forEach((item, index) => {
+  for (let i = 0; i < data.length; i++) {
     if (currentRow === maxRecordsPerPage) {
-      console.log(index);
-      // Si se alcanza el límite de registros por página, agrega una nueva página
+      // Cambiar de página cuando se llegue al número máximo de registros por página
       doc.addPage();
-      currentPage++;
       currentRow = 0;
-      // Restaura el valor de tableTop para la nueva página
-      tableTop = 20;
-      // maxRecordsPerPage = maxRecordsPerPageAfterFirstPage;
-
-      // Muestra el encabezado en las páginas posteriores
-      doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .text("Código", codigoX, tableTop)
-        .text("Nombre", nombreX, tableTop)
-        .text("Lote", loteX, tableTop)
-        .text("Manzana", manzanaX, tableTop)
-        .text("Saldo", saldoX, tableTop)
-        .text("Meses", mesesX, tableTop);
-      9;
+      tableTop = 110; // Ajustar la posición de la tabla en la nueva página
     }
-
-    rowTop = tableTop + (currentRow + 1) * 25; // Usa la variable rowTop definida fuera del bucle
 
     doc
-      .font("Helvetica")
       .fontSize(10)
-      .text(item.codigo, codigoX, rowTop)
-      .text(item.Nombre.trim(), nombreX, rowTop)
-      .text(item.Lote.trim(), loteX, rowTop)
-      .text(item.Manzana.trim(), manzanaX, rowTop)
-      .text("$" + item.saldo.toFixed(2), saldoX, rowTop)
-      .text(item.meses, mesesX, rowTop);
+      .font("Helvetica")
+      .text(data[i].codigo, codigoX, tableTop)
+      .text(data[i].Nombre, nombreX, tableTop)
+      .text(data[i].Lote, loteX, tableTop)
+      .text(data[i].Manzana, manzanaX, tableTop)
+      .text(`$${parseFloat(data[i].saldo).toFixed(2)}`, saldoX, tableTop)
+      .text(data[i].meses, mesesX, tableTop);
 
+    tableTop += 16;
     currentRow++;
+  }
+};
 
-    // Verifica si estamos en el último registro
-    if (index === data.length - 1) {
-      // doc.text(`Página ${currentPage}`, 500, 700);
+const getCustomerTable = (doc, data = [], maxRecordsPerPage) => {
+  let tableTop = 125;
+  const nombreX = 50;
+  const rucX = 320;
+  const firmaX = 425; // Nueva posición para la firma
+  const headerTop = 100;
+
+  let currentPage = 1;
+  let currentRow = 0;
+
+  // Imprimir el logo en la primera página
+  if (currentPage === 1) {
+    logoClientOne(doc);
+  }
+
+  // Mostrar el encabezado en todas las páginas
+  doc
+    .fontSize(10)
+    .font("Helvetica-Bold")
+    .text("Nombre", nombreX, headerTop)
+    .text("RUC/C.I", rucX, headerTop)
+    .text("Firma", firmaX, headerTop); // Agregar el encabezado para la firma
+
+  for (let i = 0; i < data.length; i++) {
+    if (currentRow === maxRecordsPerPage) {
+      // Cambiar de página cuando se llegue al número máximo de registros por página
+      doc.addPage();
+      currentRow = 0;
+      tableTop = 110; // Ajustar la posición de la tabla en la nueva página
     }
-  });
+
+    let truncatedNombre = data[i].Nombre;
+    if (truncatedNombre.length > 40) {
+      truncatedNombre = truncatedNombre.substring(0, 40);
+    }
+
+    // Agregar líneas rectas para firmas
+    doc
+      .fontSize(10)
+      .font("Helvetica")
+      .text(truncatedNombre, nombreX, tableTop)
+      .text(data[i].Ruc, rucX, tableTop)
+      .moveTo(firmaX, tableTop) // Mover a la posición de la firma
+      .lineTo(firmaX + 100, tableTop) // Agregar una línea recta para la firma
+      .stroke(); // Dibujar la línea
+
+    tableTop += 20;
+    currentRow++;
+  }
 };
 
 const generatePdfMeter = async (data) => {
@@ -305,12 +348,58 @@ const generatePdfMeter = async (data) => {
 const generatePdfMeasureCourt = async (data) => {
   try {
     const doc = new PDFDocument();
+    const maxRecordsPerPage = 35; // Número máximo de registros por página
+    const totalPages = Math.ceil(data.length / maxRecordsPerPage);
 
-    generateMeterTableCourt(doc, data);
-    generateFooter(doc);
+    for (let i = 0; i < totalPages; i++) {
+      if (i > 0) {
+        doc.addPage();
+      }
+
+      const currentPageData = data.slice(
+        i * maxRecordsPerPage,
+        (i + 1) * maxRecordsPerPage
+      ); // Obtén los datos para la página actual
+      generateMeterTableCourt(doc, currentPageData, maxRecordsPerPage);
+    }
 
     if (process.env.NODE_ENV === "development") {
       doc.pipe(fs.createWriteStream(`${__dirname}/../meterCourt.pdf`));
+    }
+
+    doc.end();
+
+    // Convertir el PDF a un buffer y devolverlo
+    const pdfStream = await getStream.buffer(doc);
+
+    return pdfStream;
+  } catch (error) {
+    return null;
+  }
+};
+
+const generatePdfCustomer = async (data) => {
+  try {
+    console.log("Ingresando al pdf");
+    // SELECT Nombre,Ruc,Email FROM Cliente
+    const doc = new PDFDocument();
+    const maxRecordsPerPage = 30; // Número máximo de registros por página
+    const totalPages = Math.ceil(data.length / maxRecordsPerPage);
+
+    for (let i = 0; i < totalPages; i++) {
+      if (i > 0) {
+        doc.addPage();
+      }
+
+      const currentPageData = data.slice(
+        i * maxRecordsPerPage,
+        (i + 1) * maxRecordsPerPage
+      ); // Obtén los datos para la página actual
+      getCustomerTable(doc, currentPageData, maxRecordsPerPage);
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      doc.pipe(fs.createWriteStream(`${__dirname}/../customerview.pdf`));
     }
 
     doc.end();
@@ -339,8 +428,8 @@ const showMeasure = async (req, res) => {
 };
 
 const showMeter = async (req, res) => {
-  const bodyArray = req.body;
-  const pdfStream = await generatePdfMeter(bodyArray);
+  const getAllMetersCute = await measureService.execCorte();
+  const pdfStream = await generatePdfMeter(getAllMetersCute);
   res
     .writeHead(200, {
       "Content-Length": Buffer.byteLength(pdfStream),
@@ -365,6 +454,18 @@ const showCuteMeter = async (req, res) => {
 const showMeasureCourt = async (req, res) => {
   const bodyArray = req.body;
   const pdfStream = await generatePdfMeasureCourt(bodyArray);
+  res
+    .writeHead(200, {
+      "Content-Length": Buffer.byteLength(pdfStream),
+      "Content-Type": "application/pdf",
+      "Content-disposition": "attachment;filename=test.pdf",
+    })
+    .end(pdfStream);
+};
+
+const showCustomer = async (req, res) => {
+  const getAllCustomer = await configService.getAllClients();
+  const pdfStream = await generatePdfCustomer(getAllCustomer);
   res
     .writeHead(200, {
       "Content-Length": Buffer.byteLength(pdfStream),
@@ -483,8 +584,6 @@ const calculoIntrest = async (req, res) => {
     );
   });
 
-  console.log(registros);
-
   res.json({
     registros,
   });
@@ -494,5 +593,6 @@ module.exports = {
   showMeasure,
   showMeter,
   showMeasureCourt,
+  showCustomer,
   calculoIntrest,
 };

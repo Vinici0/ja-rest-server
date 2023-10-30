@@ -184,6 +184,21 @@ const getClienteTipo = async () => {
   }
 };
 
+const getAllClients = async () => {
+  try {
+    const client = await dbConnection.query(
+      "SELECT Nombre,Ruc,Email FROM Cliente ORDER BY NOMBRE",
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    return client;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 module.exports = {
   getEmpresaById,
   updateEmpresa,
@@ -196,4 +211,5 @@ module.exports = {
   getClienteCiudad,
   getClienteTipoRuc,
   getClienteTipo,
+  getAllClients,
 };

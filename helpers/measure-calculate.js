@@ -7,7 +7,6 @@ const calculateAndUpdateMedidas = async (
   alcantarillado = 3
 ) => {
   let interestMultiplier = 1;
-
   for (let i = 1; i < medidas.length; i++) {
     const monthsDifference =
       (medidas[i - 1].Anio - medidas[i].Anio) * 12 +
@@ -53,31 +52,49 @@ const calculateAndUpdateMedidas = async (
         interesIncrement = INTERES_BASE * interestMultiplier;
       }
 
+      //Medidas
       let totalExcedente = medidas[i].Basico + ExcedenteVNew;
       let interes = totalExcedente * interesIncrement;
+
+      // Alcantarillado
       let interesAlcantarillado = alcantarillado * interesIncrement;
-      console.log(interesIncrement,"interesIncrement");
-      console.log("---------------------------------------------------------------------------------------");
-      console.log(interesAlcantarillado, "interesAlcantarillado");
+      let totalAlcantarillado = (
+        interesAlcantarillado + alcantarillado
+      ).toFixed(2);
 
       medidas[i].Total = (totalExcedente + interes).toFixed(2);
       medidas[i].Saldo = (totalExcedente + interes).toFixed(2);
 
-      medidas[i].Alcantarillado = (totalExcedente + interesAlcantarillado).toFixed(2);
-      // console.log("console.log(medidas[i].Alcantarillado);");
-      // console.log(medidas[i].Alcantarillado);
+      let totalSaldo = Number(medidas[i].Saldo) + Number(totalAlcantarillado);
 
+      //TODO: Agergar el alcantarillado a la medida y actualizar la medida
       await dbConnection.query(
-        `UPDATE JA_Medida SET Total = :Total, Saldo = :Saldo WHERE idMedida = :idMedida`,
+        `UPDATE JA_Medida SET Total = :Total, Saldo = :Saldo
+         WHERE idMedida = :idMedida`,
         {
           replacements: {
             Total: medidas[i].Total,
-            Saldo: medidas[i].Saldo,
+            Saldo: totalSaldo,
             idMedida: medidas[i].idMedida,
+            Alcantarillado: totalAlcantarillado,
           },
           type: sequelize.QueryTypes.UPDATE,
         }
       );
+
+      // TODO: DESCOMENTAR ESTE CÓDIGO CUANDO SE QUIERA ACTUALIZAR EL SALDO
+      // await dbConnection.query(
+      //   `UPDATE JA_Medida SET Saldo = :Saldo, Alcantarillado = :Alcantarillado
+      //      WHERE idMedida = :idMedida AND Anio >= 2023 AND Mes >= 9`,
+      //   {
+      //     replacements: {
+      //       Saldo: totalSaldo,
+      //       Alcantarillado: totalAlcantarillado,
+      //       idMedida: medidas[i].idMedida,
+      //     },
+      //     type: sequelize.QueryTypes.UPDATE,
+      //   }
+      // );
     }
   }
 };

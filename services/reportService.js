@@ -1,12 +1,12 @@
 const sequelize = require("sequelize");
 const { dbConnection } = require("../database/config");
 
-const getMeasurements = async (Anio, Codigo) => {
+const getMeasurements = async ( Codigo) => {
   try {
     const medidaCliente = await dbConnection.query(
-      "SELECT * FROM JA_Medida WHERE Anio = :Anio AND Codigo = :Codigo AND Saldo > 0 ORDER BY Mes DESC",
+      "SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC",
       {
-        replacements: { Anio, Codigo },
+        replacements: { Codigo },
         type: sequelize.QueryTypes.SELECT,
       }
     );
@@ -16,6 +16,8 @@ const getMeasurements = async (Anio, Codigo) => {
     throw new Error(error.msg);
   }
 };
+
+
 
 const getDetatailFinesByClient = async (id_cliente) => {
   try {
@@ -65,5 +67,5 @@ module.exports = {
   getMeasurements,
   getDetatailFinesByClient,
   getInteresBase,
-  getFineByClient
+  getFineByClient,
 };
