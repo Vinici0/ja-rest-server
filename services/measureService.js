@@ -29,6 +29,7 @@ const getMeasurementsByMonthAndYear = async (Mes, Anio) => {
         type: sequelize.QueryTypes.SELECT,
       }
     );
+    console.log(measure);
     consoleHelper.success("Medida obtenida correctamente");
     return measure;
   } catch (error) {
@@ -128,7 +129,7 @@ const updateMeasurement = async (
 
     //traer todas las medidas del cliente deode saldos sean mayores a 0
     const medidas = await dbConnection.query(
-      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Mes DESC`,
+      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC`,
       {
         replacements: { Codigo: Codigo },
         type: sequelize.QueryTypes.SELECT,
@@ -151,8 +152,6 @@ const updateMeasurement = async (
       }
       return 0;
     });
-
-    console.log("INTERES_BASE", INTERES_BASE);
 
     await calculateAndUpdateMedidas(
       medidas,
@@ -179,6 +178,75 @@ const updateMeasurement = async (
     consoleHelper.error(error.msg);
     throw new Error(error.msg);
   }
+};
+
+const updateAllMeasurements = async () => {
+  const ja_tabla = await dbConnection.query(
+    `SELECT * FROM JA_Tabla ORDER BY idTabla`,
+    {
+      type: sequelize.QueryTypes.SELECT,
+    }
+  );
+
+  const interes = await dbConnection.query(
+    `SELECT * FROM JA_Interes ORDER BY idInteres DESC`,
+    {
+      type: sequelize.QueryTypes.SELECT,
+    }
+  );
+  let INTERES_BASE = interes[0].interes / 100;
+
+  const getAllMedidas = await dbConnection.query(
+    `SELECT codigo
+    FROM JA_Medida 
+    WHERE Saldo > 0 
+    group by codigo
+    having count(*)>1`,
+    {
+      type: sequelize.QueryTypes.SELECT,
+    }
+  );
+    console.log(getAllMedidas);
+  for (const medida of getAllMedidas) {
+    const { codigo } = medida;
+    
+    const getAllMedidasByCodigo = await dbConnection.query(
+      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC`,
+      {
+        replacements: { Codigo: codigo },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    getAllMedidasByCodigo.sort((a, b) => {
+      if (a.Anio < b.Anio) {
+        return 1;
+      }
+      if (a.Anio > b.Anio) {
+        return -1;
+      }
+      // Si los Anios son iguales, ordenar por Mes
+      if (a.Mes < b.Mes) {
+        return 1;
+      }
+      if (a.Mes > b.Mes) {
+        return -1;
+      }
+      return 0;
+    });
+
+    await calculateAndUpdateMedidas(
+      getAllMedidasByCodigo,
+      INTERES_BASE,
+      dbConnection,
+      sequelize,
+      ja_tabla
+    );
+  }
+
+  return {
+    message: "Medidas actualizadas correctamente",
+  };
 };
 
 const addInterestIfUnpaid = async (Anio, Mes) => {
@@ -373,4 +441,5 @@ module.exports = {
   updateMeasurement,
   updateMeasurementForAll,
   calculoIntrest,
+  updateAllMeasurements
 };

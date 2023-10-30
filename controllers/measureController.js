@@ -103,6 +103,17 @@ const calculoIntrest = async (req, res) => {
   }
 };
 
+const updateAllMeasurements = async (req, res) => {
+  try {
+    const result = await measureService.updateAllMeasurements();
+    return new Response().success(res, "Medidas actualizadas correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+}
+
 module.exports = {
   execCorte,
   getMeasurements,
@@ -110,4 +121,5 @@ module.exports = {
   updateMeasurement,
   updateMeasurementForAll,
   calculoIntrest,
+  updateAllMeasurements
 };

@@ -8,7 +8,8 @@ const {
   getMeasurementsByMonthAndYear,
   updateMeasurement,
   updateMeasurementForAll,
-  calculoIntrest
+  calculoIntrest,
+  updateAllMeasurements
 } = require("../../controllers/measureController");
 
 const router = Router();
@@ -19,5 +20,6 @@ router.get("/monthAndYear", getMeasurementsByMonthAndYear);
 router.post("/updateMeasurement", updateMeasurement);
 router.put("/updateMeasurementForAll", updateMeasurementForAll);
 router.put("/calculoIntrest", calculoIntrest);
+router.put("/updateAllMeasurements", updateAllMeasurements);
 
 module.exports = router;
