@@ -19,7 +19,9 @@ const login = async (req, res) => {
     if (error.message === "Usuario / Password no son correctos") {
       return responseAuth.error(res, error.message, 401);
     }
+
     responseAuth.error(res, "Error en el servidor", 500);
+    
   }
 };
 

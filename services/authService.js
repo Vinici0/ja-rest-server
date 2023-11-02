@@ -6,6 +6,7 @@ const { generarJWT } = require("../helpers/generar-jwt");
 const Console = require("../helpers/console");
 
 const consoleHelper = new Console("Auth Service");
+
 const login = async (email, password) => {
   try {
     const usuario = await dbConnection.query(

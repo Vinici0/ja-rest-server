@@ -6,12 +6,11 @@ const { generarJWT } = require("../helpers/generar-jwt");
 const responseUsuario = new Response();
 
 const getUsers = async (req, res) => {
-
   const { limite = 5, desde = 0 } = req.query;
   try {
-    const usuarios  = await userService.getUsers();
+    const usuarios = await userService.getUsers();
     responseUsuario.success(res, "Usuarios obtenidos correctamente", {
-      usuarios: usuarios
+      usuarios: usuarios,
     });
   } catch (error) {
     responseUsuario.error(res, error.msg, error.status || 500);
@@ -74,9 +73,9 @@ const deleteUser = async (req, res = response) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
-  updateUser,
   deleteUser,
-  getUserById
+  getUserById,
+  getUsers,
+  updateUser,
 };
