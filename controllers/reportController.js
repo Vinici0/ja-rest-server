@@ -380,7 +380,6 @@ const generatePdfMeasureCourt = async (data) => {
 
 const generatePdfCustomer = async (data) => {
   try {
-    console.log("Ingresando al pdf");
     // SELECT Nombre,Ruc,Email FROM Cliente
     const doc = new PDFDocument();
     const maxRecordsPerPage = 30; // Número máximo de registros por página

@@ -30,7 +30,6 @@ const getUserById = async (id) => {
       }
     );
     consoleHelper.success("Usuario obtenido correctamente");
-    console.log(user);
     return user;
   } catch (error) {
     consoleHelper.error(error.msg);
@@ -112,7 +111,6 @@ const updateUser = async (id, dataToUpdate) => {
 
 const deleteUser = async (id) => {
   try {
-    console.log(id);
     const user = await dbConnection.query(
       "DELETE FROM JA_Usuario WHERE idJaUsuario = :id",
       {

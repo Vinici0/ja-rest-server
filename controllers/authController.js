@@ -27,7 +27,6 @@ const login = async (req, res) => {
 
 const renewToken = async (req, res = response) => {
   const { idJaUsuario } = req;
-  console.log(idJaUsuario);
   try {
     const { usuario, token } = await userService.renewToken(idJaUsuario);
     responseAuth.success(res, "Token renovado correctamente", {

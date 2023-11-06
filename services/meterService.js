@@ -17,7 +17,7 @@ const getMeter = async () => {
 };
 
 const updateMeterStatus = async (idMedidor, estado) => {
-  console.log(idMedidor, estado);
+
   try {
     const meters = await dbConnection.query(
       "EXEC ActualizarEstadoMedidor :idMedidor, :estado",

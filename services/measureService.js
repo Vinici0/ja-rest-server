@@ -22,7 +22,6 @@ const getMeasurements = async () => {
 
 const getMeasurementsByMonthAndYear = async (Mes, Anio) => {
   try {
-    console.log(Mes, Anio);
     const measure = await dbConnection.query(
       `EXEC ObtenerMedidasPorMesYAnio @Mes = :Mes, @Anio = :Anio`,
       {
@@ -104,7 +103,6 @@ const updateMeasurement = async (
       }
     );
 
-    console.log(medida);
 
     if (medida.length === 0) {
       throw new Error("No se encontró la medida anterior");
@@ -447,7 +445,6 @@ const execCorte = async () => {
 
 const createMeusereAndUpdateCustomer = async (data) => {
   try {
-    console.log(data);
     await dbConnection.query(
       `UPDATE Cliente SET JA_LoteVacio = :JA_LoteVacio, Codigo = :Codigo WHERE idCliente = :idCliente`,
       {

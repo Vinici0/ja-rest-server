@@ -68,7 +68,6 @@ const deleteFine = async (req = request, res = response) => {
 */
 const getFinesDetails = async (req = request, res = response) => {
   try {
-    console.log("-------------------getFinesDetails--------------------------");
     const fineDetails = await fineService.getFineDetails();
     return new Response().success(
       res,
@@ -101,7 +100,6 @@ const createFineDetail = async (req = request, res = response) => {
 const updateFineDetail = async (req = request, res = response) => {
   const { id } = req.params;
   const { body } = req;
-  console.log("body", body);
   try {
     const fineDetail = await fineService.updateFineDetail(id, body);
     return new Response().success(

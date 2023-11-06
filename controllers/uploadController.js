@@ -16,7 +16,6 @@ const cargarArchivo = async (req, res = response) => {
 
 const actualizarImagen = async (req, res = response) => {
   const { id, coleccion } = req.params;
-  console.log(req.params);
   let modelo;
 
   switch (coleccion) {
@@ -65,7 +64,6 @@ const actualizarImagen = async (req, res = response) => {
 
   if (coleccion === "users") await userService.updateUser(modelo);
   else if (coleccion === "company") {
-    console.log(modelo);
     await configService.updateEmpresa(id, modelo);
   }
 
@@ -112,7 +110,6 @@ const mostrarImagen = async (req, res = response) => {
     );
 
     if (fs.existsSync(pathImagen)) {
-      console.log("Existe");
       return res.sendFile(pathImagen);
     }
   }

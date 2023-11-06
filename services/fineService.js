@@ -105,7 +105,6 @@ const createFineDetail = async (fineDetail) => {
   try {
     const clients = fineDetail.clients;
     const fileDetalle = fineDetail.fineDetalle;
-    console.log(clients);
     for (let i = 0; i < clients.length; i++) {
       const client = clients[i];
       await dbConnection.query(
@@ -134,8 +133,6 @@ const createFineDetail = async (fineDetail) => {
 
 const updateFineDetail = async (idMultaDetalle, fineDetail) => {
   try {
-    // const date_fine = new Date(fineDetail.date_fine).toISOString().substring(0, 10);
-    // console.log(date_fine);
     const updatedFineDetail = await dbConnection.query(
       `UPDATE JA_MultaDetalle SET id_cliente = :id_cliente, id_multa = :id_multa, valor_pagar = :valor_pagar, date_fine = :date_fine, descripcion = :descripcion WHERE idMultaDetalle = :idMultaDetalle`,
       {
@@ -161,8 +158,6 @@ const updateFineDetail = async (idMultaDetalle, fineDetail) => {
 
 const togglePaymentStatus = async (idMultaDetalle, pagado) => {
   try {
-    console.log("togglePaymentStatus");
-    console.log(idMultaDetalle, pagado);
     const updatedPaymentStatus = await dbConnection.query(
       `UPDATE JA_MultaDetalle SET pagado = :pagado WHERE idMultaDetalle = :idMultaDetalle`,
       {
@@ -190,7 +185,6 @@ const getFineDetails = async () => {
         type: sequelize.QueryTypes.SELECT,
       }
     );
-    console.log(fineDetails);
     consoleHelper.success("Detalles de multas obtenidos correctamente");
     return fineDetails;
   } catch (error) {
@@ -231,7 +225,6 @@ const getFineDetailById = async (idMultaDetalle) => {
         type: sequelize.QueryTypes.SELECT,
       }
     );
-    console.log(fineDetail);
     consoleHelper.success("Detalle de multa obtenida correctamente");
     return fineDetail;
   } catch (error) {

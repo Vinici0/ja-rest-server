@@ -33,7 +33,6 @@ const getEmpresa = async () => {
 };
 
 const updateEmpresa = async (idEmpresa, data) => {
-  console.log(idEmpresa, data);
   try {
     const empresa = await dbConnection.query(
       "UPDATE JA_Empresa SET nombreEmpresa = :nombreEmpresa, rucEmpresa = :rucEmpresa, direccionEmpresa = :direccionEmpresa, telefonoEmpresa = :telefonoEmpresa, emailEmpresa = :emailEmpresa, img = :img, mensajeEmpresa = :mensajeEmpresa WHERE idEmpresa = :idEmpresa",
