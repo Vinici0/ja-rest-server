@@ -18,11 +18,7 @@ router.get("/", getFinesDetails);
 
 router.post(
   "/",
-  [
-    check("id_cliente", "El id del cliente es obligatorio").not().isEmpty(),
-    check("id_multa", "El id de la multa es obligatorio").not().isEmpty(),
-    validarCampos,
-  ],
+  /* JWT */
   createFineDetail
 );
 

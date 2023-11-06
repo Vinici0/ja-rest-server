@@ -39,8 +39,22 @@ const createClient = async (req = request, res = response) => {
   }
 };
 
+const updateClient = async (req = request, res = response) => {
+  const { id } = req.params;
+  const { body } = req;
+  try {
+    const client = await meterService.updateClient(id, body);
+    return new Response().success(res, "Cliente actualizado correctamente", {
+      client: client,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   getAllClients,
   getClientById,
   createClient,
+  updateClient
 };

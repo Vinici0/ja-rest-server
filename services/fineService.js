@@ -103,24 +103,29 @@ const deleteFine = async (idMulta) => {
 */
 const createFineDetail = async (fineDetail) => {
   try {
-    console.log(fineDetail);
-    const newFineDetail = await dbConnection.query(
-      `INSERT INTO JA_MultaDetalle (id_cliente, id_multa, valor_pagar, date_fine, descripcion) VALUES (:id_cliente, :id_multa, :valor_pagar, :date_fine, :descripcion)`,
-      {
-        replacements: {
-          id_cliente: fineDetail.id_cliente,
-          id_multa: fineDetail.id_multa,
-          valor_pagar: fineDetail.valor_pagar,
-          date_fine: fineDetail.date_fine,
-          descripcion: fineDetail.descripcion,
-          tipo_multa: fineDetail.tipo_multa,
-        },
-        type: sequelize.QueryTypes.INSERT,
-      }
-    );
+    const clients = fineDetail.clients;
+    const fileDetalle = fineDetail.fineDetalle;
+    console.log(clients);
+    for (let i = 0; i < clients.length; i++) {
+      const client = clients[i];
+      await dbConnection.query(
+        `INSERT INTO JA_MultaDetalle (id_cliente, id_multa, valor_pagar, date_fine, descripcion) VALUES (:id_cliente, :id_multa, :valor_pagar, :date_fine, :descripcion)`,
+        {
+          replacements: {
+            id_cliente: client.idCliente,
+            id_multa: fileDetalle.id_multa,
+            valor_pagar: fileDetalle.valor_pagar,
+            date_fine: fileDetalle.date_fine,
+            descripcion: fileDetalle.descripcion,
+            tipo_multa: fileDetalle.tipo_multa,
+          },
+          type: sequelize.QueryTypes.INSERT,
+        }
+      );
+    }
 
     consoleHelper.success("Detalle de multa creada correctamente");
-    return newFineDetail;
+    return "Detalle de multa creada correctamente";
   } catch (error) {
     consoleHelper.error(error.message);
     throw new Error(error.message);

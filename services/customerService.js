@@ -113,8 +113,62 @@ const createClient = async (data) => {
   }
 };
 
+const updateClient = async (id, body) => {
+  try {
+    const client = await dbConnection.query(
+      `UPDATE Cliente SET 
+      nombre = :nombre, 
+      ruc = :ruc, 
+      telefono = :telefono, 
+      email = :email, 
+      idPais = :idPais, 
+      idCiudad = :idCiudad, 
+      direccion = :direccion, 
+      fechaNacimiento = :fechaNacimiento, 
+      fechaIngreso = :fechaIngreso, 
+      fechaCaducidad = :fechaCaducidad, 
+      idTipoRuc = :idTipoRuc, 
+      hombre = :hombre, 
+      ja_discapacidad = :ja_discapacidad, 
+      ja_terceraEdad = :ja_terceraEdad, 
+      estadoCivil = :estadoCivil
+      WHERE idCliente = :id`,
+      {
+        replacements: {
+          nombre: body.nombre,
+          ruc: body.ruc,
+          telefono: body.telefono,
+          email: body.email,
+          idPais: body.idPais,
+          idCiudad: body.idCiudad,
+          direccion: body.direccion,
+          fechaNacimiento: body.fechaNacimiento,
+          fechaIngreso: body.fechaIngreso,
+          fechaCaducidad: body.fechaCaducidad,
+          idTipoRuc: body.idTipoRuc,
+          hombre: body.hombre,
+          ja_discapacidad: body.ja_discapacidad,
+          ja_terceraEdad: body.ja_terceraEdad,
+          estadoCivil: body.estadoCivil,
+          id,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    consoleHelper.success("Cliente actualizado correctamente");
+    return client;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
+
+
 module.exports = {
   getAllClients,
   getClientById,
   createClient,
+  updateClient,
 };
