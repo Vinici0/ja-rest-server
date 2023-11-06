@@ -155,7 +155,7 @@ const generatePdfMeasure = async (data) => {
 const generateMeterTable = (doc, data) => {
   const titleTable = 50;
   const tableTop = 160;
-  const maxRecordsPerPage = 20; // Número máximo de registros por página
+  const maxRecordsPerPage = 20; 
 
   const codigoX = 50;
   const nombreX = 110;
