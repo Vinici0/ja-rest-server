@@ -68,7 +68,7 @@ const calculateAndUpdateMedidas = async (
       let totalSaldo = Number(medidas[i].Saldo) + Number(totalAlcantarillado);
 
       //TODO: Agergar el alcantarillado a la medida y actualizar la medida
-      await dbConnection.query(
+      const ja_medidaQuery =  await dbConnection.query(
         `UPDATE JA_Medida SET Total = :Total, Saldo = :Saldo
          WHERE idMedida = :idMedida`,
         {
@@ -81,6 +81,10 @@ const calculateAndUpdateMedidas = async (
           type: sequelize.QueryTypes.UPDATE,
         }
       );
+
+      if (ja_medidaQuery[1] === 0) {
+        throw new Error("No se pudo actualizar la medida");
+      }
 
       // TODO: DESCOMENTAR ESTE CÓDIGO CUANDO SE QUIERA ACTUALIZAR EL SALDO
       // await dbConnection.query(

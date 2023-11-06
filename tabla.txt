@@ -1,111 +1,26 @@
-const generatePdfMeasure = async (data) => {
-  try {
-    const doc = new PDFDocument();
-    const measurementsPromises = [];
-    const multasPromises = [];
-    const INTERES_BASE = await getInteresBase();
-    const ja_table = await configService.getTabla();
 
-    let treeCounter = 0; // contador para generateHeadersClienteTree
+SELECT JA_LoteVacio FROM Cliente
 
-    for (let i = 0; i < data.length; i += 2) {
-      let measureOne = data[i];
-      let measureTwo = data[i + 1];
+SELECT JA_Discapacidad, JA_TerceraEdad, JA_LoteVacio FROM Cliente WHERE JA_LoteVacio = 1
 
-      measurementsPromises.push(getMeasurements(measureOne.Codigo));
-      if (measureTwo) {
-        measurementsPromises.push(getMeasurements(measureTwo.Codigo));
-      }
+INSERT INTO Cliente  
+(nombre, ruc, telefono, email, idPais, idCiudad, direccion, fechaNacimiento, fechaIngreso, fechaCaducidad, idTipoRuc, hombre, ja_discapacidad, ja_terceraEdad, estadoCivil)
+VALUES 
+('Juan Perez', '123456789', '1234567890', 'juanperez@example.com', 1, 1, 'Calle Falsa 123', '1990-01-01', '1990-01-01', '2024-01-01', 1, 1, 0, 1, 'M');
 
-      multasPromises.push(userService.getFineByClient(measureOne.idCliente));
-      if (measureTwo) {
-        multasPromises.push(userService.getFineByClient(measureTwo.idCliente));
-      }
-    }
+SELECT * FROM Cliente WHERE   ruc = '123456789'
+SELECT * FROM JA_Medida  WHERE   idCliente = 2670
 
-    const measurementsResults = await Promise.all(measurementsPromises);
-    const multasResults = await Promise.all(multasPromises);
+SELECT * FROM Cliente WHERE ruc = '123456789';
 
-    let measurementsIndex = 0;
-    let multasIndex = 0;
+DELETE FROM Cliente
+WHERE ruc = '123456789';
 
-    for (let i = 0; i < data.length; i += 2) {
-      if (measurementsResults[measurementsIndex].length > 4) {
-        generateHeadersClienteTree(doc, data[i]);
-        treeCounter++;
+DELETE FROM JA_Medida
+WHERE   idCliente = 2670
 
-        generateTableClienteTree(
-          doc,
-          measurementsResults[measurementsIndex],
-          INTERES_BASE,
-          multasResults.slice(multasIndex, multasIndex + 2),
-          ja_table
-        );
+update JA_Medida set Codigo = '101510' where idCliente = 2670
 
-        measurementsIndex += 1;
-        multasIndex += 2;
-
-        if (i + 2 < data.length) {
-          doc.addPage();
-        }
-      } else {
-        let measureOne = data[i];
-        let measureTwo = data[i + 1];
-
-        let tableRowOne = measurementsResults[measurementsIndex];
-        let tableRowTwo = measureTwo ? measurementsResults[measurementsIndex + 1] : [];
-
-        let multasClienteOne = multasResults[multasIndex];
-        let multasClienteTwo = measureTwo ? multasResults[multasIndex + 1] : [];
-
-        if (treeCounter > 0) {
-          measurementsIndex += treeCounter;
-          multasIndex += 2 * treeCounter;
-          treeCounter = 0;
-        }
-
-        generateHeadersClienteOne(doc, measureOne);
-        if (measureTwo) {
-          generateHeadersClienteTwo(doc, measureTwo);
-          if (tableRowTwo && tableRowTwo.length > 0) {
-            generateTableClienteTwo(
-              doc,
-              tableRowTwo,
-              INTERES_BASE,
-              multasClienteTwo,
-              ja_table
-            );
-          }
-        }
-        if (tableRowOne && tableRowOne.length > 0) {
-          generateTableClienteOne(
-            doc,
-            tableRowOne,
-            INTERES_BASE,
-            multasClienteOne,
-            ja_table
-          );
-        }
-        if (i + 2 < data.length) {
-          doc.addPage();
-        }
-        measurementsIndex += 2;
-        multasIndex += 2;
-      }
-    }
-
-    if (process.env.NODE_ENV === "development") {
-      doc.pipe(fs.createWriteStream(`${__dirname}/../file.pdf`));
-    }
-
-    doc.end();
-
-    // Convertir el PDF a un buffer y devolverlo
-    const pdfStream = await getStream.buffer(doc);
-
-    return pdfStream;
-  } catch (error) {
-    console.error("Error en la generación del PDF:", error);
-    return null;
-  }
-};
+EXEC JA_Genera @anio = 2023, @mes=11, @idCliente=2670
+EXEC JA_Llena @idCliente = 2670
+EXEC JA_Calculo @anio = 2023, @mes=11, @idCliente=2670

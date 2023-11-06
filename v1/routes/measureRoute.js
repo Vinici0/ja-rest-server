@@ -9,7 +9,8 @@ const {
   updateMeasurement,
   updateMeasurementForAll,
   calculoIntrest,
-  updateAllMeasurements
+  updateAllMeasurements,
+  createMeusereAndUpdateCustomer
 } = require("../../controllers/measureController");
 
 const router = Router();
@@ -21,5 +22,6 @@ router.post("/updateMeasurement", updateMeasurement);
 router.put("/updateMeasurementForAll", updateMeasurementForAll);
 router.put("/calculoIntrest", calculoIntrest);
 router.put("/updateAllMeasurements", updateAllMeasurements);
+router.post("/createMeusereAndUpdateCustomer", createMeusereAndUpdateCustomer);
 
 module.exports = router;

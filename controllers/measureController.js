@@ -114,6 +114,18 @@ const updateAllMeasurements = async (req, res) => {
   }
 }
 
+const createMeusereAndUpdateCustomer = async (req, res) => {
+  const body = req.body;
+  try {
+    const result = await measureService.createMeusereAndUpdateCustomer(body);
+    return new Response().success(res, "Medida guardada correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+}
+
 module.exports = {
   execCorte,
   getMeasurements,
@@ -121,5 +133,6 @@ module.exports = {
   updateMeasurement,
   updateMeasurementForAll,
   calculoIntrest,
-  updateAllMeasurements
+  updateAllMeasurements,
+  createMeusereAndUpdateCustomer
 };

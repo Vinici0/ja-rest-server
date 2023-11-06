@@ -22,6 +22,7 @@ const getMeasurements = async () => {
 
 const getMeasurementsByMonthAndYear = async (Mes, Anio) => {
   try {
+    console.log(Mes, Anio);
     const measure = await dbConnection.query(
       `EXEC ObtenerMedidasPorMesYAnio @Mes = :Mes, @Anio = :Anio`,
       {
@@ -49,6 +50,7 @@ const updateMeasurement = async (
   Mes
 ) => {
   try {
+
     const ja_tabla = await dbConnection.query(
       `SELECT * FROM JA_Tabla ORDER BY idTabla`,
       {
@@ -97,15 +99,17 @@ const updateMeasurement = async (
     const medida = await dbConnection.query(
       `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
       {
-        replacements: { Anio, Mes: Mes - 1, Codigo },
+        replacements: { Anio, Mes: Mes, Codigo },
         type: sequelize.QueryTypes.SELECT,
       }
     );
 
+    console.log(medida);
+
     if (medida.length === 0) {
       throw new Error("No se encontró la medida anterior");
     }
-    let Alcantarillado = 3
+    let Alcantarillado = 3;
     const EditarMedida = await dbConnection.query(
       `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, Basico = :Basico, ExcedenteV = :ExcedenteV, Total = :Total, Acumulado = :Acumulado, Pago = :Pago, Saldo = :Saldo, Alcantarillado = :Alcantarillado WHERE idMedida = :idMedida`,
       {
@@ -125,6 +129,10 @@ const updateMeasurement = async (
       }
     );
 
+    if (EditarMedida[1] === 0) {
+      throw new Error("No se encontró la medida");
+    }
+
     //traer todas las medidas del cliente deode saldos sean mayores a 0
     const medidas = await dbConnection.query(
       `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC`,
@@ -133,6 +141,10 @@ const updateMeasurement = async (
         type: sequelize.QueryTypes.SELECT,
       }
     );
+
+    if (medidas.length === 0) {
+      throw new Error("No se encontró la medida anterior");
+    }
 
     medidas.sort((a, b) => {
       if (a.Anio < b.Anio) {
@@ -204,10 +216,10 @@ const updateAllMeasurements = async () => {
       type: sequelize.QueryTypes.SELECT,
     }
   );
-    
+
   for (const medida of getAllMedidas) {
     const { codigo } = medida;
-    
+
     const getAllMedidasByCodigo = await dbConnection.query(
       `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC`,
       {
@@ -433,13 +445,72 @@ const execCorte = async () => {
   }
 };
 
-const createMeasure = async () => {
+const createMeusereAndUpdateCustomer = async (data) => {
   try {
-      // const 
+    console.log(data);
+    await dbConnection.query(
+      `UPDATE Cliente SET JA_LoteVacio = :JA_LoteVacio, Codigo = :Codigo WHERE idCliente = :idCliente`,
+      {
+        replacements: {
+          JA_LoteVacio: data.JA_LoteVacio,
+          Codigo: data.codigo,
+          idCliente: data.idCliente,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    await dbConnection.query(
+      `EXEC JA_Genera @anio = :anio, @mes=:mes, @idCliente=:idCliente`,
+      {
+        replacements: {
+          anio: data.Anio,
+          mes: data.Mes,
+          idCliente: data.idCliente,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    //actualicar   ja_medida lote, manzana,
+    await dbConnection.query(
+      `UPDATE JA_Medida SET Lote = :Lote, Manzana = :Manzana WHERE Codigo = :Codigo`,
+      {
+        replacements: {
+          Lote: data.lote,
+          Manzana: data.manzana,
+          Codigo: data.codigo,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    await dbConnection.query(
+      `EXEC JA_Calculo @anio = :anio, @mes=:mes, @idCliente=:idCliente`,
+      {
+        replacements: {
+          anio: data.Anio,
+          mes: data.Mes,
+          idCliente: data.idCliente,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    return {
+      message: "Medidas actualizadas correctamente",
+    };
   } catch (error) {
-    
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
   }
-}
+};
+
+const createMeasureAnd = async () => {
+  try {
+    // const
+  } catch (error) {}
+};
 
 module.exports = {
   execCorte,
@@ -448,5 +519,6 @@ module.exports = {
   updateMeasurement,
   updateMeasurementForAll,
   calculoIntrest,
-  updateAllMeasurements
+  updateAllMeasurements,
+  createMeusereAndUpdateCustomer,
 };

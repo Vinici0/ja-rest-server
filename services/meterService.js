@@ -5,7 +5,7 @@ const consoleHelper = new Console("User Service");
 
 const getMeter = async () => {
   try {
-    const meters = await dbConnection.query("EXEC ObtenerTodosLosMedidores", {
+    const meters = await dbConnection.query("SELECT * FROM JA_Medidor", {
       type: sequelize.QueryTypes.SELECT,
     });
     consoleHelper.success("Medida obtenida correctamente");
