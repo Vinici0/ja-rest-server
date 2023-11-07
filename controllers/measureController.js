@@ -15,7 +15,6 @@ const getMeasurements = async (req = request, res = response) => {
       measure: measure,
       total: measure.length,
     });
-
   } catch (error) {
     return new Response().error(res, error.message);
   }
@@ -112,7 +111,7 @@ const updateAllMeasurements = async (req, res) => {
   } catch (error) {
     return new Response().error(res, error.message);
   }
-}
+};
 
 const createMeusereAndUpdateCustomer = async (req, res) => {
   const body = req.body;
@@ -124,7 +123,31 @@ const createMeusereAndUpdateCustomer = async (req, res) => {
   } catch (error) {
     return new Response().error(res, error.message);
   }
-}
+};
+
+const getMeasureById = async (req = request, res = response) => {
+  const { id } = req.params;
+  try {
+    const measure = await measureService.getMeasureById(id);
+    return new Response().success(res, "Medida obtenida correctamente", {
+      measure: measure,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
+const updateMeauseAndCustomer = async (req, res) => {
+  const body = req.body;
+  try {
+    const result = await measureService.updateMeauseAndCustomer(body);
+    return new Response().success(res, "Medida actualizada correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
 
 module.exports = {
   execCorte,
@@ -134,5 +157,7 @@ module.exports = {
   updateMeasurementForAll,
   calculoIntrest,
   updateAllMeasurements,
-  createMeusereAndUpdateCustomer
+  createMeusereAndUpdateCustomer,
+  getMeasureById,
+  updateMeauseAndCustomer
 };

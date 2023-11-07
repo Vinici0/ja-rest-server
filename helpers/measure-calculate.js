@@ -69,7 +69,7 @@ const calculateAndUpdateMedidas = async (
 
       //TODO: Agergar el alcantarillado a la medida y actualizar la medida
       const ja_medidaQuery =  await dbConnection.query(
-        `UPDATE JA_Medida SET Total = :Total, Saldo = :Saldo
+        `UPDATE JA_Medida SET Total = :Total, Saldo = :Saldo , Alcantarillado = :Alcantarillado
          WHERE idMedida = :idMedida`,
         {
           replacements: {
