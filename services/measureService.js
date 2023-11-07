@@ -49,7 +49,6 @@ const updateMeasurement = async (
   Mes
 ) => {
   try {
-
     const ja_tabla = await dbConnection.query(
       `SELECT * FROM JA_Tabla ORDER BY idTabla`,
       {
@@ -70,6 +69,9 @@ const updateMeasurement = async (
     if (LecturaActual < LecturaAnterior) {
       throw new Error("La lectura actual no puede ser menor a la anterior");
     }
+
+    //TODO: CAMBIO DE MEDIDOR: En caso ingresar un medidor nuevo que traiga los datos
+
     let Excedente = LecturaActual - LecturaAnterior;
     let ExcedenteV = 0;
 
@@ -95,29 +97,53 @@ const updateMeasurement = async (
 
     const Total = Basico + ExcedenteV;
     const Pago = 0;
-    const medida = await dbConnection.query(
-      `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
+
+    //TODO: Corregir la parte del mes
+    const countMeasure = await dbConnection.query(
+      `SELECT COUNT(*) as count FROM JA_Medida WHERE Codigo = :Codigo`,
       {
-        replacements: { Anio, Mes: Mes, Codigo },
+        replacements: { Codigo },
         type: sequelize.QueryTypes.SELECT,
       }
     );
+
+    let medida = [];
+    if (countMeasure[0].count > 0) {
+      console.log("Ingresado por que es cero");
+      medida = await dbConnection.query(
+        `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
+        {
+          replacements: { Anio, Mes, Codigo },
+          type: sequelize.QueryTypes.SELECT,
+        }
+      );
+    } else {
+      console.log("Ingresado por que es cero2");
+
+      medida = await dbConnection.query(
+        `EXEC BuscarMedidaPorAnioMesCliente @Anio = :Anio, @Mes = :Mes, @Codigo = :Codigo`,
+        {
+          replacements: { Anio, Mes: Mes - 1, Codigo },
+          type: sequelize.QueryTypes.SELECT,
+        }
+      );
+    }
 
 
     if (medida.length === 0) {
       throw new Error("No se encontró la medida anterior");
     }
+
     let Alcantarillado = 3;
     const EditarMedida = await dbConnection.query(
-      `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, Basico = :Basico, ExcedenteV = :ExcedenteV, Total = :Total, Acumulado = :Acumulado, Pago = :Pago, Saldo = :Saldo, Alcantarillado = :Alcantarillado WHERE idMedida = :idMedida`,
+      `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, ExcedenteV = :ExcedenteV, Total = :Total, Acumulado = :Acumulado, Pago = :Pago, Saldo = :Saldo, Alcantarillado = :Alcantarillado WHERE idMedida = :idMedida`,
       {
         replacements: {
           LecturaActual,
           Excedente,
-          Basico: medida[0].Basico,
           ExcedenteV,
-          Total,
-          Acumulado: medida[0].Acumulado + Total,
+          Total: Total,
+          Acumulado: medida[0].Acumulado ? medida[0].Acumulado + Total : 0,
           Pago,
           Saldo: Total + Alcantarillado,
           Alcantarillado,
@@ -457,6 +483,7 @@ const createMeusereAndUpdateCustomer = async (data) => {
       }
     );
 
+    // TODO: No esta generado
     await dbConnection.query(
       `EXEC JA_Genera @anio = :anio, @mes=:mes, @idCliente=:idCliente`,
       {
@@ -465,7 +492,7 @@ const createMeusereAndUpdateCustomer = async (data) => {
           mes: data.Mes,
           idCliente: data.idCliente,
         },
-        type: sequelize.QueryTypes.UPDATE,
+        type: sequelize.QueryTypes.SELECT,
       }
     );
 
@@ -503,6 +530,65 @@ const createMeusereAndUpdateCustomer = async (data) => {
   }
 };
 
+const getMeasureById = async (id) => {
+  try {
+    const measure = await dbConnection.query(
+      "SELECT * FROM JA_Medida WHERE idMedida = :idMedida",
+      {
+        replacements: { idMedida: id },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Medida obtenida correctamente");
+    return measure;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
+const updateMeauseAndCustomer = async (data) => {
+  try {
+    await dbConnection.query(
+      `UPDATE JA_Medida SET Lote = :Lote, Manzana = :Manzana WHERE Codigo = :Codigo`,
+      {
+        replacements: {
+          Lote: data.lote,
+          Manzana: data.manzana,
+          Codigo: data.codigo,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    await dbConnection.query(
+      `UPDATE Cliente SET JA_LoteVacio = :JA_LoteVacio WHERE idCliente = :idCliente`,
+      {
+        replacements: {
+          JA_LoteVacio: data.JA_LoteVacio,
+          idCliente: data.idCliente,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    // await dbConnection.query(`EXEC JA_Calculo @anio = :anio, @mes=:mes`, {
+    //   replacements: {
+    //     anio: data.Anio,
+    //     mes: data.Mes,
+    //   },
+    //   type: sequelize.QueryTypes.UPDATE,
+    // });
+
+    return {
+      message: "Medidas actualizadas correctamente",
+    };
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 const createMeasureAnd = async () => {
   try {
     // const
@@ -518,4 +604,6 @@ module.exports = {
   calculoIntrest,
   updateAllMeasurements,
   createMeusereAndUpdateCustomer,
+  getMeasureById,
+  updateMeauseAndCustomer,
 };

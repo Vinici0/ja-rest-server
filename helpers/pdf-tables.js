@@ -126,6 +126,7 @@ const generateTableClienteOne = async (
     }
 
     currentRow = currentRow - 5;
+
     const fontSizeDetaller = 10;
     const detallex = 300;
     const detallerValue = 400;
@@ -305,6 +306,7 @@ const generateTableClienteTwo = async (
       }
 
       currentRow = currentRow - 5;
+
       const fontSizeDetaller = 10;
       const detallex = 300;
       const detallerValue = 400;
@@ -332,7 +334,11 @@ const generateTableClienteTwo = async (
         .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y);
 
       doc
-        .text(`$${totalAlacantarillado}`, detallerValue + 100, SANAMIENTO_POSITION_Y)
+        .text(
+          `$${totalAlacantarillado.toFixed(2)}`,
+          detallerValue + 100,
+          SANAMIENTO_POSITION_Y
+        )
         .text(MULTA_TEXT, detallex, MULTA_POSITION_Y)
         .text("$" + totalMultas, detallerValue + 100, MULTA_POSITION_Y);
 
@@ -370,6 +376,7 @@ const generateTableClienteTree = async (
   ja_tabla = []
 ) => {
   try {
+
     let INTERES = INTERES_BASE;
     let interesIcrement = 0;
 
@@ -449,7 +456,7 @@ const generateTableClienteTree = async (
           .text(rowData[i].LecturaAnterior, lecturaAnteriorX, currentRow)
           .text(rowData[i].LecturaActual, lecturaActualX, currentRow)
           .text(
-            rowData[i].LecturaActual - rowData[i].LecturaAnterior,
+            (rowData[i].LecturaActual - rowData[i].LecturaAnterior).toFixed(2),
             consumoX,
             currentRow
           );
@@ -498,16 +505,23 @@ const generateTableClienteTree = async (
     const SANAMIENTO_POSITION_Y = currentRow + 30;
     const MULTA_POSITION_Y = currentRow + 45;
 
+
     let totalSanamiento = parseFloat(
       rowData[0].Basico === 5.5 / 2
         ? (1.5 * rowData.length).toFixed(2)
         : (rowData.length * 3.0).toFixed(2)
     ).toFixed(2);
 
-    const totalMultas = multas
-      .map((multa) => multa.valor_pagar)
-      .reduce((a, b) => a + b, 0)
-      .toFixed(2);
+    let totalMultas;
+
+    if (multas.length > 0) {
+      totalMultas = multas
+        .map((multa) => multa.valor_pagar)
+        .reduce((a, b) => a + b, 0)
+        .toFixed(2);
+    } else {
+      totalMultas = 0;
+    }
 
     doc
       .fontSize(fontSizeDetaller)
@@ -516,7 +530,7 @@ const generateTableClienteTree = async (
       .text("$" + total.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
-        `$${totalAlacantarillado}`,
+        `$${totalAlacantarillado.toFixed(2)}`,
 
         detallerValue + 100,
         SANAMIENTO_POSITION_Y

@@ -81,12 +81,11 @@ const generatePdfMeasure = async (data) => {
     for (let i = 0; i < data.length; i += 2) {
       if (measurementsResults[measurementsIndex].length > 4) {
         generateHeadersClienteTree(doc, data[i]);
-
         generateTableClienteTree(
           doc,
           measurementsResults[measurementsIndex],
           INTERES_BASE,
-          multasResults.slice(multasIndex, multasIndex + 2),
+          multasResults[multasIndex],
           ja_table
         );
 
@@ -155,7 +154,7 @@ const generatePdfMeasure = async (data) => {
 const generateMeterTable = (doc, data) => {
   const titleTable = 50;
   const tableTop = 160;
-  const maxRecordsPerPage = 20; 
+  const maxRecordsPerPage = 20;
 
   const codigoX = 50;
   const nombreX = 110;
