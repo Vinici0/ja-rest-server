@@ -12,7 +12,8 @@ const {
   updateAllMeasurements,
   createMeusereAndUpdateCustomer,
   getMeasureById,
-  updateMeauseAndCustomer
+  updateMeauseAndCustomer,
+  generaAndCalculo
 } = require("../../controllers/measureController");
 
 const router = Router();
@@ -27,6 +28,7 @@ router.put("/updateAllMeasurements", updateAllMeasurements);
 router.post("/createMeusereAndUpdateCustomer", createMeusereAndUpdateCustomer);
 router.get("/:id", getMeasureById);
 router.put("/updateMeauseAndCustomer", updateMeauseAndCustomer);
+router.post("/generaAndCalculo", generaAndCalculo);
 
 
 module.exports = router;

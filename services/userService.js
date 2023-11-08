@@ -127,6 +127,82 @@ const deleteUser = async (id) => {
     throw new Error(error.msg);
   }
 };
+const updateUserInfo = async (idJaUsuario, body) => {
+  try {
+    const { oldPassword, newPassword, newEmail, newName } = body;
+
+    const usuario = await dbConnection.query(
+      "SELECT * FROM JA_Usuario WHERE idJaUsuario = :idJaUsuario",
+      {
+        replacements: {
+          idJaUsuario,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    if (!usuario || usuario.length === 0) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    const validPassword = bcryptjs.compareSync(
+      oldPassword,
+      usuario[0].password
+    );
+    if (!validPassword) {
+      throw new Error("La contraseña anterior no es correcta");
+    }
+
+    // Verificar si el nuevo email ya existe
+    const userExist = await dbConnection.query(
+      "SELECT * FROM JA_Usuario WHERE email = :newEmail AND idJaUsuario != :idJaUsuario",
+      {
+        replacements: {
+          newEmail,
+          idJaUsuario,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    if (userExist.length > 0) {
+      throw new Error("El correo electrónico ya está en uso");
+    }
+
+    const hashedPassword = bcryptjs.hashSync(newPassword, 10); // 10 es el número de rondas de hashing
+
+    await dbConnection.query(
+      "UPDATE JA_Usuario SET email = :newEmail, nombre = :newName, password = :hashedPassword WHERE idJaUsuario = :idJaUsuario",
+      {
+        replacements: {
+          newEmail,
+          newName,
+          hashedPassword,
+          idJaUsuario,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    consoleHelper.success("Información de usuario actualizada correctamente");
+    const updatedUsuario = await dbConnection.query(
+      "SELECT * FROM JA_Usuario WHERE idJaUsuario = :idJaUsuario",
+      {
+        replacements: {
+          idJaUsuario,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    return {
+      usuario: updatedUsuario[0],
+    };
+  } catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
+};
 
 module.exports = {
   getUsers,
@@ -134,4 +210,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserById,
+  updateUserInfo,
 };

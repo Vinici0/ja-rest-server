@@ -39,3 +39,53 @@ EXEC JA_Calculo @anio = 2023, @mes=11, @idCliente=2670
           type: sequelize.QueryTypes.UPDATE,
         }
       );
+
+
+use JUNTADEAGUAELPORTON_ANGULAR
+select * from JA_Medida where codigo = '20 000 325'  and saldo > 0 order by mes desc , anio desc 
+
+SELECT top 1 *
+FROM cliente order by idCliente desc
+
+SELECT *
+FROM JA_Medida where idCliente = 2051 order by mes desc , anio desc 
+
+SELECT *  FROM JA_Medida WHERE codigo = '20 000 325'
+order by idMedida desc
+WHERE mes = 1 AND anio = 2023
+GROUP BY codigo
+HAVING COUNT(*) > 1;
+
+select count(*) from cliente where codigo is null
+select * from cliente where ruc = '1305857557'
+EXEC JA_Genera @anio = 2023, @mes=11, @idCliente=2648
+EXEC JA_Llena @idCliente = 2051
+EXEC JA_Calculo @anio = 2023, @mes=11, @idCliente=2051
+
+
+SELECT *  FROM JA_Medida where idCliente = 7777777
+
+-- Delete
+delete from Cliente where idCliente = 2647
+
+select * from JA_MultaDetalle where id_cliente = 1332
+
+select * from Cliente where idCliente = 2651
+
+select * from Cliente where Codigo = '120837'
+
+SELECT *  FROM JA_Medida where Codigo = '120837' and saldo > 0 order by anio desc , mes desc
+
+UPDATE JA_Medida SET Acumulado = 0 where Codigo = '565656' 
+DELETE FROM JA_Medida where Codigo = '565656'
+
+SELECT *  FROM JA_Medida order by anio, mes desc
+
+SELECT *  FROM Cliente order by idCliente desc
+
+EXEC JA_Corte
+
+EXEC JA_Genera @anio = 2023, @mes=11, @idCliente=2651
+
+EXEC JA_Calculo  @anio = 2023, @mes=11, @idCliente=2647
+

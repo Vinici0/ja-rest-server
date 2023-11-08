@@ -72,10 +72,27 @@ const deleteUser = async (req, res = response) => {
   }
 };
 
+const updateUserInfo = async (req, res = response) => {
+  try {
+    const body  = req.body;
+    console.log(body);
+    const { idJaUsuario } = req.params;
+    const usuario = await userService.updateUserInfo(idJaUsuario, body);
+    responseUsuario.success(
+      res,
+      "Información de usuario actualizada correctamente",
+      usuario
+    );
+  } catch (error) {
+    responseUsuario.error(res, error.msg, error.status || 500);
+  }
+};
+
 module.exports = {
   createUser,
   deleteUser,
   getUserById,
   getUsers,
   updateUser,
+  updateUserInfo,
 };

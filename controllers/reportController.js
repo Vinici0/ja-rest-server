@@ -57,81 +57,63 @@ const generatePdfMeasure = async (data) => {
     const INTERES_BASE = await getInteresBase();
     const ja_table = await configService.getTabla();
 
-    for (let i = 0; i < data.length; i += 2) {
-      let measureOne = data[i];
-      let measureTwo = data[i + 1];
-
-      measurementsPromises.push(getMeasurements(measureOne.Codigo));
-      if (measureTwo) {
-        measurementsPromises.push(getMeasurements(measureTwo.Codigo));
-      }
-
-      multasPromises.push(userService.getFineByClient(measureOne.idCliente));
-      if (measureTwo) {
-        multasPromises.push(userService.getFineByClient(measureTwo.idCliente));
-      }
+    // Preparar promesas para obtener mediciones y multas.
+    for (let i = 0; i < data.length; i++) {
+      measurementsPromises.push(getMeasurements(data[i].Codigo));
+      multasPromises.push(userService.getFineByClient(data[i].idCliente));
     }
 
+    // Esperar a que todas las promesas se resuelvan.
     const measurementsResults = await Promise.all(measurementsPromises);
     const multasResults = await Promise.all(multasPromises);
+    let conuntBasico = 0;
+    // Procesar los datos y generar el PDF.
+    for (let i = 0; i < data.length; i++) {
+      const currentData = data[i];
+      const currentMeasurements = measurementsResults[i];
+      const currentFines = multasResults[i];
 
-    let measurementsIndex = 0;
-    let multasIndex = 0;
 
-    for (let i = 0; i < data.length; i += 2) {
-      if (measurementsResults[measurementsIndex].length > 4) {
-        generateHeadersClienteTree(doc, data[i]);
+      // Decidir si se genera una tabla para un cliente o dos en la misma página.
+      if (currentMeasurements.length > 4) {
+        // Generar tabla que ocupa toda la hoja.
+        generateHeadersClienteTree(doc, currentData);
         generateTableClienteTree(
           doc,
-          measurementsResults[measurementsIndex],
+          currentMeasurements,
           INTERES_BASE,
-          multasResults[multasIndex],
+          currentFines,
+          ja_table
+        );
+      } else {
+        // Generar tablas para dos clientes en la misma página si es posible.
+        generateHeadersClienteOne(doc, currentData);
+        generateTableClienteOne(
+          doc,
+          currentMeasurements,
+          INTERES_BASE,
+          currentFines,
           ja_table
         );
 
-        measurementsIndex += 1;
-        multasIndex += 2;
-
-        if (i + 2 < data.length) {
-          doc.addPage();
-        }
-      } else {
-        let measureOne = data[i];
-        let measureTwo = data[i + 1];
-
-        let tableRowOne = measurementsResults[measurementsIndex];
-        let tableRowTwo = measurementsResults[measurementsIndex + 1];
-
-        let multasClienteOne = multasResults[multasIndex];
-        let multasClienteTwo = multasResults[multasIndex + 1];
-
-        generateHeadersClienteOne(doc, measureOne);
-        if (measureTwo) {
-          generateHeadersClienteTwo(doc, measureTwo);
-          if (tableRowTwo && tableRowTwo.length > 0) {
-            generateTableClienteTwo(
-              doc,
-              tableRowTwo,
-              INTERES_BASE,
-              multasClienteTwo,
-              ja_table
-            );
-          }
-        }
-        if (tableRowOne && tableRowOne.length > 0) {
-          generateTableClienteOne(
+        // Verificar si hay un próximo cliente y si cabe en la misma página.
+        if (i + 1 < data.length && measurementsResults[i + 1].length <= 4) {
+          const nextData = data[i + 1];
+          generateHeadersClienteTwo(doc, nextData);
+          generateTableClienteTwo(
             doc,
-            tableRowOne,
+            measurementsResults[i + 1],
             INTERES_BASE,
-            multasClienteOne,
+            multasResults[i + 1],
             ja_table
           );
+          i++; // Incrementar i ya que hemos procesado el siguiente registro también.
         }
-        if (i + 2 < data.length) {
-          doc.addPage();
-        }
-        measurementsIndex += 2;
-        multasIndex += 2;
+      }
+
+      // Añadir una nueva página si todavía hay más datos para procesar.
+      if (i + 1 < data.length) {
+        doc.addPage();
       }
     }
 
@@ -141,7 +123,7 @@ const generatePdfMeasure = async (data) => {
 
     doc.end();
 
-    // Convertir el PDF a un buffer y devolverlo
+    // Convertir el PDF a un buffer y devolverlo.
     const pdfStream = await getStream.buffer(doc);
 
     return pdfStream;
@@ -150,6 +132,7 @@ const generatePdfMeasure = async (data) => {
     return null;
   }
 };
+
 
 const generateMeterTable = (doc, data) => {
   const titleTable = 50;
@@ -426,6 +409,7 @@ const showMeasure = async (req, res) => {
 };
 
 const showMeter = async (req, res) => {
+  
   const getAllMetersCute = await measureService.execCorte();
   const pdfStream = await generatePdfMeter(getAllMetersCute);
   res

@@ -26,7 +26,6 @@ const generateTableClienteOne = async (
     const fontBold = "Helvetica-Bold";
     const fontRegular = "Helvetica";
 
-    // Títulos de la tabla
     doc
       .font(fontBold)
       .fontSize(titleFontSize)
@@ -51,6 +50,7 @@ const generateTableClienteOne = async (
     let total = 0;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
+    let basico = 0;
     if (rowData.length !== 0) {
       for (let i = 0; i < rowData.length && i < MAX_ROWS; i++) {
         let ExcedenteNew =
@@ -108,7 +108,7 @@ const generateTableClienteOne = async (
 
         doc
           .text(
-            (interesIcrement * 100).toFixed(2) + "%",
+            (interesIcrement * 100).toFixed(0) + "%",
             observacionX,
             currentRow
           ) /* Aqui va el subTotal */
@@ -122,6 +122,7 @@ const generateTableClienteOne = async (
         total += rowData[i].Total;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
+        basico = rowData[i].Basico;
       }
     }
 
@@ -138,7 +139,7 @@ const generateTableClienteOne = async (
     const MULTA_POSITION_Y = currentRow + 45;
 
     let totalSanamiento =
-      rowData[0].Basico === 5.5 / 2
+      basico === 5.5 / 2
         ? (1.5 * rowData.length).toFixed(2)
         : (rowData.length * 3.0).toFixed(2);
 
@@ -154,7 +155,7 @@ const generateTableClienteOne = async (
       .text("$" + total.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
-        `$${totalAlacantarillado}`,
+        `$${totalAlacantarillado.toFixed(2)}`,
 
         detallerValue + 100,
         SANAMIENTO_POSITION_Y
@@ -288,7 +289,7 @@ const generateTableClienteTwo = async (
             currentRow
           )
           .text(
-            (interesIcrement * 100).toFixed(2) + "%",
+            (interesIcrement * 100).toFixed(0) + "%",
             observacionX,
             currentRow
           )
@@ -376,7 +377,6 @@ const generateTableClienteTree = async (
   ja_tabla = []
 ) => {
   try {
-
     let INTERES = INTERES_BASE;
     let interesIcrement = 0;
 
@@ -477,7 +477,7 @@ const generateTableClienteTree = async (
 
         doc
           .text(
-            (interesIcrement * 100).toFixed(2) + "%",
+            (interesIcrement * 100).toFixed(0) + "%",
             observacionX,
             currentRow
           ) /* Aqui va el subTotal */
@@ -505,7 +505,6 @@ const generateTableClienteTree = async (
     const SANAMIENTO_POSITION_Y = currentRow + 30;
     const MULTA_POSITION_Y = currentRow + 45;
 
-
     let totalSanamiento = parseFloat(
       rowData[0].Basico === 5.5 / 2
         ? (1.5 * rowData.length).toFixed(2)
@@ -531,7 +530,6 @@ const generateTableClienteTree = async (
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
         `$${totalAlacantarillado.toFixed(2)}`,
-
         detallerValue + 100,
         SANAMIENTO_POSITION_Y
       )
