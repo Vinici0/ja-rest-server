@@ -24,3 +24,18 @@ update JA_Medida set Codigo = '101510' where idCliente = 2670
 EXEC JA_Genera @anio = 2023, @mes=11, @idCliente=2670
 EXEC JA_Llena @idCliente = 2670
 EXEC JA_Calculo @anio = 2023, @mes=11, @idCliente=2670
+
+
+  const ja_medidaQuery =  await dbConnection.query(
+        `UPDATE JA_Medida SET Total = :Total, Saldo = :Saldo
+         WHERE idMedida = :idMedida`,
+        {
+          replacements: {
+            Total: medidas[i].Total,
+            Saldo: totalSaldo,
+            idMedida: medidas[i].idMedida,
+            Alcantarillado: totalAlcantarillado,
+          },
+          type: sequelize.QueryTypes.UPDATE,
+        }
+      );
