@@ -118,8 +118,8 @@ const generateTableClienteOne = async (
             currentRow
           )
 
-          .text("$" + rowData[i].Total.toFixed(2), totalX, currentRow);
-        total += rowData[i].Total;
+          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow);
+        total += rowData[i].Saldo;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
         basico = rowData[i].Basico;
@@ -298,10 +298,10 @@ const generateTableClienteTwo = async (
             subTotalX,
             currentRow
           )
-          .text("$" + rowData[i].Total.toFixed(2), totalX, currentRow);
+          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow);
 
         // Actualizar el valor detotal
-        total += rowData[i].Total;
+        total += rowData[i].Saldo;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
       }
@@ -388,7 +388,7 @@ const generateTableClienteTree = async (
     const consumoX = 300;
     const observacionX = 370;
     const subTotalX = 430;
-    const totalX = 500;
+    const totalX = 485;
 
     const titleFontSize = 16;
     const rowFontSize = 10;
@@ -411,7 +411,7 @@ const generateTableClienteTree = async (
       .text("Consumo", consumoX, tableTop)
       .text("Interes", observacionX, tableTop)
       .text("Sub Total", subTotalX, tableTop)
-      .text("Total", totalX, tableTop);
+      .text("Total + $3", totalX, tableTop);
 
     doc.moveTo(titleTableX, 195).lineTo(550, 195).stroke();
 
@@ -487,8 +487,8 @@ const generateTableClienteTree = async (
             currentRow
           )
 
-          .text("$" + rowData[i].Total.toFixed(2), totalX, currentRow);
-        total += rowData[i].Total;
+          .text("$" + rowData[i].Saldo.toFixed(2) , totalX, currentRow);
+        total += rowData[i].Saldo;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
       }

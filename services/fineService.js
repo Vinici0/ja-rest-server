@@ -233,6 +233,29 @@ const getFineDetailById = async (idMultaDetalle) => {
   }
 };
 
+const calculateTotalAmount = async () => {
+  try {
+    const calculateTotal = await dbConnection.query(
+      `SELECT
+     c.Nombre,
+     c.ruc,
+     COUNT(m.id_cliente) AS cantidad_de_multas,
+     SUM(m.valor_pagar) AS total_pagar
+ FROM
+     cliente c
+ INNER JOIN
+     JA_MultaDetalle m ON m.id_cliente = c.idCliente
+ GROUP BY
+     c.Nombre, c.ruc;`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Total calculado correctamente");
+    return calculateTotal;
+  } catch (error) {}
+};
+
 module.exports = {
   deleteFineDetail,
   createFine,
@@ -245,4 +268,5 @@ module.exports = {
   updateFine,
   updateFineDetail,
   getFineDetailById,
+  calculateTotalAmount,
 };
