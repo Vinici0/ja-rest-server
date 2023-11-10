@@ -9,8 +9,9 @@ class Response {
         token: data.token,
       });
     }
-
+    
     return res.status(status).json({
+
       ok: true,
       msg,
       data,

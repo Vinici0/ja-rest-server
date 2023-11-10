@@ -193,6 +193,25 @@ const getFineDetails = async () => {
   }
 };
 
+const getFineDetailsByIdClient = async (idCliente) => {
+  try {
+    const fineDetails = await dbConnection.query(
+      "SELECT JA_MultaDetalle.id_cliente,date_fine,descripcion,pagado,valor_pagar,idMultaDetalle,nombre, ruc,typeFine, telefono  FROM JA_MultaDetalle INNER JOIN Cliente ON JA_MultaDetalle.id_cliente = Cliente.idCliente INNER JOIN JA_Multa ON JA_MultaDetalle.id_multa = JA_Multa.idMulta WHERE JA_MultaDetalle.id_cliente = :idCliente",
+      {
+        replacements: {
+          idCliente,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Detalles de multas obtenidos correctamente");
+    return fineDetails;
+  } catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
+};
+
 const deleteFineDetail = async (idMultaDetalle) => {
   try {
     const deletedFineDetail = await dbConnection.query(
@@ -233,27 +252,22 @@ const getFineDetailById = async (idMultaDetalle) => {
   }
 };
 
+
+
 const calculateTotalAmount = async () => {
   try {
-    const calculateTotal = await dbConnection.query(
-      `SELECT
-     c.Nombre,
-     c.ruc,
-     COUNT(m.id_cliente) AS cantidad_de_multas,
-     SUM(m.valor_pagar) AS total_pagar
- FROM
-     cliente c
- INNER JOIN
-     JA_MultaDetalle m ON m.id_cliente = c.idCliente
- GROUP BY
-     c.Nombre, c.ruc;`,
+    const result = await dbConnection.query(
+      " SELECT  c.idCliente ,c.nombre, c.ruc, COUNT(m.id_cliente) AS cantidadMultas, SUM(m.valor_pagar) AS totalPagar FROM cliente c INNER JOIN JA_MultaDetalle m ON m.id_cliente = c.idCliente GROUP BY c.Nombre, c.ruc, c.idCliente",
       {
         type: sequelize.QueryTypes.SELECT,
       }
     );
     consoleHelper.success("Total calculado correctamente");
-    return calculateTotal;
-  } catch (error) {}
+    return result;
+  } catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
 };
 
 module.exports = {
@@ -269,4 +283,5 @@ module.exports = {
   updateFineDetail,
   getFineDetailById,
   calculateTotalAmount,
+  getFineDetailsByIdClient
 };

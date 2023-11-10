@@ -10,11 +10,15 @@ const {
   togglePaymentStatus,
   updateFineDetail,
   getFineDetailById,
+  calculateTotalAmount,
+  getFineDetailsByIdClient
 } = require("../../controllers/fineController");
 
 const router = Router();
 
 router.get("/", getFinesDetails);
+
+router.get("/calculateTotalAmount", calculateTotalAmount);
 
 router.post(
   "/",
@@ -37,5 +41,8 @@ router.put("/:id/paymentStatus", togglePaymentStatus);
 router.delete("/:id", deleteFineDetail);
 
 router.get("/:id", getFineDetailById);
+
+router.get("/client/:id", getFineDetailsByIdClient);
+
 
 module.exports = router;

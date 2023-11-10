@@ -164,9 +164,24 @@ const getFineDetailById = async (req = request, res = response) => {
 };
 
 const calculateTotalAmount = async (req = request, res = response) => {
+  try {
+    const fineDetail = await fineService.calculateTotalAmount();
+    return new Response().success(
+      res,
+      "Detalle de multa obtenido correctamente",
+      {
+        calculateTotalAmount: fineDetail,
+      }
+    );
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
+const getFineDetailsByIdClient = async (req = request, res = response) => {
   const { id } = req.params;
   try {
-    const fineDetail = await fineService.getFineDetailById(id);
+    const fineDetail = await fineService.getFineDetailsByIdClient(id);
     return new Response().success(
       res,
       "Detalle de multa obtenido correctamente",
@@ -191,5 +206,6 @@ module.exports = {
   updateFine,
   updateFineDetail,
   getFineDetailById,
-  calculateTotalAmount
+  calculateTotalAmount,
+  getFineDetailsByIdClient
 };

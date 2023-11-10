@@ -13,7 +13,6 @@ const {
   togglePaymentStatus,
   updateFine,
   updateFineDetail,
-  calculateTotalAmount
 } = require("../../controllers/fineController");
 
 const router = Router();
@@ -45,6 +44,6 @@ router.put(
 router.delete("/:id", deleteFine);
 
 
-router.get("/calculateTotalAmount", calculateTotalAmount);
+
 
 module.exports = router;
