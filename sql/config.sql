@@ -22,3 +22,14 @@ insert into ja_interes (interes, descripcion) values (3, 'Sin interes')
 -- Altarando una tabla
 ALTER TABLE ja_medida
 ADD Alcantarillado DECIMAL (8, 2);
+
+
+
+
+
+CREATE LOGIN test1 WITH PASSWORD = 'root', CHECK_POLICY = OFF;
+GO
+
+-- Asignar el rol sysadmin al usuario
+ALTER SERVER ROLE sysadmin ADD MEMBER test1;
+GO
