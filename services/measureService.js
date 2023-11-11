@@ -99,7 +99,7 @@ const updateMeasurement = async (
 
     //TODO: Corregir la parte del mes
 
-    let Alcantarillado = 3;
+    let Alcantarillado = Basico === 2.75 ? 1.5 : 3.0;
     const EditarMedida = await dbConnection.query(
       `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, ExcedenteV = :ExcedenteV, Total = :Total, Pago = :Pago, Saldo = :Saldo, Alcantarillado = :Alcantarillado WHERE idMedida = :idMedida`,
       {
@@ -285,10 +285,10 @@ const updateAllMeasurements = async () => {
       ja_tabla
     );
 
-    // for (const medida of getAllMedidasByCodigo) {
-    //   console.log("ingreasndo");
-    //  await  calculateAndUpdateMedidasAcumulado(medida.Codigo);
-    // }
+    for (const medida of getAllMedidasByCodigo) {
+      console.log("ingreasndo");
+     await  calculateAndUpdateMedidasAcumulado(medida.Codigo);
+    }
   }
 
   return {

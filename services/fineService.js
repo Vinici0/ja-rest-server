@@ -156,13 +156,16 @@ const updateFineDetail = async (idMultaDetalle, fineDetail) => {
   }
 };
 
-const togglePaymentStatus = async (idMultaDetalle, pagado) => {
+const togglePaymentStatus = async (idMultaDetalle, pagado, fecha) => {
   try {
+    let fechaPagoValue = pagado === 1 ? fecha : null;
+
     const updatedPaymentStatus = await dbConnection.query(
-      `UPDATE JA_MultaDetalle SET pagado = :pagado WHERE idMultaDetalle = :idMultaDetalle`,
+      `UPDATE JA_MultaDetalle SET pagado = :pagado, fecha_pago = :fechaPago WHERE idMultaDetalle = :idMultaDetalle`,
       {
         replacements: {
           pagado,
+          fechaPago: fechaPagoValue,
           idMultaDetalle,
         },
         type: sequelize.QueryTypes.UPDATE,
@@ -176,6 +179,7 @@ const togglePaymentStatus = async (idMultaDetalle, pagado) => {
     throw new Error(error.message);
   }
 };
+
 
 const getFineDetails = async () => {
   try {
@@ -252,12 +256,10 @@ const getFineDetailById = async (idMultaDetalle) => {
   }
 };
 
-
-
 const calculateTotalAmount = async () => {
   try {
     const result = await dbConnection.query(
-      " SELECT  c.idCliente ,c.nombre, c.ruc, COUNT(m.id_cliente) AS cantidadMultas, SUM(m.valor_pagar) AS totalPagar FROM cliente c INNER JOIN JA_MultaDetalle m ON m.id_cliente = c.idCliente GROUP BY c.Nombre, c.ruc, c.idCliente",
+      "SELECT  c.idCliente ,c.nombre, c.ruc, COUNT(m.id_cliente) AS cantidadMultas, SUM(m.valor_pagar) AS totalPagar FROM cliente c INNER JOIN JA_MultaDetalle m ON m.id_cliente = c.idCliente GROUP BY c.Nombre, c.ruc, c.idCliente",
       {
         type: sequelize.QueryTypes.SELECT,
       }
@@ -283,5 +285,5 @@ module.exports = {
   updateFineDetail,
   getFineDetailById,
   calculateTotalAmount,
-  getFineDetailsByIdClient
+  getFineDetailsByIdClient,
 };

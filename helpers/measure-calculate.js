@@ -13,30 +13,27 @@ const calculateAndUpdateMedidas = async (
       (medidas[i - 1].Mes - medidas[i].Mes);
 
     if (monthsDifference > 0) {
-      let ExcedenteNew = medidas[i].LecturaActual - medidas[i].LecturaAnterior;
+      const ExcedenteNew =
+        medidas[i].LecturaActual - medidas[i].LecturaAnterior;
       let ExcedenteVNew = 0;
 
       if (
         ExcedenteNew >= ja_tabla[0].Desde &&
         ExcedenteNew <= ja_tabla[0].Hasta
       ) {
-        ExcedenteNew = 0;
         ExcedenteVNew = 0;
       } else if (
         ExcedenteNew >= ja_tabla[1].Desde &&
         ExcedenteNew <= ja_tabla[1].Hasta
       ) {
-        ExcedenteNew = ExcedenteNew - 15;
-        ExcedenteVNew = ja_tabla[1].ValorExc * ExcedenteNew;
+        ExcedenteVNew = ja_tabla[1].ValorExc * (ExcedenteNew - 15);
       } else if (
         ExcedenteNew >= ja_tabla[2].Desde &&
         ExcedenteNew <= ja_tabla[2].Hasta
       ) {
-        ExcedenteNew = ExcedenteNew - 15;
-        ExcedenteVNew = ja_tabla[2].ValorExc * ExcedenteNew;
+        ExcedenteVNew = ja_tabla[2].ValorExc * (ExcedenteNew - 15);
       } else if (ExcedenteNew >= ja_tabla[3].Desde) {
-        ExcedenteNew = ExcedenteNew - 15;
-        ExcedenteVNew = ja_tabla[3].ValorExc * ExcedenteNew;
+        ExcedenteVNew = ja_tabla[3].ValorExc * (ExcedenteNew - 15);
       }
 
       let interesIncrement = 0;
@@ -48,24 +45,24 @@ const calculateAndUpdateMedidas = async (
         interesIncrement = INTERES_BASE;
       } else if (i >= 2) {
         // Cálculo del interés basado en el múltiplo de INTERES_BASE
-        interestMultiplier++; // Incrementar el multiplicador de interés por cada iteración
+        interestMultiplier++;
         interesIncrement = INTERES_BASE * interestMultiplier;
       }
 
       //Medidas
-      let totalExcedente = medidas[i].Basico + ExcedenteVNew;
-      let interes = totalExcedente * interesIncrement;
-
+      const totalExcedente = medidas[i].Basico + ExcedenteVNew;
+      const interes = totalExcedente * interesIncrement;
+      const calculoAlcantarillado = medidas[i].Basico === 2.75 ? 1.5 : 3.0;
       // Alcantarillado
-      let interesAlcantarillado = alcantarillado * interesIncrement;
-      let totalAlcantarillado = (
-        interesAlcantarillado + alcantarillado
+      const interesAlcantarillado = calculoAlcantarillado * interesIncrement;
+      const totalAlcantarillado = (
+        interesAlcantarillado + calculoAlcantarillado
       ).toFixed(2);
 
       medidas[i].Total = (totalExcedente + interes).toFixed(2);
       medidas[i].Saldo = (totalExcedente + interes).toFixed(2);
 
-      let totalSaldo = Number(medidas[i].Saldo) + Number(totalAlcantarillado);
+      const totalSaldo = Number(medidas[i].Saldo) + Number(totalAlcantarillado);
 
       //TODO: Agergar el alcantarillado a la medida y actualizar la medida
       const ja_medidaQuery = await dbConnection.query(
@@ -85,30 +82,9 @@ const calculateAndUpdateMedidas = async (
       if (ja_medidaQuery[1] === 0) {
         throw new Error("No se pudo actualizar la medida");
       }
-
-
-
-      // TODO: DESCOMENTAR ESTE CÓDIGO CUANDO SE QUIERA ACTUALIZAR EL SALDO
-      // await dbConnection.query(
-      //   `UPDATE JA_Medida SET Saldo = :Saldo, Alcantarillado = :Alcantarillado
-      //      WHERE idMedida = :idMedida AND Anio >= 2023 AND Mes >= 9`,
-      //   {
-      //     replacements: {
-      //       Saldo: totalSaldo,
-      //       Alcantarillado: totalAlcantarillado,
-      //       idMedida: medidas[i].idMedida,
-      //     },
-      //     type: sequelize.QueryTypes.UPDATE,
-      //   }
-      // );
     }
   }
-
-
 };
-
-
-
 
 module.exports = {
   calculateAndUpdateMedidas,

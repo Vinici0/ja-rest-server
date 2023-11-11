@@ -11,14 +11,15 @@ const generateTableClienteOne = async (
     let INTERES = INTERES_BASE;
     let interesIcrement = 0;
 
-    const titleTableX = 50;
     let tableTop = 180;
+    const titleTableX = 50;
     const fechaX = 50;
     const lecturaAnteriorX = 110;
-    const lecturaActualX = 210;
-    const consumoX = 300;
-    const observacionX = 370;
-    const subTotalX = 430;
+    const lecturaActualX = 190;
+    const consumoX = 265;
+    const subTotalX = 335; //335
+    const alcantarilladoX = 395;
+    const interesX = 445;
     const totalX = 500;
 
     const titleFontSize = 16;
@@ -36,11 +37,12 @@ const generateTableClienteOne = async (
       .fontSize(rowFontSize)
       .font(fontBold)
       .text("Fecha", fechaX, tableTop)
-      .text("Lectura Anterior", lecturaAnteriorX, tableTop)
-      .text("Lectura Actual", lecturaActualX, tableTop)
+      .text("Lec. Anterior", lecturaAnteriorX, tableTop)
+      .text("Lec. Actual", lecturaActualX, tableTop)
       .text("Consumo", consumoX, tableTop)
-      .text("Interes", observacionX, tableTop)
-      .text("Sub Total", subTotalX, tableTop)
+      .text("Interes", interesX, tableTop)
+      .text("Agua", subTotalX, tableTop)
+      .text("Alc.", alcantarilladoX, tableTop)
       .text("Total", totalX, tableTop);
 
     doc.moveTo(titleTableX, 195).lineTo(550, 195).stroke();
@@ -48,6 +50,7 @@ const generateTableClienteOne = async (
     let rowData = data;
     let currentRow = tableTop + 18;
     let total = 0;
+    let totalAgua = 0;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
     let basico = 0;
@@ -109,9 +112,14 @@ const generateTableClienteOne = async (
         doc
           .text(
             (interesIcrement * 100).toFixed(0) + "%",
-            observacionX,
+            interesX,
             currentRow
           ) /* Aqui va el subTotal */
+          .text(
+            "$" + Number(rowData[i].Alcantarillado).toFixed(2),
+            alcantarilladoX,
+            currentRow
+          )
           .text(
             "$" + (rowData[i].Basico + ExcedenteVNew).toFixed(2),
             subTotalX,
@@ -120,6 +128,7 @@ const generateTableClienteOne = async (
 
           .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow);
         total += rowData[i].Saldo;
+        totalAgua += rowData[i].Total;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
         basico = rowData[i].Basico;
@@ -152,7 +161,7 @@ const generateTableClienteOne = async (
       .fontSize(fontSizeDetaller)
       .text(DETALLE_TEXT, detallex, DETALLE_POSITION_Y)
       //redondear a dos decimales
-      .text("$" + total.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
+      .text("$" + totalAgua.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
         `$${totalAlacantarillado.toFixed(2)}`,
@@ -174,7 +183,7 @@ const generateTableClienteOne = async (
     const textoCuadroY = cuadroY + 5;
 
     const totalValue = (
-      parseFloat(total) +
+      parseFloat(totalAgua) +
       parseFloat(totalAlacantarillado) +
       parseFloat(totalMultas)
     ).toFixed(2);
@@ -198,15 +207,18 @@ const generateTableClienteTwo = async (
 ) => {
   try {
     let total = 0;
-    const titleTableX = 50;
     let tableTop = 570;
+
+    const titleTableX = 50;
     const fechaX = 50;
     const lecturaAnteriorX = 110;
-    const lecturaActualX = 210;
-    const consumoX = 300;
-    const observacionX = 370;
-    const subTotalX = 430;
+    const lecturaActualX = 190;
+    const consumoX = 265;
+    const subTotalX = 335; //335
+    const alcantarilladoX = 395;
+    const interesX = 445;
     const totalX = 500;
+
     const titleFontSize = 16;
     const rowFontSize = 10;
     const fontBold = "Helvetica-Bold";
@@ -222,11 +234,12 @@ const generateTableClienteTwo = async (
       .fontSize(rowFontSize)
       .font(fontBold)
       .text("Fecha", fechaX, tableTop)
-      .text("Lectura Anterior", lecturaAnteriorX, tableTop)
-      .text("Lectura Actual", lecturaActualX, tableTop)
+      .text("Lec. Anterior", lecturaAnteriorX, tableTop)
+      .text("Lec. Actual", lecturaActualX, tableTop)
       .text("Consumo", consumoX, tableTop)
-      .text("Interes", observacionX, tableTop)
-      .text("Sub Total", subTotalX, tableTop)
+      .text("Interes", interesX, tableTop)
+      .text("Agua", subTotalX, tableTop)
+      .text("Alc.", alcantarilladoX, tableTop)
       .text("Total", totalX, tableTop);
 
     doc.moveTo(titleTableX, 585).lineTo(550, 585).stroke();
@@ -290,9 +303,16 @@ const generateTableClienteTwo = async (
           )
           .text(
             (interesIcrement * 100).toFixed(0) + "%",
-            observacionX,
+            interesX,
             currentRow
           )
+
+          .text(
+            "$" + Number(rowData[i].Alcantarillado).toFixed(2),
+            alcantarilladoX,
+            currentRow
+          )
+
           .text(
             "$" + (rowData[i].Basico + ExcedenteVNew),
             subTotalX,
@@ -380,15 +400,17 @@ const generateTableClienteTree = async (
     let INTERES = INTERES_BASE;
     let interesIcrement = 0;
 
-    const titleTableX = 50;
     let tableTop = 180;
+
+    const titleTableX = 50;
     const fechaX = 50;
     const lecturaAnteriorX = 110;
-    const lecturaActualX = 210;
-    const consumoX = 300;
-    const observacionX = 370;
-    const subTotalX = 430;
-    const totalX = 485;
+    const lecturaActualX = 190;
+    const consumoX = 265;
+    const subTotalX = 335; //335
+    const alcantarilladoX = 395;
+    const interesX = 445;
+    const totalX = 500;
 
     const titleFontSize = 16;
     const rowFontSize = 10;
@@ -406,18 +428,20 @@ const generateTableClienteTree = async (
       .fontSize(rowFontSize)
       .font(fontBold)
       .text("Fecha", fechaX, tableTop)
-      .text("Lectura Anterior", lecturaAnteriorX, tableTop)
-      .text("Lectura Actual", lecturaActualX, tableTop)
+      .text("Lec. Anterior", lecturaAnteriorX, tableTop)
+      .text("Lec. Actual", lecturaActualX, tableTop)
       .text("Consumo", consumoX, tableTop)
-      .text("Interes", observacionX, tableTop)
-      .text("Sub Total", subTotalX, tableTop)
-      .text("Total + $3", totalX, tableTop);
+      .text("Interes", interesX, tableTop)
+      .text("Agua", subTotalX, tableTop)
+      .text("Alc.", alcantarilladoX, tableTop)
+      .text("Total", totalX, tableTop);
 
     doc.moveTo(titleTableX, 195).lineTo(550, 195).stroke();
 
     let rowData = data;
     let currentRow = tableTop + 18;
     let total = 0;
+    let totalAgua = 0;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
     if (rowData.length !== 0) {
@@ -478,7 +502,7 @@ const generateTableClienteTree = async (
         doc
           .text(
             (interesIcrement * 100).toFixed(0) + "%",
-            observacionX,
+            interesX,
             currentRow
           ) /* Aqui va el subTotal */
           .text(
@@ -486,9 +510,15 @@ const generateTableClienteTree = async (
             subTotalX,
             currentRow
           )
+          .text(
+            "$" + Number(rowData[i].Alcantarillado).toFixed(2),
+            alcantarilladoX,
+            currentRow
+          )
 
-          .text("$" + rowData[i].Saldo.toFixed(2) , totalX, currentRow);
+          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow);
         total += rowData[i].Saldo;
+        totalAgua += rowData[i].Total;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
       }
@@ -526,7 +556,7 @@ const generateTableClienteTree = async (
       .fontSize(fontSizeDetaller)
       .text(DETALLE_TEXT, detallex, DETALLE_POSITION_Y)
       //redondear a dos decimales
-      .text("$" + total.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
+      .text("$" + totalAgua.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
         `$${totalAlacantarillado.toFixed(2)}`,
@@ -534,6 +564,7 @@ const generateTableClienteTree = async (
         SANAMIENTO_POSITION_Y
       )
       .text(MULTA_TEXT, detallex, MULTA_POSITION_Y)
+
       .text("$" + totalMultas, detallerValue + 100, MULTA_POSITION_Y);
 
     // Agregar el cuadro de texto
