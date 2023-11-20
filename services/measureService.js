@@ -30,6 +30,7 @@ const getMeasurementsByMonthAndYear = async (Mes, Anio) => {
       }
     );
     consoleHelper.success("Medida obtenida correctamente");
+    console.log(measure);
     return measure;
   } catch (error) {
     consoleHelper.error(error.msg);
@@ -284,16 +285,53 @@ const updateAllMeasurements = async () => {
       sequelize,
       ja_tabla
     );
-
-    for (const medida of getAllMedidasByCodigo) {
-      console.log("ingreasndo");
-     await  calculateAndUpdateMedidasAcumulado(medida.Codigo);
-    }
   }
 
   return {
     message: "Medidas actualizadas correctamente",
   };
+};
+
+const calculateAllAndUpdateMedidasAcumulado = async () => {
+  const transaction = await dbConnection.transaction();
+
+  try {
+    const getAllMedidas = await dbConnection.query(
+      `SELECT codigo FROM JA_Medida WHERE Saldo > 0 GROUP BY codigo HAVING COUNT(*) > 0`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+        transaction,
+      }
+    );
+
+    for (const medida of getAllMedidas) {
+      const { codigo } = medida;
+
+      const getAllMedidasByCodigo = await dbConnection.query(
+        `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC`,
+        {
+          replacements: { Codigo: codigo },
+          type: sequelize.QueryTypes.SELECT,
+          transaction,
+        }
+      );
+
+      getAllMedidasByCodigo.sort((a, b) =>
+        a.Anio !== b.Anio ? b.Anio - a.Anio : b.Mes - a.Mes
+      );
+
+      await calculateAndUpdateMedidasAcumulado(codigo);
+    }
+
+    await transaction.commit();
+
+    return {
+      message: "Medidas actualizadas correctamente",
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };
 
 const addInterestIfUnpaid = async (Anio, Mes) => {
@@ -600,4 +638,5 @@ module.exports = {
   getMeasureById,
   updateMeauseAndCustomer,
   generaAndCalculo,
+  calculateAllAndUpdateMedidasAcumulado,
 };

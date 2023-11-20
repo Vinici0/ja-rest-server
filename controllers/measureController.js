@@ -161,6 +161,18 @@ const generaAndCalculo = async (req, res) => {
   }
 };
 
+
+const calculateAllAndUpdateMedidasAcumulado = async (req, res) => {
+  try {
+    const result = await measureService.calculateAllAndUpdateMedidasAcumulado();
+    return new Response().success(res, "Medida actualizada correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   execCorte,
   getMeasurements,
@@ -172,5 +184,6 @@ module.exports = {
   createMeusereAndUpdateCustomer,
   getMeasureById,
   updateMeauseAndCustomer,
-  generaAndCalculo
+  generaAndCalculo,
+  calculateAllAndUpdateMedidasAcumulado
 };
