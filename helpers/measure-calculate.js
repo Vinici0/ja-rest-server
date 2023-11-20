@@ -86,6 +86,73 @@ const calculateAndUpdateMedidas = async (
   }
 };
 
+const calculateMeasurementValues = async (
+  LecturaActual,
+  LecturaAnterior,
+  Basico,
+  ja_tabla,
+) => {
+  if (LecturaActual < LecturaAnterior) {
+    throw new Error("La lectura actual no puede ser menor a la anterior");
+  }
+
+  let Excedente = LecturaActual - LecturaAnterior;
+  let ExcedenteV = 0;
+
+  if (Excedente >= ja_tabla[0].Desde && Excedente <= ja_tabla[0].Hasta) {
+    Excedente = 0;
+    ExcedenteV = 0;
+  } else if (Excedente >= ja_tabla[1].Desde && Excedente <= ja_tabla[1].Hasta) {
+    Excedente = Excedente - 15;
+    ExcedenteV = ja_tabla[1].ValorExc * Excedente;
+  } else if (Excedente >= ja_tabla[2].Desde && Excedente <= ja_tabla[2].Hasta) {
+    Excedente = Excedente - 15;
+    ExcedenteV = ja_tabla[2].ValorExc * Excedente;
+  } else if (Excedente >= ja_tabla[3].Desde) {
+    Excedente = Excedente - 15;
+    ExcedenteV = ja_tabla[3].ValorExc * Excedente;
+  }
+
+  const Total = Basico + ExcedenteV;
+  const Pago = 0;
+
+  let Alcantarillado = Basico === 2.75 ? 1.5 : 3.0;
+
+  return { Excedente, ExcedenteV, Total, Alcantarillado, Pago };
+};
+
+const updateMeasurementInDatabase = async (
+  idMedida,
+  LecturaActual,
+  valuesToUpdate,
+  dbConnection,
+  sequelize
+) => {
+  const { Excedente, ExcedenteV, Total, Pago, Alcantarillado } = valuesToUpdate;
+
+  const result = await dbConnection.query(
+    `UPDATE JA_Medida SET LecturaActual = :LecturaActual, Excedente = :Excedente, ExcedenteV = :ExcedenteV, Total = :Total, Pago = :Pago, Saldo = :Saldo, Alcantarillado = :Alcantarillado WHERE idMedida = :idMedida`,
+    {
+      replacements: {
+        LecturaActual,
+        Excedente,
+        ExcedenteV,
+        Total,
+        Pago,
+        Saldo: Total + Alcantarillado,
+        Alcantarillado,
+        idMedida,
+      },
+      type: sequelize.QueryTypes.UPDATE,
+    }
+  );
+
+  if (result[1] === 0) {
+    throw new Error("No se encontró la medida");
+  }
+};
 module.exports = {
   calculateAndUpdateMedidas,
+  calculateMeasurementValues,
+  updateMeasurementInDatabase,
 };

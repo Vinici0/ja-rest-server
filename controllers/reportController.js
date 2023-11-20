@@ -107,7 +107,8 @@ const generatePdfMeasure = async (data) => {
             multasResults[i + 1],
             ja_table
           );
-          i++; // Incrementar i ya que hemos procesado el siguiente registro también.
+
+          i++;
         }
       }
 
