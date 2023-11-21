@@ -1,7 +1,11 @@
 const sequelize = require("sequelize");
 const { dbConnection } = require("../database/config");
 const Console = require("../helpers/console");
-const { calculateAndUpdateMedidas, calculateMeasurementValues, updateMeasurementInDatabase } = require("../helpers/measure-calculate");
+const {
+  calculateAndUpdateMedidas,
+  calculateMeasurementValues,
+  updateMeasurementInDatabase,
+} = require("../helpers/measure-calculate");
 const consoleHelper = new Console("Measure Service");
 
 const getMeasurements = async () => {
@@ -48,24 +52,37 @@ const updateMeasurement = async (
   Mes
 ) => {
   try {
-    const ja_tabla = await dbConnection.query(`SELECT * FROM JA_Tabla ORDER BY idTabla`, {
-      type: sequelize.QueryTypes.SELECT,
-    });
+    const ja_tabla = await dbConnection.query(
+      `SELECT * FROM JA_Tabla ORDER BY idTabla`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
 
-    const interes = await dbConnection.query(`SELECT * FROM JA_Interes ORDER BY idInteres DESC`, {
-      type: sequelize.QueryTypes.SELECT,
-    });
+    const interes = await dbConnection.query(
+      `SELECT * FROM JA_Interes ORDER BY idInteres DESC`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
 
     const INTERES_BASE = interes[0].interes / 100;
 
-    const { Excedente, ExcedenteV, Total, Alcantarillado, Pago } = await calculateMeasurementValues(
-      LecturaActual,
-      LecturaAnterior,
-      Basico,
-      ja_tabla
-    );
+    const { Excedente, ExcedenteV, Total, Alcantarillado, Pago } =
+      await calculateMeasurementValues(
+        LecturaActual,
+        LecturaAnterior,
+        Basico,
+        ja_tabla
+      );
 
-    await updateMeasurementInDatabase(idMedida, LecturaActual, { Excedente, ExcedenteV, Total, Pago, Alcantarillado }, dbConnection, sequelize);
+    await updateMeasurementInDatabase(
+      idMedida,
+      LecturaActual,
+      { Excedente, ExcedenteV, Total, Pago, Alcantarillado },
+      dbConnection,
+      sequelize
+    );
 
     const medidas = await dbConnection.query(
       `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC`,
@@ -95,7 +112,13 @@ const updateMeasurement = async (
       return 0;
     });
 
-    await calculateAndUpdateMedidas(medidas, INTERES_BASE, dbConnection, sequelize, ja_tabla);
+    await calculateAndUpdateMedidas(
+      medidas,
+      INTERES_BASE,
+      dbConnection,
+      sequelize,
+      ja_tabla
+    );
     await calculateAndUpdateMedidasAcumulado(Codigo);
 
     return {
@@ -115,6 +138,73 @@ const updateMeasurement = async (
     throw new Error(error.msg);
   }
 };
+
+//TODO: Para cuando los no se ultilice esta el Angular
+const updateDatosAlcantarilladoConSaldoPositivo = async () => {
+  try {
+    const ja_tabla = await dbConnection.query(
+      `SELECT * FROM JA_Tabla ORDER BY idTabla`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    const interes = await dbConnection.query(
+      `SELECT * FROM JA_Interes ORDER BY idInteres DESC`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    const INTERES_BASE = interes[0].interes / 100;
+
+    const measure = await dbConnection.query(
+      `SELECT DISTINCT codigo FROM JA_Medida WHERE Saldo > 0;`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    for (const medida of measure) {
+      const { codigo } = medida;
+
+      const medidas = await dbConnection.query(
+        `SELECT TOP 1* FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC`,
+        {
+          replacements: { Codigo: codigo },
+          type: sequelize.QueryTypes.SELECT,
+        }
+      );
+
+      if (medidas.length === 0) {
+        throw new Error("No se encontró la medida anterior");
+      }
+
+      await calculateAndUpdateMedidas(
+        medidas,
+        INTERES_BASE,
+        dbConnection,
+        sequelize,
+        ja_tabla
+      );
+
+      // await updateMeasurementInDatabase(
+      //   medidas[0].idMedida,
+      //   medidas[0].LecturaActual,
+      //   { Excedente, ExcedenteV, Total, Pago, Alcantarillado },
+      //   dbConnection,
+      //   sequelize
+      // );
+    }
+
+    consoleHelper.success("Medida obtenida correctamente");
+    return measure;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 const calculateAndUpdateMedidasAcumulado = async (Codigo) => {
   // Iniciar una transacción
   const transaction = await dbConnection.transaction();
@@ -220,7 +310,6 @@ const updateAllMeasurements = async () => {
       sequelize,
       ja_tabla
     );
-
   }
 
   return {
@@ -252,7 +341,9 @@ const calculateAllAndUpdateMedidasAcumulado = async () => {
         }
       );
 
-      getAllMedidasByCodigo.sort((a, b) => (a.Anio !== b.Anio ? b.Anio - a.Anio : b.Mes - a.Mes));
+      getAllMedidasByCodigo.sort((a, b) =>
+        a.Anio !== b.Anio ? b.Anio - a.Anio : b.Mes - a.Mes
+      );
 
       await calculateAndUpdateMedidasAcumulado(codigo);
     }
@@ -573,4 +664,5 @@ module.exports = {
   updateMeauseAndCustomer,
   generaAndCalculo,
   calculateAllAndUpdateMedidasAcumulado,
+  updateDatosAlcantarilladoConSaldoPositivo,
 };
