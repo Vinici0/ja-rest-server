@@ -605,8 +605,6 @@ const updateMeauseAndCustomer = async (data) => {
 
 const generaAndCalculo = async (Anio, Mes) => {
   try {
-    //verificar si ya esta generado las medidas en el mes y año
-    console.log(Anio, Mes);
     const medidas = await dbConnection.query(
       `SELECT * FROM JA_Medida WHERE Anio = :Anio AND Mes = :Mes`,
       {
@@ -619,12 +617,10 @@ const generaAndCalculo = async (Anio, Mes) => {
     );
 
     if (medidas.length > 100) {
-      console.log("Ya se generaron las medidas para el mes y año seleccionado");
       throw new Error(
         "Ya se generaron las medidas para el mes y año seleccionado"
       );
     } else {
-      console.log("Generando medidas");
       await dbConnection.query(`EXEC JA_Genera @anio = :anio, @mes=:mes`, {
         replacements: {
           anio: Anio,

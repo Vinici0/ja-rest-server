@@ -104,7 +104,6 @@ const calculateAndUpdateAlcantarilladoMeidaIgualACero = async (
   sequelize,
   ja_tabla
 ) => {
-  console.log(medida.idMedida);
   let Excedente = medida.LecturaActual - medida.LecturaAnterior;
   let ExcedenteV = 0;
 

@@ -14,13 +14,14 @@ const generateTableClienteOne = async (
     let tableTop = 180;
     const titleTableX = 50;
     const fechaX = 50;
-    const lecturaAnteriorX = 110;
-    const lecturaActualX = 190;
-    const consumoX = 265;
-    const subTotalX = 335; //335
-    const alcantarilladoX = 395;
-    const interesX = 445;
-    const totalX = 500;
+    const lecturaAnteriorX = 95;
+    const lecturaActualX = 170;
+    const consumoX = 240;
+    const subTotalX = 305; //335
+    const alcantarilladoX = 355;
+    const interesX = 395;
+    const totalX = 440;
+    const AcumuladoX = 485;
 
     const titleFontSize = 16;
     const rowFontSize = 10;
@@ -43,7 +44,8 @@ const generateTableClienteOne = async (
       .text("Interes", interesX, tableTop)
       .text("Agua", subTotalX, tableTop)
       .text("Alc.", alcantarilladoX, tableTop)
-      .text("Total", totalX, tableTop);
+      .text("Total", totalX, tableTop)
+      .text("Acumulado", AcumuladoX, tableTop);
 
     doc.moveTo(titleTableX, 195).lineTo(550, 195).stroke();
 
@@ -126,7 +128,8 @@ const generateTableClienteOne = async (
             currentRow
           )
 
-          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow);
+          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow)
+          .text("$" + rowData[i].Acumulado.toFixed(2), AcumuladoX, currentRow);
         total += rowData[i].Saldo;
         totalAgua += rowData[i].Total;
         totalAlacantarillado += rowData[i].Alcantarillado;
@@ -211,13 +214,14 @@ const generateTableClienteTwo = async (
 
     const titleTableX = 50;
     const fechaX = 50;
-    const lecturaAnteriorX = 110;
-    const lecturaActualX = 190;
-    const consumoX = 265;
-    const subTotalX = 335; //335
-    const alcantarilladoX = 395;
-    const interesX = 445;
-    const totalX = 500;
+    const lecturaAnteriorX = 95;
+    const lecturaActualX = 170;
+    const consumoX = 240;
+    const subTotalX = 305; //335
+    const alcantarilladoX = 355;
+    const interesX = 395;
+    const totalX = 440;
+    const AcumuladoX = 485;
 
     const titleFontSize = 16;
     const rowFontSize = 10;
@@ -240,7 +244,8 @@ const generateTableClienteTwo = async (
       .text("Interes", interesX, tableTop)
       .text("Agua", subTotalX, tableTop)
       .text("Alc.", alcantarilladoX, tableTop)
-      .text("Total", totalX, tableTop);
+      .text("Total", totalX, tableTop)
+      .text("Acumulado", AcumuladoX, tableTop);
 
     doc.moveTo(titleTableX, 585).lineTo(550, 585).stroke();
 
@@ -301,11 +306,7 @@ const generateTableClienteTwo = async (
             consumoX,
             currentRow
           )
-          .text(
-            (interesIcrement * 100).toFixed(0) + "%",
-            interesX,
-            currentRow
-          )
+          .text((interesIcrement * 100).toFixed(0) + "%", interesX, currentRow)
 
           .text(
             "$" + Number(rowData[i].Alcantarillado).toFixed(2),
@@ -318,7 +319,8 @@ const generateTableClienteTwo = async (
             subTotalX,
             currentRow
           )
-          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow);
+          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow)
+          .text("$" + rowData[i].Acumulado.toFixed(2), AcumuladoX, currentRow);
 
         // Actualizar el valor detotal
         total += rowData[i].Saldo;
@@ -404,13 +406,14 @@ const generateTableClienteTree = async (
 
     const titleTableX = 50;
     const fechaX = 50;
-    const lecturaAnteriorX = 110;
-    const lecturaActualX = 190;
-    const consumoX = 265;
-    const subTotalX = 335; //335
-    const alcantarilladoX = 395;
-    const interesX = 445;
-    const totalX = 500;
+    const lecturaAnteriorX = 95;
+    const lecturaActualX = 170;
+    const consumoX = 240;
+    const subTotalX = 305; //335
+    const alcantarilladoX = 355;
+    const interesX = 395;
+    const totalX = 440;
+    const AcumuladoX = 485;
 
     const titleFontSize = 16;
     const rowFontSize = 10;
@@ -434,7 +437,8 @@ const generateTableClienteTree = async (
       .text("Interes", interesX, tableTop)
       .text("Agua", subTotalX, tableTop)
       .text("Alc.", alcantarilladoX, tableTop)
-      .text("Total", totalX, tableTop);
+      .text("Total", totalX, tableTop)
+      .text("Acumulado", AcumuladoX, tableTop);
 
     doc.moveTo(titleTableX, 195).lineTo(550, 195).stroke();
 
@@ -516,7 +520,8 @@ const generateTableClienteTree = async (
             currentRow
           )
 
-          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow);
+          .text("$" + rowData[i].Saldo.toFixed(2), totalX, currentRow)
+          .text("$" + rowData[i].Acumulado.toFixed(2), AcumuladoX, currentRow);
         total += rowData[i].Saldo;
         totalAgua += rowData[i].Total;
         totalAlacantarillado += rowData[i].Alcantarillado;

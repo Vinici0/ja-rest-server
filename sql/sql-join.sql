@@ -5,6 +5,7 @@ GO
 ALTER SERVER ROLE sysadmin ADD MEMBER test1;
 GO
 
+
 -------------------------------------------------------------------------------------------
 create table ja_empresa (
     idEmpresa int primary key identity(1,1),
@@ -36,8 +37,6 @@ ALTER TABLE CLIENTE
 ADD Discapacidad BIT;
 -- Se actualiza la tabla para que no tenga valores nulos
 UPDATE CLIENTE SET Discapacidad = 0 WHERE Discapacidad IS NULL;
-
-
 
 
 ---------------------------------------------------------------------
@@ -119,8 +118,7 @@ EXEC [dbo].[ObtenerMedidasPorMesYAnio] @Anio = 2023, @Mes = 9;
 ---------------------------------------------------------------------------------------
                             Creando registros anuales - Aprovado
 ---------------------------------------------------------------------------------------
-USE [JUNTADEAGUAELPORTON]
-GO
+
 
 CREATE PROCEDURE CrearRegistrosPredeterminados
 AS
@@ -184,8 +182,6 @@ GO
 ---------------------------------------------------------------------------------------
                     Copiar LecturaActual a LecturaAnterior - Comprobado
 ---------------------------------------------------------------------------------------
-USE [JUNTADEAGUAELPORTON]
-GO
 
 CREATE PROCEDURE [dbo].[ActualizarLecturaActualParaTodos]
     @Anio INT,
@@ -231,8 +227,6 @@ BEGIN
     SELECT * FROM JA_Medida WHERE Anio = @Anio AND Mes = @Mes + 1;
 END;
 
-EXEC [dbo].[ActualizarLecturaActualParaTodos] @Anio = 2023, @Mes = 10;
-
 
 ---------------------------------------------------------------------------------------
                     Editar Medida - Comprobado
@@ -265,16 +259,6 @@ BEGIN
         idMedida = @idMedida;
 END;
 
-exec EditarMedida
-    @idMedida = 1,
-    @LecturaActual = 100.00,
-    @Excedente = 100.00,
-    @Basico = 100.00,
-    @ExcedenteV = 100.00,
-    @Total = 100.00,
-    @Acumulado = 100.00,
-    @Pago = 100.00,
-    @Saldo = 100.00;
 
 ---------------------------------------------------------------------------------------
                     Buscar Medida por Anio y Mes - Comprobado
@@ -294,10 +278,6 @@ BEGIN
       AND Codigo = @Codigo;
 END;
 
-exec BuscarMedidaPorAnioMesCliente
-    @Anio = 2023,
-    @Mes = 10,
-    @Codigo = 62528;
 
 
 ---------------------------------------------------------------------------------------------
@@ -310,7 +290,6 @@ BEGIN
     UPDATE JA_Medidor SET estado = @estado WHERE idMedidor = @idMedidor;
 END;
 
-EXEC ActualizarEstadoMedidor 1, 0;
 
 CREATE TABLE JA_Usuario (
     idJaUsuario INT IDENTITY(1,1) PRIMARY KEY,
@@ -324,8 +303,7 @@ CREATE TABLE JA_Usuario (
     fecha_ingreso DATETIME NOT NULL DEFAULT GETDATE(),
 );
 
-select * from JA_Usuario;
--- Update role user
+
 UPDATE JA_Usuario SET role = 'ADMIN_ROLE' WHERE idJaUsuario = 1;
 
 
@@ -360,4 +338,3 @@ UPDATE JA_Usuario SET role = 'ADMIN_ROLE' WHERE idJaUsuario = 1;
     END;
     GO
 
-EXEC InsertarUsuario 'Juan', '
