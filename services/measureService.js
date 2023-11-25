@@ -647,6 +647,26 @@ const generaAndCalculo = async (Anio, Mes) => {
   }
 };
 
+// EXEC ObtenerInformacionCliente 1305
+const getCustomerInformation = async (idCliente) => {
+  try {
+    const customer = await dbConnection.query(
+      `EXEC ObtenerInformacionCliente @idCliente = :idCliente`,
+      {
+        replacements: {
+          idCliente,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    return customer;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 module.exports = {
   execCorte,
   getMeasurements,
@@ -661,4 +681,5 @@ module.exports = {
   generaAndCalculo,
   calculateAllAndUpdateMedidasAcumulado,
   updateDatosAlcantarilladoConSaldoPositivo,
+  getCustomerInformation,
 };

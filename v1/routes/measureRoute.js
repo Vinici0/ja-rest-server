@@ -15,7 +15,8 @@ const {
   updateMeauseAndCustomer,
   generaAndCalculo ,
   calculateAllAndUpdateMedidasAcumulado,
-  updateDatosAlcantarilladoConSaldoPositivo
+  updateDatosAlcantarilladoConSaldoPositivo,
+  getCustomerInformation
 } = require("../../controllers/measureController");
 
 const router = Router();
@@ -23,8 +24,8 @@ const router = Router();
 router.get("/", getMeasurements);
 router.get("/court", execCorte);
 router.get("/monthAndYear", getMeasurementsByMonthAndYear);
-router.post("/updateMeasurement", updateMeasurement);
 router.put("/updateMeasurementForAll", updateMeasurementForAll);
+router.post("/updateMeasurement", updateMeasurement);
 router.put("/calculoIntrest", calculoIntrest);
 router.put("/updateAllMeasurements", updateAllMeasurements);
 router.post("/createMeusereAndUpdateCustomer", createMeusereAndUpdateCustomer);
@@ -33,6 +34,7 @@ router.put("/updateMeauseAndCustomer", updateMeauseAndCustomer);
 router.post("/generaAndCalculo", generaAndCalculo);
 router.put("/calculateAllAndUpdateMedidasAcumulado", calculateAllAndUpdateMedidasAcumulado);
 router.put("/updateDatosAlcantarilladoConSaldoPositivo", updateDatosAlcantarilladoConSaldoPositivo);
+router.get("/getCustomerInformation/:id", getCustomerInformation);
 
 
 module.exports = router;

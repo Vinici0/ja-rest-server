@@ -161,7 +161,6 @@ const generaAndCalculo = async (req, res) => {
   }
 };
 
-
 const calculateAllAndUpdateMedidasAcumulado = async (req, res) => {
   try {
     const result = await measureService.calculateAllAndUpdateMedidasAcumulado();
@@ -175,7 +174,20 @@ const calculateAllAndUpdateMedidasAcumulado = async (req, res) => {
 
 const updateDatosAlcantarilladoConSaldoPositivo = async (req, res) => {
   try {
-    const result = await measureService.updateDatosAlcantarilladoConSaldoPositivo();
+    const result =
+      await measureService.updateDatosAlcantarilladoConSaldoPositivo();
+    return new Response().success(res, "Medida actualizada correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
+const getCustomerInformation = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await measureService.getCustomerInformation(id);
     return new Response().success(res, "Medida actualizada correctamente", {
       measure: result,
     });
@@ -197,5 +209,6 @@ module.exports = {
   updateMeauseAndCustomer,
   generaAndCalculo,
   calculateAllAndUpdateMedidasAcumulado,
-  updateDatosAlcantarilladoConSaldoPositivo
+  getCustomerInformation,
+  updateDatosAlcantarilladoConSaldoPositivo,
 };

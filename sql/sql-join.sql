@@ -62,7 +62,6 @@ INSERT INTO JA_Multa (typeFine, cost) VALUES ('Falta a la reunión', 0.50)
 INSERT INTO JA_Multa (typeFine, cost) VALUES ('Falta a la reunión', 0.50)
 
 
-
     CREATE PROCEDURE sp_CalcularTotalesMultas
 AS
 BEGIN
@@ -338,3 +337,14 @@ UPDATE JA_Usuario SET role = 'ADMIN_ROLE' WHERE idJaUsuario = 1;
     END;
     GO
 
+-- Ejemplo de ejecución del procedimiento almacenado
+CREATE PROCEDURE ObtenerInformacionCliente
+@idCliente int
+AS
+BEGIN
+SELECT Nombre,Ruc, Direccion, Email, Telefono, id_cliente, JA_MultaDetalle.idMultaDetalle,Fecha, typeFine
+FROM JA_MultaDetalle
+INNER JOIN JA_Multa ON JA_MultaDetalle .id_multa = JA_Multa.idMulta
+INNER JOIN Cliente ON Cliente.idCliente = JA_MultaDetalle.id_cliente
+where id_cliente = @idCliente
+END
