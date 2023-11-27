@@ -215,6 +215,8 @@ const updateMeasurementInDatabase = async (
   }
 };
 
+
+
 module.exports = {
   calculateAndUpdateMedidas,
   calculateMeasurementValues,

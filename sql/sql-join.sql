@@ -108,7 +108,8 @@ BEGIN
     SELECT *
     FROM JA_Medida
     WHERE Anio = @Anio AND Mes = @Mes
-    ORDER BY Lote, Manzana;
+    ORDER BY  Manzana, Lote;
+    
 END;
 -- Ejemplo de ejecución del procedimiento almacenado
 EXEC [dbo].[ObtenerMedidasPorMesYAnio] @Anio = 2023, @Mes = 9;

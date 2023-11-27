@@ -51,6 +51,9 @@ const agregarPagosAnteriores = (doc, pagosAnteriores, startX, startY) => {
 
 const generatePdfMeasure = async (data) => {
   try {
+
+    
+    
     const doc = new PDFDocument();
     const measurementsPromises = [];
     const multasPromises = [];

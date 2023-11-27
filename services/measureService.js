@@ -92,6 +92,9 @@ const updateMeasurement = async (
       }
     );
 
+    //Generar medidas
+    await generateMeasurementsNewAnioAndMes(Anio, Mes, Codigo, idCliente);
+
     if (medidas.length === 0) {
       throw new Error("No se encontró la medida anterior");
     }
@@ -138,6 +141,84 @@ const updateMeasurement = async (
     throw new Error(error.msg);
   }
 };
+
+//Test - Generador de medidas
+const generateMeasurementsNewAnioAndMes = async (Anio, Mes, Codigo, idCliente) => {
+  try {
+    const nuevosMeses = obtenerMesesSiguientes(Anio, Mes);
+
+    // Verificar si la medida para el siguiente mes ya existe
+    const medidaSiguienteMes = await dbConnection.query(
+      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Anio = :Anio AND Mes = :Mes`,
+      {
+        replacements: { Codigo, Anio: nuevosMeses[0].anio, Mes: nuevosMeses[0].mes },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Si no existe, crear la medida utilizando el procedimiento almacenado
+    if (medidaSiguienteMes.length === 0) {
+      await dbConnection.query(`exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`, {
+        replacements: { Anio: nuevosMeses[0].anio, Mes: nuevosMeses[0].mes, idCliente },
+        type: sequelize.QueryTypes.RAW,
+      });
+    }
+
+    // Verificar si la medida para el segundo mes ya existe
+    const medidaSegundoMes = await dbConnection.query(
+      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Anio = :Anio AND Mes = :Mes`,
+      {
+        replacements: { Codigo, Anio: nuevosMeses[1].anio, Mes: nuevosMeses[1].mes },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Si no existe, crear la medida utilizando el procedimiento almacenado
+    if (medidaSegundoMes.length === 0) {
+      await dbConnection.query(`exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`, {
+        replacements: { Anio: nuevosMeses[1].anio, Mes: nuevosMeses[1].mes, idCliente },
+        type: sequelize.QueryTypes.RAW,
+      });
+    }
+
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.msg);
+  }
+};
+
+
+const obtenerMesesSiguientes = (anio, mes) => {
+  // Verificar que el mes esté en el rango de 1 a 12 y el año sea un número positivo
+  if (mes < 1 || mes > 12 || isNaN(anio) || anio < 0) {
+    return null; // Devolver null si los parámetros no son válidos
+  }
+
+  // Calcular el siguiente mes
+  let siguienteMes = mes + 1;
+  let siguienteAnio = anio;
+
+  // Si el siguiente mes es 13, avanzar al siguiente año y establecer el mes a 1
+  if (siguienteMes > 12) {
+    siguienteMes = 1;
+    siguienteAnio++;
+  }
+
+  // Calcular el mes después del siguiente mes
+  let segundoMes = siguienteMes + 1;
+  let segundoAnio = siguienteAnio;
+
+  // Si el segundo mes es 13, avanzar al siguiente año y establecer el mes a 1
+  if (segundoMes > 12) {
+    segundoMes = 1;
+    segundoAnio++;
+  }
+
+  return [{ mes: siguienteMes, anio: siguienteAnio }, { mes: segundoMes, anio: segundoAnio }];
+}
+
+
+
 
 //TODO: Para cuando los no se ultilice esta el Angular
 const updateDatosAlcantarilladoConSaldoPositivo = async () => {

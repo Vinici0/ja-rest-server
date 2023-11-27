@@ -1,3 +1,5 @@
+const sequelize = require("sequelize");
+const { dbConnection } = require("../database/config");
 const MAX_ROWS = 4;
 
 const generateTableClienteOne = async (
@@ -190,6 +192,7 @@ const generateTableClienteOne = async (
       parseFloat(totalAlacantarillado) +
       parseFloat(totalMultas)
     ).toFixed(2);
+
     doc
       .fontSize(fontSizeDetaller)
       .text("TOTAL:", textoCuadroX, textoCuadroY)
@@ -402,6 +405,8 @@ const generateTableClienteTree = async (
     let INTERES = INTERES_BASE;
     let interesIcrement = 0;
 
+
+
     let tableTop = 180;
 
     const titleTableX = 50;
@@ -448,6 +453,7 @@ const generateTableClienteTree = async (
     let totalAgua = 0;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
+    const resGetSum = await getSum(data[0].idCliente);
     if (rowData.length !== 0) {
       for (let i = 0; i < rowData.length && i < 25; i++) {
         let ExcedenteNew =
@@ -557,11 +563,12 @@ const generateTableClienteTree = async (
       totalMultas = 0;
     }
 
+
     doc
       .fontSize(fontSizeDetaller)
       .text(DETALLE_TEXT, detallex, DETALLE_POSITION_Y)
       //redondear a dos decimales
-      .text("$" + totalAgua.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
+      .text("$" + resGetSum[0].totalTotal.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
         `$${totalAlacantarillado.toFixed(2)}`,
@@ -583,7 +590,7 @@ const generateTableClienteTree = async (
     const textoCuadroY = cuadroY + 5;
 
     const totalValue = (
-      parseFloat(total) +
+      parseFloat(totalAgua) +
       parseFloat(totalAlacantarillado) +
       parseFloat(totalMultas)
     ).toFixed(2);
@@ -597,6 +604,18 @@ const generateTableClienteTree = async (
     // O puedes manejar el error de otra manera más adecuada para tu caso
   }
 };
+
+const getSum = async(idCliente) => {
+  const totales = await dbConnection.query(
+    `SELECT SUM(Saldo) as totalSaldo, SUM(Total) as totalTotal, SUM(Alcantarillado) as totalAlcantarillado FROM JA_Medida WHERE idCliente = :idCliente`,
+    {
+      replacements: { idCliente: idCliente },
+      type: sequelize.QueryTypes.SELECT,
+    }
+  );
+  console.log(totales);
+  return totales;
+}
 
 module.exports = {
   generateTableClienteOne,
