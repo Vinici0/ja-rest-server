@@ -472,7 +472,7 @@ const calculoIntrest = async (Anio, Codigo, InteresPorMora) => {
 
 const execCorte = async () => {
   try {
-    const meters = await dbConnection.query("EXEC JA_Corte", {
+    const meters = await dbConnection.query("EXEC JA_Corte @meses = 2", {
       type: sequelize.QueryTypes.SELECT,
     });
     consoleHelper.success("Medida obtenida correctamente");
