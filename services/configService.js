@@ -198,6 +198,21 @@ const getAllClients = async () => {
   }
 };
 
+const getMeasureCourt = async () => {
+  try {
+    const client = await dbConnection.query(
+      "EXEC JA_Corte",
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    return client;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+};
+
 module.exports = {
   getEmpresaById,
   updateEmpresa,
@@ -211,4 +226,5 @@ module.exports = {
   getClienteTipoRuc,
   getClienteTipo,
   getAllClients,
+  getMeasureCourt
 };

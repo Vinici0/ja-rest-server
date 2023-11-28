@@ -405,8 +405,6 @@ const generateTableClienteTree = async (
     let INTERES = INTERES_BASE;
     let interesIcrement = 0;
 
-
-
     let tableTop = 180;
 
     const titleTableX = 50;
@@ -563,12 +561,15 @@ const generateTableClienteTree = async (
       totalMultas = 0;
     }
 
-
     doc
       .fontSize(fontSizeDetaller)
       .text(DETALLE_TEXT, detallex, DETALLE_POSITION_Y)
       //redondear a dos decimales
-      .text("$" + resGetSum[0].totalTotal.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
+      .text(
+        "$" + resGetSum[0].totalTotal.toFixed(2),
+        detallerValue + 100,
+        DETALLE_POSITION_Y
+      )
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
         `$${totalAlacantarillado.toFixed(2)}`,
@@ -605,7 +606,7 @@ const generateTableClienteTree = async (
   }
 };
 
-const getSum = async(idCliente) => {
+const getSum = async (idCliente) => {
   const totales = await dbConnection.query(
     `SELECT SUM(Saldo) as totalSaldo, SUM(Total) as totalTotal, SUM(Alcantarillado) as totalAlcantarillado FROM JA_Medida WHERE idCliente = :idCliente`,
     {
@@ -615,10 +616,113 @@ const getSum = async(idCliente) => {
   );
   console.log(totales);
   return totales;
-}
+};
+//////////////////////////////////////////////////////////////////////////////////////////////
+//                                        Cortes
+//////////////////////////////////////////////////////////////////////////////////////////////
+/* 
+  Texto de referencia:
+  Sr(a) MANZANILLAS VELEZ JUAN CARLOS
+Presente-
+En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del dia sábado, 18 noviembre, 2023 se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con 2 meses, del medidor 230424823, de la manzana 04, Solar nro 46, El monto adeudado es 130.00 USD por
+efecto del consumo
+La Junta previene que una vez suspendido el servicio, la reconexión será dentro de las 24 horas despues que ud haya efectuado el pago, rogamos respetar el horario.
+Evitese molestiasy cancele a tiempo sus planillas.
+ATTE
+LA DIRECTIVA
+*/
+const generateTableMeasureCourtOne = async (doc, data) => {
+  try {
+    //Manzana	Lote	Nombre	codigo	meses	saldo
+    const codigoX = 150;
+    const loteX = 100;
+    const manzanaX = 50;
+    const mesesX = 200;
+    const nombreX = 50;
+    const saldoX = 250;
+    const textoTop = 180;
 
+    const titleFontSize = 16;
+
+    const rowFontSize = 10;
+
+    const fontBold = "Helvetica-Bold";
+    const fontRegular = "Helvetica";
+
+    const textInformation = `Sr(a) ${data[0].Nombre}`;
+    const textInformationX = 50;
+    const textInformationY = 150;
+    const textInformationFontSize = 12;
+
+    const textPresente = "Presente-";
+    const textPresenteX = 50;
+    const textPresenteY = 165;
+    const textPresenteFontSize = 12;
+
+    const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día sábado, 18 noviembre, 2023 se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con 2 meses, del medidor ${data[0].Codigo}, de la manzana ${data[0].Manzana}, Solar nro ${data[0].Lote}, El monto adeudado es ${data[0].Saldo} USD por efecto del consumo`;
+    const textEnUsoX = 50;
+    const textEnUsoY = 180;
+    const textEnUsoFontSize = 12;
+
+    const textLaJunta = `La Junta previene que una vez suspendido el servicio, la reconexión será dentro de las 24 horas después que usted haya efectuado el pago, rogamos respetar el horario.`;
+    const textLaJuntaX = 50;
+    const textLaJuntaY = 195;
+    const textLaJuntaFontSize = 12;
+
+    const textEvitese = `Evítese molestias y cancele a tiempo sus planillas.`;
+    const textEviteseX = 50;
+    const textEviteseY = 210;
+    const textEviteseFontSize = 12;
+
+    const textAtte = `ATTE`;
+    const textAtteX = 50;
+    const textAtteY = 225;
+    const textAtteFontSize = 12;
+
+    const textLaDirectiva = `LA DIRECTIVA`;
+    const textLaDirectivaX = 50;
+    const textLaDirectivaY = 240;
+    const textLaDirectivaFontSize = 12;
+
+    // Agregar texto al documento
+    doc
+      .font(fontBold)
+      .fontSize(titleFontSize)
+      .text("Notificación de Corte de Agua", 200, 50);
+    doc
+      .fontSize(textInformationFontSize)
+      .text(textInformation, textInformationX, textInformationY);
+    doc
+      .fontSize(textPresenteFontSize)
+      .text(textPresente, textPresenteX, textPresenteY);
+    doc
+      .fontSize(textEnUsoFontSize)
+      .text(textEnUso, textEnUsoX, textEnUsoY, { width: 500 });
+    doc
+      .fontSize(textLaJuntaFontSize)
+      .text(textLaJunta, textLaJuntaX, textLaJuntaY, { width: 500 });
+    doc
+      .fontSize(textEviteseFontSize)
+      .text(textEvitese, textEviteseX, textEviteseY, { width: 500 });
+    doc.fontSize(textAtteFontSize).text(textAtte, textAtteX, textAtteY);
+    doc
+      .fontSize(textLaDirectivaFontSize)
+      .text(textLaDirectiva, textLaDirectivaX, textLaDirectivaY);
+
+    // Linea de Firma
+    doc.moveTo(50, 260).lineTo(550, 260).stroke();
+
+  } catch (error) {
+    console.error("Ha ocurrido un error:", error);
+  }
+};
+
+
+const generateTableMeasureCourtTwo = async (doc, data) => {};
 module.exports = {
   generateTableClienteOne,
   generateTableClienteTwo,
   generateTableClienteTree,
+  generateTableMeasureCourtOne,
+  generateTableMeasureCourtTwo,
 };

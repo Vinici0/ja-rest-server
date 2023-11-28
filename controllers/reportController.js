@@ -16,6 +16,8 @@ const {
   generateTableClienteOne,
   generateTableClienteTwo,
   generateTableClienteTree,
+  generateTableMeasureCourtOne,
+  // generateTableMeasureCourtTwo,
 } = require("../helpers/pdf-tables");
 const {
   getMeasurements,
@@ -51,9 +53,6 @@ const agregarPagosAnteriores = (doc, pagosAnteriores, startX, startY) => {
 
 const generatePdfMeasure = async (data) => {
   try {
-
-    
-    
     const doc = new PDFDocument();
     const measurementsPromises = [];
     const multasPromises = [];
@@ -75,7 +74,6 @@ const generatePdfMeasure = async (data) => {
       const currentData = data[i];
       const currentMeasurements = measurementsResults[i];
       const currentFines = multasResults[i];
-
 
       // Decidir si se genera una tabla para un cliente o dos en la misma página.
       if (currentMeasurements.length > 4) {
@@ -137,6 +135,45 @@ const generatePdfMeasure = async (data) => {
   }
 };
 
+const generateMeuserCourt = async (data) => {
+  try {
+    const doc = new PDFDocument();
+    console.log(data.length);
+    for (let i = 0; i < data.length; i++) {
+      if (i > 0) {
+        doc.addPage();
+      }
+
+      const currentPageData = data.slice(i * 20, (i + 1) * 20); // Obtén los datos para la página actual
+      generateTableMeasureCourtOne(doc, currentPageData);
+
+      // Verificar si hay un próximo cliente y si cabe en la misma página.
+      if (i + 1 < data.length && data[i + 1].length <= 20) {
+        const nextData = data[i + 1];
+        // generateTableMeasureCourtTwo(doc, nextData);
+        i++;
+      }
+      // Añadir una nueva página si todavía hay más datos para procesar.
+      if (i + 1 < data.length) {
+        doc.addPage();
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        doc.pipe(fs.createWriteStream(`${__dirname}/../file.pdf`));
+
+        doc.end();
+
+        // Convertir el PDF a un buffer y devolverlo.
+        const pdfStream = await getStream.buffer(doc);
+
+        return pdfStream;
+      }
+    }
+  } catch (error) {
+    console.error("Error en la generación del PDF:", error);
+    return null;
+  }
+};
 
 const generateMeterTable = (doc, data) => {
   const titleTable = 50;
@@ -413,7 +450,6 @@ const showMeasure = async (req, res) => {
 };
 
 const showMeter = async (req, res) => {
-  
   const getAllMetersCute = await measureService.execCorte();
   const pdfStream = await generatePdfMeter(getAllMetersCute);
   res
@@ -452,6 +488,18 @@ const showMeasureCourt = async (req, res) => {
 const showCustomer = async (req, res) => {
   const getAllCustomer = await configService.getAllClients();
   const pdfStream = await generatePdfCustomer(getAllCustomer);
+  res
+    .writeHead(200, {
+      "Content-Length": Buffer.byteLength(pdfStream),
+      "Content-Type": "application/pdf",
+      "Content-disposition": "attachment;filename=test.pdf",
+    })
+    .end(pdfStream);
+};
+
+const showCourt = async (req, res) => {
+  const getAllCustomer = await configService.getMeasureCourt();
+  const pdfStream = await generateMeuserCourt(getAllCustomer);
   res
     .writeHead(200, {
       "Content-Length": Buffer.byteLength(pdfStream),
@@ -581,4 +629,5 @@ module.exports = {
   showMeasureCourt,
   showCustomer,
   calculoIntrest,
+  showCourt,
 };
