@@ -17,7 +17,7 @@ const {
   generateTableClienteTwo,
   generateTableClienteTree,
   generateTableMeasureCourtOne,
-  // generateTableMeasureCourtTwo,
+  generateTableMeasureCourtTwo,
 } = require("../helpers/pdf-tables");
 const {
   getMeasurements,
@@ -135,45 +135,55 @@ const generatePdfMeasure = async (data) => {
   }
 };
 
-const generateMeuserCourt = async (data) => {
+const generateMeuserCourt = async (data, outputPath, dataAll) => {
   try {
     const doc = new PDFDocument();
-    console.log(data.length);
     for (let i = 0; i < data.length; i++) {
-      if (i > 0) {
+      if (i % 2 === 0) {
+        generateTableMeasureCourtOne(doc, data[i], dataAll);
+      } else {
+        generateTableMeasureCourtTwo(doc, data[i], dataAll);
         doc.addPage();
-      }
-
-      const currentPageData = data.slice(i * 20, (i + 1) * 20); // Obtén los datos para la página actual
-      generateTableMeasureCourtOne(doc, currentPageData);
-
-      // Verificar si hay un próximo cliente y si cabe en la misma página.
-      if (i + 1 < data.length && data[i + 1].length <= 20) {
-        const nextData = data[i + 1];
-        // generateTableMeasureCourtTwo(doc, nextData);
-        i++;
-      }
-      // Añadir una nueva página si todavía hay más datos para procesar.
-      if (i + 1 < data.length) {
-        doc.addPage();
-      }
-
-      if (process.env.NODE_ENV === "development") {
-        doc.pipe(fs.createWriteStream(`${__dirname}/../file.pdf`));
-
-        doc.end();
-
-        // Convertir el PDF a un buffer y devolverlo.
-        const pdfStream = await getStream.buffer(doc);
-
-        return pdfStream;
       }
     }
+
+    // Eliminar la última página agregada, ya que no se necesita
+
+    // Guardar el archivo localmente
+    doc.pipe(fs.createWriteStream(outputPath));
+    doc.end();
+
+    // Convertir la generación del PDF en una Promesa
+    const pdfStream = await getStream.buffer(fs.createReadStream(outputPath));
+    return pdfStream;
   } catch (error) {
     console.error("Error en la generación del PDF:", error);
-    return null;
+    throw error; // Rechazar la Promesa en caso de error
   }
 };
+
+const showCourt = async (req, res) => {
+  try {
+    const data = req.body;
+    const getAllCustomer = await configService.getMeasureCourt(data.meses);
+
+    const outputPath = `${__dirname}/../confirmado.pdf`;
+    const pdfStream = await generateMeuserCourt(getAllCustomer, outputPath, data);
+
+    // Enviar el archivo como respuesta
+    res.writeHead(200, {
+      "Content-Length": Buffer.byteLength(pdfStream),
+      "Content-Type": "application/pdf",
+      "Content-disposition": "inline;filename=confirmado.pdf",
+    }).end(pdfStream);
+
+  } catch (error) {
+    console.error("Error al mostrar la corte:", error);
+    res.status(500).send("Error interno del servidor");
+  }
+};
+
+
 
 const generateMeterTable = (doc, data) => {
   const titleTable = 50;
@@ -414,6 +424,7 @@ const generatePdfCustomer = async (data) => {
       }
 
       const currentPageData = data.slice(
+        //Sirve para cortar el array en el numero de registros que se le pase por parametro
         i * maxRecordsPerPage,
         (i + 1) * maxRecordsPerPage
       ); // Obtén los datos para la página actual
@@ -497,17 +508,6 @@ const showCustomer = async (req, res) => {
     .end(pdfStream);
 };
 
-const showCourt = async (req, res) => {
-  const getAllCustomer = await configService.getMeasureCourt();
-  const pdfStream = await generateMeuserCourt(getAllCustomer);
-  res
-    .writeHead(200, {
-      "Content-Length": Buffer.byteLength(pdfStream),
-      "Content-Type": "application/pdf",
-      "Content-disposition": "attachment;filename=test.pdf",
-    })
-    .end(pdfStream);
-};
 
 const calculoIntrest = async (req, res) => {
   // Datos de entrada

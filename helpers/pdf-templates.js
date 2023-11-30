@@ -61,7 +61,7 @@ const generateHeadersClienteOne = (doc, factura) => {
 
     doc.moveTo(inicioPagina, headerY).lineTo(finPagina, headerY).stroke();
     // Columna izquierda (negrita)
-    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY);
+    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY, { width: 500 });
     doc.font(boldFont).text("Direccion:", leftColumnX, secondRowY);
     doc.font(boldFont).text("Manzana:", leftColumnX, thirdRowY);
     // Columna derecha (fuente predeterminada)
@@ -101,7 +101,7 @@ const generateHeadersClienteTwo = (doc, factura) => {
 
     doc.moveTo(inicioPagina, headerY).lineTo(finPagina, headerY).stroke();
     // Columna izquierda (negrita)
-    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY);
+    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY, { width: 500 });
     doc.font(boldFont).text("Direccion:", leftColumnX, secondRowY);
     doc.font(boldFont).text("Manzana:", leftColumnX, thirdRowY);
     // Columna derecha (fuente predeterminada)
@@ -142,7 +142,7 @@ const generateHeadersClienteTree = (doc, factura) => {
 
     doc.moveTo(inicioPagina, headerY).lineTo(finPagina, headerY).stroke();
     // Columna izquierda (negrita)
-    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY);
+    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY, { width: 500 });
     doc.font(boldFont).text("Direccion:", leftColumnX, secondRowY);
     doc.font(boldFont).text("Manzana:", leftColumnX, thirdRowY);
     // Columna derecha (fuente predeterminada)

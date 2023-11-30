@@ -143,7 +143,12 @@ const updateMeasurement = async (
 };
 
 //Test - Generador de medidas
-const generateMeasurementsNewAnioAndMes = async (Anio, Mes, Codigo, idCliente) => {
+const generateMeasurementsNewAnioAndMes = async (
+  Anio,
+  Mes,
+  Codigo,
+  idCliente
+) => {
   try {
     const nuevosMeses = obtenerMesesSiguientes(Anio, Mes);
 
@@ -151,42 +156,62 @@ const generateMeasurementsNewAnioAndMes = async (Anio, Mes, Codigo, idCliente) =
     const medidaSiguienteMes = await dbConnection.query(
       `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Anio = :Anio AND Mes = :Mes`,
       {
-        replacements: { Codigo, Anio: nuevosMeses[0].anio, Mes: nuevosMeses[0].mes },
+        replacements: {
+          Codigo,
+          Anio: nuevosMeses[0].anio,
+          Mes: nuevosMeses[0].mes,
+        },
         type: sequelize.QueryTypes.SELECT,
       }
     );
 
     // Si no existe, crear la medida utilizando el procedimiento almacenado
     if (medidaSiguienteMes.length === 0) {
-      await dbConnection.query(`exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`, {
-        replacements: { Anio: nuevosMeses[0].anio, Mes: nuevosMeses[0].mes, idCliente },
-        type: sequelize.QueryTypes.RAW,
-      });
+      await dbConnection.query(
+        `exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`,
+        {
+          replacements: {
+            Anio: nuevosMeses[0].anio,
+            Mes: nuevosMeses[0].mes,
+            idCliente,
+          },
+          type: sequelize.QueryTypes.RAW,
+        }
+      );
     }
 
     // Verificar si la medida para el segundo mes ya existe
     const medidaSegundoMes = await dbConnection.query(
       `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Anio = :Anio AND Mes = :Mes`,
       {
-        replacements: { Codigo, Anio: nuevosMeses[1].anio, Mes: nuevosMeses[1].mes },
+        replacements: {
+          Codigo,
+          Anio: nuevosMeses[1].anio,
+          Mes: nuevosMeses[1].mes,
+        },
         type: sequelize.QueryTypes.SELECT,
       }
     );
 
     // Si no existe, crear la medida utilizando el procedimiento almacenado
     if (medidaSegundoMes.length === 0) {
-      await dbConnection.query(`exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`, {
-        replacements: { Anio: nuevosMeses[1].anio, Mes: nuevosMeses[1].mes, idCliente },
-        type: sequelize.QueryTypes.RAW,
-      });
+      await dbConnection.query(
+        `exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`,
+        {
+          replacements: {
+            Anio: nuevosMeses[1].anio,
+            Mes: nuevosMeses[1].mes,
+            idCliente,
+          },
+          type: sequelize.QueryTypes.RAW,
+        }
+      );
     }
-
   } catch (error) {
     console.error(error);
     throw new Error(error.msg);
   }
 };
-
 
 const obtenerMesesSiguientes = (anio, mes) => {
   // Verificar que el mes esté en el rango de 1 a 12 y el año sea un número positivo
@@ -214,11 +239,11 @@ const obtenerMesesSiguientes = (anio, mes) => {
     segundoAnio++;
   }
 
-  return [{ mes: siguienteMes, anio: siguienteAnio }, { mes: segundoMes, anio: segundoAnio }];
-}
-
-
-
+  return [
+    { mes: siguienteMes, anio: siguienteAnio },
+    { mes: segundoMes, anio: segundoAnio },
+  ];
+};
 
 //TODO: Para cuando los no se ultilice esta el Angular
 const updateDatosAlcantarilladoConSaldoPositivo = async () => {
@@ -644,36 +669,115 @@ const getMeasureById = async (id) => {
 
 const updateMeauseAndCustomer = async (data) => {
   try {
-    await dbConnection.query(
-      `UPDATE JA_Medida SET Lote = :Lote, Manzana = :Manzana WHERE Codigo = :Codigo`,
+    /* 
       {
-        replacements: {
-          Lote: data.lote,
-          Manzana: data.manzana,
-          Codigo: data.codigo,
-        },
-        type: sequelize.QueryTypes.UPDATE,
+      lote: '01                  ',
+      manzana: '02                  ',
+      codigo: '99999999',
+      JA_LoteVacio: false,
+      idCliente: 1305
       }
-    );
 
+    */
+    // Recuperar el mes y año de la medida actual
+    const mes = new Date().getMonth() + 1;
+    const anio = new Date().getFullYear();
+
+    // Actauliza el codigo del cliente
     await dbConnection.query(
-      `UPDATE Cliente SET JA_LoteVacio = :JA_LoteVacio WHERE idCliente = :idCliente`,
+      `UPDATE Cliente SET JA_LoteVacio = :JA_LoteVacio, Codigo = :Codigo WHERE idCliente = :idCliente`,
       {
         replacements: {
           JA_LoteVacio: data.JA_LoteVacio,
+          Codigo: data.codigo,
           idCliente: data.idCliente,
         },
         type: sequelize.QueryTypes.UPDATE,
       }
     );
 
-    // await dbConnection.query(`EXEC JA_Calculo @anio = :anio, @mes=:mes`, {
-    //   replacements: {
-    //     anio: data.Anio,
-    //     mes: data.Mes,
-    //   },
-    //   type: sequelize.QueryTypes.UPDATE,
-    // });
+    // Actualiza todo el historial de medidas del cliente en base a Lote y Manzana pero solo actuliza el codigo donde pago es 0 y saldo es 0
+    await dbConnection.query(
+      `UPDATE JA_Medida SET Codigo = :Codigo WHERE Lote = :Lote AND Manzana = :Manzana AND Pago = 0 AND Saldo = 0 AND LecturaActual = 0 AND LecturaAnterior = 0`,
+      {
+        replacements: {
+          Codigo: data.codigo,
+          Lote: data.lote,
+          Manzana: data.manzana,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+    );
+
+    //Obtener los siguiente dos meses que siguen
+    //  exec JA_Genera @Anio = 2023, @Mes = 11, @idCliente = 1312
+    await dbConnection.query(
+      `exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`,
+      {
+        replacements: {
+          Anio: anio,
+          Mes: mes,
+          idCliente: data.idCliente,
+        },
+        type: sequelize.QueryTypes.RAW,
+      }
+    );
+    const nuevosMeses = obtenerMesesSiguientes(anio, mes);
+    // Verificar si la medida para el siguiente mes ya existe
+    const medidaSiguienteMes = await dbConnection.query(
+      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Anio = :Anio AND Mes = :Mes`,
+      {
+        replacements: {
+          Codigo: data.codigo,
+          Anio: nuevosMeses[0].anio,
+          Mes: nuevosMeses[0].mes,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Si no existe, crear la medida utilizando el procedimiento almacenado
+    if (medidaSiguienteMes.length === 0) {
+      await dbConnection.query(
+        `exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`,
+        {
+          replacements: {
+            Anio: nuevosMeses[0].anio,
+            Mes: nuevosMeses[0].mes,
+            idCliente: data.idCliente,
+          },
+          type: sequelize.QueryTypes.RAW,
+        }
+      );
+    }
+
+    // Verificar si la medida para el segundo mes ya existe
+    const medidaSegundoMes = await dbConnection.query(
+      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Anio = :Anio AND Mes = :Mes`,
+      {
+        replacements: {
+          Codigo: data.codigo,
+          Anio: nuevosMeses[1].anio,
+          Mes: nuevosMeses[1].mes,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Si no existe, crear la medida utilizando el procedimiento almacenado
+    if (medidaSegundoMes.length === 0) {
+      await dbConnection.query(
+        `exec JA_Genera @Anio = :Anio, @Mes = :Mes, @idCliente = :idCliente`,
+        {
+          replacements: {
+            Anio: nuevosMeses[1].anio,
+            Mes: nuevosMeses[1].mes,
+            idCliente: data.idCliente,
+          },
+          type: sequelize.QueryTypes.RAW,
+        }
+      );
+    }
 
     return {
       message: "Medidas actualizadas correctamente",

@@ -198,14 +198,15 @@ const getAllClients = async () => {
   }
 };
 
-const getMeasureCourt = async () => {
+const getMeasureCourt = async (meses = 2) => {
   try {
     const client = await dbConnection.query(
-      "EXEC JA_Corte",
+      `EXEC JA_Corte @meses = ${meses}`,
       {
         type: sequelize.QueryTypes.SELECT,
       }
     );
+    console.log('PDF Terminado');
     return client;
   } catch (error) {
     consoleHelper.error(error.msg);

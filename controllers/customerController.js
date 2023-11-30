@@ -52,9 +52,25 @@ const updateClient = async (req = request, res = response) => {
   }
 };
 
+const getAllClientsAndManzadaAndLote = async (
+  req = request,
+  res = response
+) => {
+  try {
+    const clients = await meterService.getAllClientsAndManzadaAndLote();
+    return new Response().success(res, "Clientes obtenidos correctamente", {
+      clients: clients,
+      total: clients.length,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   getAllClients,
   getClientById,
   createClient,
-  updateClient
+  updateClient,
+  getAllClientsAndManzadaAndLote
 };

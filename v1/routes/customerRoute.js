@@ -6,8 +6,8 @@ const {
   getAllClients,
   getClientById,
   createClient,
-  updateClient
-
+  updateClient,
+  getAllClientsAndManzadaAndLote,
 } = require("../../controllers/customerController");
 
 const router = Router();
@@ -16,5 +16,6 @@ router.get("/", getAllClients);
 router.get("/:id", getClientById);
 router.post("/", createClient);
 router.put("/:id", updateClient);
+router.get("/customers/getAllClientsAndManzadaAndLote", getAllClientsAndManzadaAndLote);
 
 module.exports = router;

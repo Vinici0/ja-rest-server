@@ -1,5 +1,6 @@
 const sequelize = require("sequelize");
 const { dbConnection } = require("../database/config");
+const { months } = require("moment/moment");
 const MAX_ROWS = 4;
 
 const generateTableClienteOne = async (
@@ -64,10 +65,7 @@ const generateTableClienteOne = async (
           rowData[i].LecturaActual - rowData[i].LecturaAnterior;
         let ExcedenteVNew = 0;
 
-        if (
-          ExcedenteNew >= ja_tabla[0].Desde &&
-          ExcedenteNew <= ja_tabla[0].Hasta
-        ) {
+        if (ExcedenteNew >= ja_tabla.Desde && ExcedenteNew <= ja_tabla.Hasta) {
           ExcedenteNew = 0;
           ExcedenteVNew = 0;
         } else if (
@@ -262,10 +260,7 @@ const generateTableClienteTwo = async (
           rowData[i].LecturaActual - rowData[i].LecturaAnterior;
         let ExcedenteVNew = 0;
 
-        if (
-          ExcedenteNew >= ja_tabla[0].Desde &&
-          ExcedenteNew <= ja_tabla[0].Hasta
-        ) {
+        if (ExcedenteNew >= ja_tabla.Desde && ExcedenteNew <= ja_tabla.Hasta) {
           ExcedenteNew = 0;
           ExcedenteVNew = 0;
         } else if (
@@ -349,7 +344,7 @@ const generateTableClienteTwo = async (
         .toFixed(2);
 
       let totalSanamiento = parseFloat(
-        rowData[0].Basico === 5.5 / 2
+        rowData.Basico === 5.5 / 2
           ? (1.5 * rowData.length).toFixed(2)
           : (rowData.length * 3.0).toFixed(2)
       ).toFixed(2);
@@ -446,22 +441,27 @@ const generateTableClienteTree = async (
     doc.moveTo(titleTableX, 195).lineTo(550, 195).stroke();
 
     let rowData = data;
+    //Sumar el total de consumo de agua
+    let totalSumaALL = 0;
+    let totalAlcantarrilladoAll = 0;
+    for (let i = 0; i < rowData.length; i++) {
+      totalSumaALL += rowData[i].Total;
+      totalAlcantarrilladoAll += rowData[i].Alcantarillado;
+    }
     let currentRow = tableTop + 18;
     let total = 0;
     let totalAgua = 0;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
-    const resGetSum = await getSum(data[0].idCliente);
+    // let resGetSum = [];
     if (rowData.length !== 0) {
       for (let i = 0; i < rowData.length && i < 25; i++) {
+        // resGetSum = await getSum(rowData[i].idCliente);
         let ExcedenteNew =
           rowData[i].LecturaActual - rowData[i].LecturaAnterior;
         let ExcedenteVNew = 0;
 
-        if (
-          ExcedenteNew >= ja_tabla[0].Desde &&
-          ExcedenteNew <= ja_tabla[0].Hasta
-        ) {
+        if (ExcedenteNew >= ja_tabla.Desde && ExcedenteNew <= ja_tabla.Hasta) {
           ExcedenteNew = 0;
           ExcedenteVNew = 0;
         } else if (
@@ -545,7 +545,7 @@ const generateTableClienteTree = async (
     const MULTA_POSITION_Y = currentRow + 45;
 
     let totalSanamiento = parseFloat(
-      rowData[0].Basico === 5.5 / 2
+      rowData.Basico === 5.5 / 2
         ? (1.5 * rowData.length).toFixed(2)
         : (rowData.length * 3.0).toFixed(2)
     ).toFixed(2);
@@ -565,14 +565,10 @@ const generateTableClienteTree = async (
       .fontSize(fontSizeDetaller)
       .text(DETALLE_TEXT, detallex, DETALLE_POSITION_Y)
       //redondear a dos decimales
-      .text(
-        "$" + resGetSum[0].totalTotal.toFixed(2),
-        detallerValue + 100,
-        DETALLE_POSITION_Y
-      )
+      .text("$" + totalSumaALL.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
-        `$${totalAlacantarillado.toFixed(2)}`,
+        `$${totalAlcantarrilladoAll.toFixed(2)}`,
         detallerValue + 100,
         SANAMIENTO_POSITION_Y
       )
@@ -598,7 +594,11 @@ const generateTableClienteTree = async (
     doc
       .fontSize(fontSizeDetaller)
       .text("TOTAL:", textoCuadroX, textoCuadroY)
-      .text("$" + totalValue, detallerValue + 100, textoCuadroY);
+      .text(
+        "$" + rowData[0].Acumulado.toFixed(2),
+        detallerValue + 100,
+        textoCuadroY
+      );
   } catch (error) {
     // Manejo de errores
     console.error("Ha ocurrido un error:", error);
@@ -614,111 +614,273 @@ const getSum = async (idCliente) => {
       type: sequelize.QueryTypes.SELECT,
     }
   );
-  console.log(totales);
   return totales;
 };
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                        Cortes
 //////////////////////////////////////////////////////////////////////////////////////////////
-/* 
-  Texto de referencia:
-  Sr(a) MANZANILLAS VELEZ JUAN CARLOS
-Presente-
-En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del dia sábado, 18 noviembre, 2023 se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con 2 meses, del medidor 230424823, de la manzana 04, Solar nro 46, El monto adeudado es 130.00 USD por
-efecto del consumo
-La Junta previene que una vez suspendido el servicio, la reconexión será dentro de las 24 horas despues que ud haya efectuado el pago, rogamos respetar el horario.
-Evitese molestiasy cancele a tiempo sus planillas.
-ATTE
-LA DIRECTIVA
-*/
-const generateTableMeasureCourtOne = async (doc, data) => {
+const generateTableMeasureCourtOne = (doc, data, dataAll) => {
   try {
-    //Manzana	Lote	Nombre	codigo	meses	saldo
-    const codigoX = 150;
-    const loteX = 100;
-    const manzanaX = 50;
-    const mesesX = 200;
-    const nombreX = 50;
-    const saldoX = 250;
-    const textoTop = 180;
+    const { day, month, monthsCorte } = dataAll;
+    // arreglo de fechas de corte por numero de meses llave valor
+    const fechasCorteMes = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
 
-    const titleFontSize = 16;
+    const year = new Date().getFullYear();
 
-    const rowFontSize = 10;
-
+    const titleFontSize = 12;
+    const commonFontSize = 12;
     const fontBold = "Helvetica-Bold";
     const fontRegular = "Helvetica";
 
-    const textInformation = `Sr(a) ${data[0].Nombre}`;
-    const textInformationX = 50;
-    const textInformationY = 150;
-    const textInformationFontSize = 12;
+    const ubicValo = 50; // Posición X común
+    const ubicValoY = 150; // Posición Y común
+    const textoInX = 50; // Posición X común
 
-    const textPresente = "Presente-";
-    const textPresenteX = 50;
-    const textPresenteY = 165;
-    const textPresenteFontSize = 12;
+    const tituloTitle = "JUNTA ADM DE AGUA POTABLE DE LA URB";
+    const tituloSubtitle = "EL PORTON";
+    const tituloSubtitleSub = "NOTIFICACION DE CORTE";
 
-    const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día sábado, 18 noviembre, 2023 se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con 2 meses, del medidor ${data[0].Codigo}, de la manzana ${data[0].Manzana}, Solar nro ${data[0].Lote}, El monto adeudado es ${data[0].Saldo} USD por efecto del consumo`;
-    const textEnUsoX = 50;
-    const textEnUsoY = 180;
-    const textEnUsoFontSize = 12;
+    const textInformation = `Sr(a): ${data.Nombre}`.trim();
+    const textInformationFontSize = commonFontSize;
+
+    const textPresente = "Presente.-";
+    const textPresenteFontSize = commonFontSize;
+
+    const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día sábado, ${day} ${
+      fechasCorteMes[month]
+    }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${monthsCorte} meses, del medidor ${
+      data.codigo
+    }, de la manzana ${data.Manzana.trim()}, Solar nro ${data.Lote.trim()}, El monto adeudado es $${data.saldo.toFixed(
+      2
+    )} USD por efecto del consumo.`;
+    const textEnUsoFontSize = commonFontSize;
 
     const textLaJunta = `La Junta previene que una vez suspendido el servicio, la reconexión será dentro de las 24 horas después que usted haya efectuado el pago, rogamos respetar el horario.`;
-    const textLaJuntaX = 50;
-    const textLaJuntaY = 195;
-    const textLaJuntaFontSize = 12;
+    const textLaJuntaFontSize = commonFontSize;
 
     const textEvitese = `Evítese molestias y cancele a tiempo sus planillas.`;
-    const textEviteseX = 50;
-    const textEviteseY = 210;
-    const textEviteseFontSize = 12;
+    const textEviteseFontSize = commonFontSize;
 
     const textAtte = `ATTE`;
-    const textAtteX = 50;
-    const textAtteY = 225;
-    const textAtteFontSize = 12;
+    const textAtteFontSize = commonFontSize;
 
     const textLaDirectiva = `LA DIRECTIVA`;
-    const textLaDirectivaX = 50;
-    const textLaDirectivaY = 240;
-    const textLaDirectivaFontSize = 12;
+    const textLaDirectivaFontSize = commonFontSize;
 
-    // Agregar texto al documento
-    doc
-      .font(fontBold)
-      .fontSize(titleFontSize)
-      .text("Notificación de Corte de Agua", 200, 50);
-    doc
-      .fontSize(textInformationFontSize)
-      .text(textInformation, textInformationX, textInformationY);
-    doc
-      .fontSize(textPresenteFontSize)
-      .text(textPresente, textPresenteX, textPresenteY);
-    doc
-      .fontSize(textEnUsoFontSize)
-      .text(textEnUso, textEnUsoX, textEnUsoY, { width: 500 });
-    doc
-      .fontSize(textLaJuntaFontSize)
-      .text(textLaJunta, textLaJuntaX, textLaJuntaY, { width: 500 });
-    doc
-      .fontSize(textEviteseFontSize)
-      .text(textEvitese, textEviteseX, textEviteseY, { width: 500 });
-    doc.fontSize(textAtteFontSize).text(textAtte, textAtteX, textAtteY);
-    doc
-      .fontSize(textLaDirectivaFontSize)
-      .text(textLaDirectiva, textLaDirectivaX, textLaDirectivaY);
+    //Agreggar el titulo y centrar el texto horizontalmente
 
-    // Linea de Firma
-    doc.moveTo(50, 260).lineTo(550, 260).stroke();
+    // doc.image('assets/logo2.png', {
+    //   fit: [50, 50],
+    //   align: 'center',
+    //   valign: 'center'
+    // });
+    doc.font(fontBold).fontSize(16);
 
+    doc.text(tituloTitle, {
+      width: 500,
+      height: 5,
+      align: "center",
+    });
+
+    doc.text(tituloSubtitle, {
+      width: 500,
+      height: 40,
+      align: "center",
+    });
+
+    doc.text(tituloSubtitleSub, {
+      width: 500,
+      height: 55,
+      align: "center",
+    });
+
+    const sumY = 10;
+    const fontTextSize = 10;
+    //Letras tamaño 12
+    //Quitar la negrita del texto
+    doc.font(fontRegular).fontSize(fontTextSize);
+
+    // ...
+    doc
+      .fontSize(fontTextSize)
+      .text(textInformation, textoInX, ubicValoY, { align: "justify" });
+    doc
+      .fontSize(fontTextSize)
+      .text(textPresente, textoInX, ubicValoY + 20 + sumY, {
+        align: "justify",
+      });
+    doc
+      .fontSize(fontTextSize)
+      .text(textEnUso, textoInX, ubicValoY + 35 + sumY, { align: "justify" });
+    doc
+      .fontSize(fontTextSize)
+      .text(textLaJunta, textoInX, ubicValoY + 100 + sumY, {
+        align: "justify",
+      });
+    doc
+      .fontSize(fontTextSize)
+      .text(textEvitese, textoInX, ubicValoY + 140 + sumY, {
+        align: "justify",
+      });
+
+    doc
+      .fontSize(fontTextSize)
+      .text(textAtte, textoInX, ubicValoY + 175 + sumY, {
+        align: "center",
+      });
+
+    doc
+      .fontSize(fontTextSize)
+      .text(textLaDirectiva, textoInX, ubicValoY + 190 + sumY, {
+        align: "center",
+      });
+
+    doc.fontSize(fontTextSize).text("", textoInX, ubicValoY + 230 + sumY, {
+      align: "center",
+    });
   } catch (error) {
     console.error("Ha ocurrido un error:", error);
   }
 };
 
+const generateTableMeasureCourtTwo = (doc, data, dataAll) => {
+  try {
+    //Cnter text
+    const { day, month, monthsCorte } = dataAll;
+    // arreglo de fechas de corte por numero de meses llave valor
+    const fechasCorteMes = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
 
-const generateTableMeasureCourtTwo = async (doc, data) => {};
+    const year = new Date().getFullYear();
+
+    const titleFontSize = 12;
+    const commonFontSize = 12;
+    const fontBold = "Helvetica-Bold";
+    const fontRegular = "Helvetica";
+
+    const ubicValo = 50; // Posición X común
+    const ubicValoY = 470; // Posición Y común
+    const textoInX = 50; // Posición X común
+
+    const tituloTitle = "JUNTA ADM DE AGUA POTABLE DE LA URB";
+    const tituloSubtitle = "EL PORTON";
+    const tituloSubtitleSub = "NOTIFICACION DE CORTE";
+
+    const textInformation = `Sr(a): ${data.Nombre}`.trim();
+    const textInformationFontSize = commonFontSize;
+
+    const textPresente = "Presente.-";
+    const textPresenteFontSize = commonFontSize;
+
+    const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día sábado, ${day} ${
+      fechasCorteMes[month]
+    }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${monthsCorte} meses, del medidor ${
+      data.codigo
+    }, de la manzana ${data.Manzana.trim()}, Solar nro ${data.Lote.trim()}, El monto adeudado es $${data.saldo.toFixed(
+      2
+    )} USD por efecto del consumo.`;
+    const textEnUsoFontSize = commonFontSize;
+
+    const textLaJunta = `La Junta previene que una vez suspendido el servicio, la reconexión será dentro de las 24 horas después que usted haya efectuado el pago, rogamos respetar el horario.`;
+    const textLaJuntaFontSize = commonFontSize;
+
+    const textEvitese = `Evítese molestias y cancele a tiempo sus planillas.`;
+    const textEviteseFontSize = commonFontSize;
+
+    const textAtte = `ATTE`;
+    const textAtteFontSize = commonFontSize;
+
+    const textLaDirectiva = `LA DIRECTIVA`;
+    const textLaDirectivaFontSize = commonFontSize;
+
+    //Agreggar el titulo y centrar el texto horizontalmente
+    doc.font(fontBold).fontSize(16);
+
+    doc.text(tituloTitle, {
+      width: 500,
+      height: 380,
+      align: "center", // Centrar horizontalmente
+    });
+
+    doc.text(tituloSubtitle, {
+      width: 500,
+      height: 40,
+      align: "center", // Centrar horizontalmente
+    });
+
+    doc.text(tituloSubtitleSub, {
+      width: 500,
+      height: 55,
+      align: "center", // Centrar horizontalmente
+    });
+
+    const sumY = 10;
+    const fontTextSize = 10;
+    //Letras tamaño 12
+    //Quitar la negrita del texto
+    doc.font(fontRegular).fontSize(fontTextSize);
+
+    // ...
+    doc
+      .fontSize(fontTextSize)
+      .text(textInformation, textoInX, ubicValoY, { align: "justify" });
+    doc
+      .fontSize(fontTextSize)
+      .text(textPresente, textoInX, ubicValoY + 20 + sumY, {
+        align: "justify",
+      });
+    doc
+      .fontSize(fontTextSize)
+      .text(textEnUso, textoInX, ubicValoY + 35 + sumY, { align: "justify" });
+    doc
+      .fontSize(fontTextSize)
+      .text(textLaJunta, textoInX, ubicValoY + 100 + sumY, {
+        align: "justify",
+      });
+    doc
+      .fontSize(fontTextSize)
+      .text(textEvitese, textoInX, ubicValoY + 140 + sumY, {
+        align: "justify",
+      });
+    doc
+      .fontSize(fontTextSize)
+      .text(textAtte, textoInX + 220, ubicValoY + 175 + sumY, {
+        align: "justify",
+      });
+    doc
+      .fontSize(fontTextSize)
+      .text(textLaDirectiva, textoInX + 200, ubicValoY + 190 + sumY, {
+        align: "justify",
+      });
+  } catch (error) {
+    console.log(error);
+  }
+};
 module.exports = {
   generateTableClienteOne,
   generateTableClienteTwo,
