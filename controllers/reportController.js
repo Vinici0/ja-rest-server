@@ -147,18 +147,22 @@ const generateMeuserCourt = async (data, outputPath, dataAll) => {
       }
     }
 
-    // Eliminar la última página agregada, ya que no se necesita
+    // Crea el stream de escritura y pipea el documento
+    const writeStream = fs.createWriteStream(outputPath);
+    doc.pipe(writeStream);
+    doc.end(); // Asegúrate de cerrar el stream
 
-    // Guardar el archivo localmente
-    doc.pipe(fs.createWriteStream(outputPath));
-    doc.end();
+    // Espera a que el stream de escritura termine
+    await new Promise((resolve, reject) => {
+      writeStream.on('finish', resolve);
+      writeStream.on('error', reject);
+    });
 
-    // Convertir la generación del PDF en una Promesa
-    const pdfStream = await getStream.buffer(fs.createReadStream(outputPath));
-    return pdfStream;
+    // Devuelve el path del archivo creado
+    return outputPath;
   } catch (error) {
     console.error("Error en la generación del PDF:", error);
-    throw error; // Rechazar la Promesa en caso de error
+    throw error;
   }
 };
 
@@ -166,22 +170,19 @@ const showCourt = async (req, res) => {
   try {
     const data = req.body;
     const getAllCustomer = await configService.getMeasureCourt(data.meses);
-
     const outputPath = `${__dirname}/../confirmado.pdf`;
-    const pdfStream = await generateMeuserCourt(getAllCustomer, outputPath, data);
 
-    // Enviar el archivo como respuesta
-    res.writeHead(200, {
-      "Content-Length": Buffer.byteLength(pdfStream),
-      "Content-Type": "application/pdf",
-      "Content-disposition": "inline;filename=confirmado.pdf",
-    }).end(pdfStream);
+    // Genera el PDF y obtén el path del archivo creado
+    const pdfPath = await generateMeuserCourt(getAllCustomer, outputPath, data);
 
+    // Lee el stream desde el archivo y pipea la respuesta HTTP
+    fs.createReadStream(pdfPath).pipe(res);
   } catch (error) {
     console.error("Error al mostrar la corte:", error);
     res.status(500).send("Error interno del servidor");
   }
 };
+
 
 
 

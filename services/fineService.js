@@ -158,8 +158,8 @@ const updateFineDetail = async (idMultaDetalle, fineDetail) => {
 
 const togglePaymentStatus = async (idMultaDetalle, pagado, fecha) => {
   try {
-    let fechaPagoValue = pagado === 1 ? fecha : null;
-
+    let fechaPagoValue = pagado === true ? new Date() : null;
+    console.log(fechaPagoValue);
     const updatedPaymentStatus = await dbConnection.query(
       `UPDATE JA_MultaDetalle SET pagado = :pagado, fecha_pago = :fechaPago WHERE idMultaDetalle = :idMultaDetalle`,
       {

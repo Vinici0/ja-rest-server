@@ -565,7 +565,11 @@ const generateTableClienteTree = async (
       .fontSize(fontSizeDetaller)
       .text(DETALLE_TEXT, detallex, DETALLE_POSITION_Y)
       //redondear a dos decimales
-      .text("$" + totalSumaALL.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
+      .text(
+        "$" + totalSumaALL.toFixed(2),
+        detallerValue + 100,
+        DETALLE_POSITION_Y
+      )
       .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y)
       .text(
         `$${totalAlcantarrilladoAll.toFixed(2)}`,
@@ -621,6 +625,8 @@ const getSum = async (idCliente) => {
 //////////////////////////////////////////////////////////////////////////////////////////////
 const generateTableMeasureCourtOne = (doc, data, dataAll) => {
   try {
+    const year = new Date().getFullYear();
+    //Cnter text
     const { day, month, monthsCorte } = dataAll;
     // arreglo de fechas de corte por numero de meses llave valor
     const fechasCorteMes = [
@@ -638,7 +644,20 @@ const generateTableMeasureCourtOne = (doc, data, dataAll) => {
       "diciembre",
     ];
 
-    const year = new Date().getFullYear();
+    //Busqur que dia de la semana es en base al dya o mes
+    const dayWeek = new Date(year, dataAll.month, dataAll.day).getDay();
+
+    const dayWeekText = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miercoles",
+      "Jueves",
+      "Viernes",
+      "Sabado",
+    ];
+
+    const dayWeekTextValue = dayWeekText[dayWeek];
 
     const titleFontSize = 12;
     const commonFontSize = 12;
@@ -659,7 +678,7 @@ const generateTableMeasureCourtOne = (doc, data, dataAll) => {
     const textPresente = "Presente.-";
     const textPresenteFontSize = commonFontSize;
 
-    const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día sábado, ${day} ${
+    const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día ${dayWeekTextValue} ${day} de ${
       fechasCorteMes[month]
     }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${monthsCorte} meses, del medidor ${
       data.codigo
@@ -758,6 +777,7 @@ const generateTableMeasureCourtOne = (doc, data, dataAll) => {
 
 const generateTableMeasureCourtTwo = (doc, data, dataAll) => {
   try {
+    const year = new Date().getFullYear();
     //Cnter text
     const { day, month, monthsCorte } = dataAll;
     // arreglo de fechas de corte por numero de meses llave valor
@@ -776,7 +796,20 @@ const generateTableMeasureCourtTwo = (doc, data, dataAll) => {
       "diciembre",
     ];
 
-    const year = new Date().getFullYear();
+    //Busqur que dia de la semana es en base al dya o mes
+    const dayWeek = new Date(year, dataAll.month, dataAll.day).getDay();
+
+    const dayWeekText = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miercoles",
+      "Jueves",
+      "Viernes",
+      "Sabado",
+    ];
+
+    const dayWeekTextValue = dayWeekText[dayWeek];
 
     const titleFontSize = 12;
     const commonFontSize = 12;
@@ -797,7 +830,7 @@ const generateTableMeasureCourtTwo = (doc, data, dataAll) => {
     const textPresente = "Presente.-";
     const textPresenteFontSize = commonFontSize;
 
-    const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día sábado, ${day} ${
+    const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día ${dayWeekTextValue}, ${day} ${
       fechasCorteMes[month]
     }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${monthsCorte} meses, del medidor ${
       data.codigo
