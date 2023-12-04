@@ -35,6 +35,23 @@ const getDetatailFinesByClient = async (id_cliente) => {
   }
 };
 
+
+const getFineDetailsByIdClient = async (id_cliente) => {
+  try {
+    const detalleMultas = await dbConnection.query(
+      "SELECT * FROM JA_MultaDetalle INNER JOIN JA_Multa ON JA_MultaDetalle.id_multa = JA_Multa.idMulta WHERE id_cliente = :id_cliente and pagado = 0 ORDER BY date_fine DESC",
+      {
+        replacements: { id_cliente },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    return detalleMultas;
+  } catch (error) {
+    // consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+}
+
 const getInteresBase = async () => {
   try {
     const interesBase = await dbConnection.query("SELECT * FROM JA_Interes", {
@@ -67,4 +84,5 @@ module.exports = {
   getDetatailFinesByClient,
   getInteresBase,
   getFineByClient,
+  getFineDetailsByIdClient
 };

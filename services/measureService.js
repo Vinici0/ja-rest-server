@@ -852,6 +852,27 @@ const getCustomerInformation = async (idCliente) => {
   }
 };
 
+// SELECT * FROM JA_Medida WHERE Codigo = '19101505' AND SALDO > 0 ORDER BY anio DESC, mes DESC;
+const getMeasurementsByCode = async (Codigo) => {
+  try {
+    const measure = await dbConnection.query(
+      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND SALDO > 0 ORDER BY anio DESC, mes DESC`,
+      {
+        replacements: {
+          Codigo,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Medida obtenida correctamente");
+    return measure;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+}
+
+
 module.exports = {
   execCorte,
   getMeasurements,
@@ -867,4 +888,5 @@ module.exports = {
   calculateAllAndUpdateMedidasAcumulado,
   updateDatosAlcantarilladoConSaldoPositivo,
   getCustomerInformation,
+  getMeasurementsByCode
 };

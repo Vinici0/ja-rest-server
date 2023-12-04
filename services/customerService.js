@@ -22,7 +22,7 @@ const getAllClients = async () => {
 const getAllClientsAndManzadaAndLote = async () => {
   try {
     const clients = await dbConnection.query(
-      "select distinct JA_Medida.idCliente, JA_Medida.nombre, lote, manzana, JA_Medida.codigo, ruc  from JA_Medida  INNER JOIN cliente ON JA_Medida.idCliente = cliente.idCliente where  lote is not null and manzana is not null order by lote asc , manzana asc",
+      "select distinct JA_Medida.idCliente, JA_Medida.nombre, lote, manzana, JA_Medida.codigo, ruc  from JA_Medida  INNER JOIN cliente ON JA_Medida.idCliente = cliente.idCliente where  lote is not null and manzana is not null order by manzana asc , lote asc",
       {
         type: sequelize.QueryTypes.SELECT,
       }

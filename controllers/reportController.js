@@ -56,6 +56,8 @@ const generatePdfMeasure = async (data) => {
     const doc = new PDFDocument();
     const measurementsPromises = [];
     const multasPromises = [];
+    // getFineDetailsByIdClient
+    const fineDetailsByIdClient = []
     const INTERES_BASE = await getInteresBase();
     const ja_table = await configService.getTabla();
 
@@ -63,11 +65,14 @@ const generatePdfMeasure = async (data) => {
     for (let i = 0; i < data.length; i++) {
       measurementsPromises.push(getMeasurements(data[i].Codigo));
       multasPromises.push(userService.getFineByClient(data[i].idCliente));
+      // fineDetailsByIdClient.push(userService.getFineDetailsByIdClient(data[i].idCliente));
     }
 
     // Esperar a que todas las promesas se resuelvan.
     const measurementsResults = await Promise.all(measurementsPromises);
     const multasResults = await Promise.all(multasPromises);
+    // const fineDetailsByIdClientResults = await Promise.all(fineDetailsByIdClient);
+
     let conuntBasico = 0;
     // Procesar los datos y generar el PDF.
     for (let i = 0; i < data.length; i++) {
@@ -94,7 +99,8 @@ const generatePdfMeasure = async (data) => {
           currentMeasurements,
           INTERES_BASE,
           currentFines,
-          ja_table
+          ja_table,
+          // fineDetailsByIdClientResults
         );
 
         // Verificar si hay un próximo cliente y si cabe en la misma página.
@@ -140,9 +146,9 @@ const generateMeuserCourt = async (data, outputPath, dataAll) => {
     const doc = new PDFDocument();
     for (let i = 0; i < data.length; i++) {
       if (i % 2 === 0) {
-        generateTableMeasureCourtOne(doc, data[i], dataAll);
+        await generateTableMeasureCourtOne(doc, data[i], dataAll);
       } else {
-        generateTableMeasureCourtTwo(doc, data[i], dataAll);
+        await generateTableMeasureCourtTwo(doc, data[i], dataAll);
         doc.addPage();
       }
     }

@@ -1,6 +1,7 @@
 const sequelize = require("sequelize");
 const { dbConnection } = require("../database/config");
 const { months } = require("moment/moment");
+const { getMeasurementsByCode } = require("../services/measureService");
 const MAX_ROWS = 4;
 
 const generateTableClienteOne = async (
@@ -8,7 +9,8 @@ const generateTableClienteOne = async (
   data,
   INTERES_BASE,
   multas = [],
-  ja_tabla = []
+  ja_tabla = [],
+  fineDetailsByIdClient = []
 ) => {
   try {
     let INTERES = INTERES_BASE;
@@ -159,6 +161,43 @@ const generateTableClienteOne = async (
       .map((multa) => multa.valor_pagar)
       .reduce((a, b) => a + b, 0)
       .toFixed(2);
+
+    //ubicar a la derecho de agua un titulo en negrtita que diga "Multas"
+    //Texto en negrita
+    // doc.
+    //   font(fontBold)
+    //   .fontSize(14)
+    //   .text("MULTAS DE ASAMBLEA", 50, DETALLE_POSITION_Y);
+
+
+    // const maxDetalles = 4;
+    // const detallesRecorridos = Math.min(
+    //   fineDetailsByIdClient.length,
+    //   maxDetalles
+    // );
+
+    // // Quitar texto en negrita
+    // doc.font(fontRegular);
+
+    // for (let index = 0; index < detallesRecorridos; index++) {
+    //   const detalle = fineDetailsByIdClient[index];
+    //   const detalleText = `${detalle[index].typeFine}:`;
+    //   const detalleValue = `$${detalle[index].valor_pagar.toFixed(2)}`;
+    //   // const detalleValue = `$${detalle.valor_pagar.toFixed(2)}`;
+
+    //   // Calcular la posición vertical para cada detalle
+    //   const detallePositionY = DETALLE_POSITION_Y + 15 + index * 15;
+
+    //   // Imprimir el tipo de detalle y su valor
+    //   doc
+    //     .fontSize(fontSizeDetaller)
+    //     .text(
+    //       `${detalleText} ${detalleValue}`,
+    //       50,
+    //       detallePositionY
+    //     );
+    //   // .text(detalleValue, 50 + 100, detallePositionY);
+    // }
 
     doc
       .fontSize(fontSizeDetaller)
@@ -623,8 +662,9 @@ const getSum = async (idCliente) => {
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                        Cortes
 //////////////////////////////////////////////////////////////////////////////////////////////
-const generateTableMeasureCourtOne = (doc, data, dataAll) => {
+const generateTableMeasureCourtOne = async (doc, data, dataAll) => {
   try {
+    const totalPagar = await getMeasurementsByCode(data.codigo);
     const year = new Date().getFullYear();
     //Cnter text
     const { day, month, monthsCorte } = dataAll;
@@ -682,7 +722,7 @@ const generateTableMeasureCourtOne = (doc, data, dataAll) => {
       fechasCorteMes[month]
     }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${monthsCorte} meses, del medidor ${
       data.codigo
-    }, de la manzana ${data.Manzana.trim()}, Solar nro ${data.Lote.trim()}, El monto adeudado es $${data.saldo.toFixed(
+    }, de la manzana ${data.Manzana.trim()}, Solar nro ${data.Lote.trim()}, El monto adeudado es $${totalPagar[0].Acumulado.toFixed(
       2
     )} USD por efecto del consumo.`;
     const textEnUsoFontSize = commonFontSize;
@@ -775,8 +815,9 @@ const generateTableMeasureCourtOne = (doc, data, dataAll) => {
   }
 };
 
-const generateTableMeasureCourtTwo = (doc, data, dataAll) => {
+const generateTableMeasureCourtTwo = async (doc, data, dataAll) => {
   try {
+    const totalPagar = await getMeasurementsByCode(data.codigo);
     const year = new Date().getFullYear();
     //Cnter text
     const { day, month, monthsCorte } = dataAll;
@@ -834,7 +875,7 @@ const generateTableMeasureCourtTwo = (doc, data, dataAll) => {
       fechasCorteMes[month]
     }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${monthsCorte} meses, del medidor ${
       data.codigo
-    }, de la manzana ${data.Manzana.trim()}, Solar nro ${data.Lote.trim()}, El monto adeudado es $${data.saldo.toFixed(
+    }, de la manzana ${data.Manzana.trim()}, Solar nro ${data.Lote.trim()}, El monto adeudado es $${totalPagar[0].Acumulado.toFixed(
       2
     )} USD por efecto del consumo.`;
     const textEnUsoFontSize = commonFontSize;
