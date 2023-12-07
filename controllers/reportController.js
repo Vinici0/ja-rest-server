@@ -11,6 +11,7 @@ const {
   generateHeadersClienteOne,
   generateHeadersClienteTwo,
   generateHeadersClienteTree,
+  generateHeadersClienteOneV2,
 } = require("../helpers/pdf-templates");
 const {
   generateTableClienteOne,
@@ -26,6 +27,7 @@ const {
 
 const configService = require("../services/configService");
 const measureService = require("../services/measureService");
+const { getFineReport, getMeasureReport } = require("../services/fineService");
 
 const generateFooter = (doc) => {
   doc.fontSize(10).text("Juntos por el agua", 50, 690, {
@@ -57,7 +59,7 @@ const generatePdfMeasure = async (data) => {
     const measurementsPromises = [];
     const multasPromises = [];
     // getFineDetailsByIdClient
-    const fineDetailsByIdClient = []
+    const fineDetailsByIdClient = [];
     const INTERES_BASE = await getInteresBase();
     const ja_table = await configService.getTabla();
 
@@ -99,7 +101,7 @@ const generatePdfMeasure = async (data) => {
           currentMeasurements,
           INTERES_BASE,
           currentFines,
-          ja_table,
+          ja_table
           // fineDetailsByIdClientResults
         );
 
@@ -144,11 +146,11 @@ const generatePdfMeasure = async (data) => {
 const generateMeuserCourt = async (data, outputPath, dataAll) => {
   try {
     const doc = new PDFDocument();
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < dataAll.length; i++) {
       if (i % 2 === 0) {
-        await generateTableMeasureCourtOne(doc, data[i], dataAll);
+        await generateTableMeasureCourtOne(doc, dataAll[i], data);
       } else {
-        await generateTableMeasureCourtTwo(doc, data[i], dataAll);
+        await generateTableMeasureCourtTwo(doc, dataAll[i], data);
         doc.addPage();
       }
     }
@@ -160,8 +162,8 @@ const generateMeuserCourt = async (data, outputPath, dataAll) => {
 
     // Espera a que el stream de escritura termine
     await new Promise((resolve, reject) => {
-      writeStream.on('finish', resolve);
-      writeStream.on('error', reject);
+      writeStream.on("finish", resolve);
+      writeStream.on("error", reject);
     });
 
     // Devuelve el path del archivo creado
@@ -175,11 +177,13 @@ const generateMeuserCourt = async (data, outputPath, dataAll) => {
 const showCourt = async (req, res) => {
   try {
     const data = req.body;
+
+    //TODO: Get all customers
     const getAllCustomer = await configService.getMeasureCourt(data.meses);
     const outputPath = `${__dirname}/../confirmado.pdf`;
 
     // Genera el PDF y obtén el path del archivo creado
-    const pdfPath = await generateMeuserCourt(getAllCustomer, outputPath, data);
+    const pdfPath = await generateMeuserCourt(data, outputPath, getAllCustomer);
 
     // Lee el stream desde el archivo y pipea la respuesta HTTP
     fs.createReadStream(pdfPath).pipe(res);
@@ -189,8 +193,68 @@ const showCourt = async (req, res) => {
   }
 };
 
+const generateFineByIdCliente = async (
+  countFinesByClientArray,
+  getMeasureReportArray,
+  outputPath
+) => {
+  try {
+    const doc = new PDFDocument();
+
+    generateHeadersClienteOneV2(doc, getMeasureReportArray);
+
+    // Tabla de multas con los datos del cliente
+    countFinesByClientArray.forEach((fine, index) => {
+      const tableTop = 160 + index * 15; // Ajusta la posición vertical para cada fila
+
+      // Imprimir datos de la multa en la tabla
+      doc
+        .fontSize(10)
+        .text(fine.typeFine, 50, tableTop)
+        .text(`$${fine.valor_pagar}`, 150, tableTop); // Ajusta las coordenadas según tus necesidades
+    });
 
 
+    // Terminar el documento
+    const writeStream = fs.createWriteStream(outputPath);
+    doc.pipe(writeStream);
+
+    doc.end();
+
+    // Espera a que el stream de escritura termine
+    await new Promise((resolve, reject) => {
+      writeStream.on("finish", resolve);
+      writeStream.on("error", reject);
+    });
+
+    // Devuelve el path del archivo creado
+    return outputPath;
+  } catch (error) {
+    console.error("Error en la generación del PDF:", error);
+    return null;
+  }
+};
+
+const showFine = async (req, res) => {
+  try {
+    const idCliente = req.params.idCliente;
+    const countFinesByClientArray = await getFineReport(idCliente);
+    const getMeasureReportArray = await getMeasureReport(idCliente);
+    const outputPath = `${__dirname}/../fineCliente.pdf`;
+
+    const pdfPath = await generateFineByIdCliente(
+      countFinesByClientArray,
+      getMeasureReportArray[0],
+      outputPath
+    );
+
+    // Lee el stream desde el archivo y pipea la respuesta HTTP
+    fs.createReadStream(pdfPath).pipe(res);
+  } catch (error) {
+    console.error("Error al mostrar la multa:", error);
+    res.status(500).send("Error interno del servidor");
+  }
+};
 
 const generateMeterTable = (doc, data) => {
   const titleTable = 50;
@@ -515,7 +579,6 @@ const showCustomer = async (req, res) => {
     .end(pdfStream);
 };
 
-
 const calculoIntrest = async (req, res) => {
   // Datos de entrada
   const registros = [
@@ -637,4 +700,5 @@ module.exports = {
   showCustomer,
   calculoIntrest,
   showCourt,
+  showFine,
 };

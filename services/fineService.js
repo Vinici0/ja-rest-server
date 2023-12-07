@@ -272,6 +272,50 @@ const calculateTotalAmount = async () => {
   }
 };
 
+
+const getFineReport = async (idCliente) => {
+  try {
+    const result = await dbConnection.query(
+      "SELECT id_cliente,* FROM JA_MultaDetalle INNER JOIN JA_Multa ON JA_MultaDetalle.id_multa = JA_Multa.idMulta WHERE id_cliente = :idCliente AND pagado = 0 ORDER BY date_fine ASC",
+      {
+        replacements: {
+          idCliente,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Total calculado correctamente");
+    return result;
+  }
+  catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
+};
+
+const getMeasureReport = async (idCliente) => {
+  try {
+    const result = await dbConnection.query(
+      "SELECT TOP 1 * FROM JA_Medida WHERE idCliente = :idCliente"
+      ,
+      {
+        replacements: {
+          idCliente,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Total calculado correctamente");
+    return result;
+  }
+  catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
+};
+
+
+
 module.exports = {
   deleteFineDetail,
   createFine,
@@ -286,4 +330,6 @@ module.exports = {
   getFineDetailById,
   calculateTotalAmount,
   getFineDetailsByIdClient,
+  getFineReport,
+  getMeasureReport
 };

@@ -83,6 +83,46 @@ const generateHeadersClienteOne = (doc, factura) => {
   }
 };
 
+const generateHeadersClienteOneV2 = (doc, factura) => {
+  try {
+    logoClientOne(doc);
+    const inicioPagina = 50;
+    const finPagina = 550;
+    const headerY = 75;
+    const defaultFont = "Helvetica";
+    const boldFont = "Helvetica-Bold";
+    const leftColumnX = inicioPagina;
+    const middleColumnX = inicioPagina + 220;
+    const rightColumnX = inicioPagina + 320;
+    const firstRowY = 85;
+    const secondRowY = 100;
+    const thirdRowY = 115;
+    const separatorY = 130;
+
+    doc.moveTo(inicioPagina, headerY).lineTo(finPagina, headerY).stroke();
+    // Columna izquierda (negrita)
+    doc.font(boldFont).text("Nombre:", leftColumnX, firstRowY, { width: 500 });
+    doc.font(boldFont).text("Direccion:", leftColumnX, secondRowY);
+    doc.font(boldFont).text("Manzana:", leftColumnX, thirdRowY);
+    // Columna derecha (fuente predeterminada)
+    doc.font(defaultFont).text(factura.Nombre, leftColumnX + 80, firstRowY);
+    doc.font(defaultFont).text("El Porton", leftColumnX + 80, secondRowY);
+    doc.font(defaultFont).text(factura.Manzana, leftColumnX + 80, thirdRowY);
+    // Columna del medio (negrita)
+    doc.font(boldFont).text("Lote:", middleColumnX, secondRowY);
+    doc.font(boldFont).text("Medidor:", middleColumnX, thirdRowY);
+
+    // Columna de la mitad derecha (fuente predeterminada)
+    doc.font(defaultFont).text(factura.Lote, rightColumnX, secondRowY);
+    doc.font(defaultFont).text(factura.Codigo, rightColumnX, thirdRowY);
+    doc.moveTo(inicioPagina, separatorY).lineTo(finPagina, separatorY).stroke();
+  } catch (error) {
+    // Manejo de errores
+    console.error("Ha ocurrido un error:", error);
+    // O puedes manejar el error de otra manera más adecuada para tu caso
+  }
+};
+
 const generateHeadersClienteTwo = (doc, factura) => {
   try {
     const logoY = 200; // Ajusta esto según la posición en Y donde deseas que comience el encabezado
@@ -169,5 +209,6 @@ module.exports = {
   logoClientTwo,
   generateHeadersClienteOne,
   generateHeadersClienteTwo,
-  generateHeadersClienteTree
+  generateHeadersClienteTree,
+  generateHeadersClienteOneV2
 };

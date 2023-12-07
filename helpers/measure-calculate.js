@@ -60,7 +60,11 @@ const calculateAndUpdateMedidas = async (
         //Medidas
         const totalExcedente = medidas[i].Basico + ExcedenteVNew;
         const interes = totalExcedente * interesIncrement;
-        const calculoAlcantarillado = medidas[i].Basico === 2.75 ? 1.5 : 3.0;
+        // TODO: Si el mes es mayor a 7 se se agrega el alcantarillado
+        let calculoAlcantarillado = 0;
+        if (medidas[i].Mes >= 7 && medidas[i].Anio >= 2023) {
+          calculoAlcantarillado = medidas[i].Basico === 2.75 ? 1.5 : 3.0;
+        }
         // Alcantarillado
         const interesAlcantarillado = calculoAlcantarillado * interesIncrement;
         const totalAlcantarillado = (

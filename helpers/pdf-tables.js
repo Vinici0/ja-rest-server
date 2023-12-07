@@ -60,6 +60,7 @@ const generateTableClienteOne = async (
     let totalAgua = 0;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
+    let conteoIndexAlcantarillado = 0;
     let basico = 0;
     if (rowData.length !== 0) {
       for (let i = 0; i < rowData.length && i < MAX_ROWS; i++) {
@@ -137,6 +138,10 @@ const generateTableClienteOne = async (
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
         basico = rowData[i].Basico;
+        // conteoIndexAlcantarillado contar si alcantarillado mayor a cero
+        if (rowData[i].Alcantarillado > 0) {
+          conteoIndexAlcantarillado++;
+        }
       }
     }
 
@@ -146,7 +151,7 @@ const generateTableClienteOne = async (
     const detallex = 300;
     const detallerValue = 400;
     const DETALLE_TEXT = "AGUA:";
-    const SANAMIENTO_TEXT = `SERVICIO DE ALCANTARILLADO (${rowData.length}):`;
+    const SANAMIENTO_TEXT = `SERVICIO DE ALCANTARILLADO (${conteoIndexAlcantarillado}):`;
     const MULTA_TEXT = `TOTAL MULTAS (${multas.length}):`;
     const DETALLE_POSITION_Y = currentRow + 15;
     const SANAMIENTO_POSITION_Y = currentRow + 30;
@@ -293,6 +298,7 @@ const generateTableClienteTwo = async (
     let currentRow = tableTop + 18;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
+    let conteoIndexAlcantarillado = 0;
     if (rowData.length !== 0) {
       for (let i = 0; i < rowData.length && i < MAX_ROWS; i++) {
         let ExcedenteNew =
@@ -363,6 +369,10 @@ const generateTableClienteTwo = async (
         total += rowData[i].Saldo;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
+        // conteoIndexAlcantarillado contar si alcantarillado mayor a cero
+        if (rowData[i].Alcantarillado > 0) {
+          conteoIndexAlcantarillado++;
+        }
       }
 
       currentRow = currentRow - 5;
@@ -371,7 +381,7 @@ const generateTableClienteTwo = async (
       const detallex = 300;
       const detallerValue = 400;
       const DETALLE_TEXT = "AGUA:";
-      const SANAMIENTO_TEXT = `SERVICIO DE SANAMIENTO (${rowData.length}):`;
+      const SANAMIENTO_TEXT = `SERVICIO DE SANAMIENTO (${conteoIndexAlcantarillado}):`;
       const MULTA_TEXT = `TOTAL MULTAS (${multas.length}):`;
       const DETALLE_POSITION_Y = currentRow + 15;
       const SANAMIENTO_POSITION_Y = currentRow + 30;
@@ -483,9 +493,15 @@ const generateTableClienteTree = async (
     //Sumar el total de consumo de agua
     let totalSumaALL = 0;
     let totalAlcantarrilladoAll = 0;
+    let conteoIndexAlcantarillado = 0;
     for (let i = 0; i < rowData.length; i++) {
       totalSumaALL += rowData[i].Total;
       totalAlcantarrilladoAll += rowData[i].Alcantarillado;
+    }
+
+    let multasSumaALL = 0;
+    for (let i = 0; i < multas.length; i++) {
+      multasSumaALL += multas[i].valor_pagar;
     }
     let currentRow = tableTop + 18;
     let total = 0;
@@ -569,6 +585,10 @@ const generateTableClienteTree = async (
         totalAgua += rowData[i].Total;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
+        // conteoIndexAlcantarillado contar si alcantarillado mayor a cero
+        if (rowData[i].Alcantarillado > 0) {
+          conteoIndexAlcantarillado++;
+        }
       }
     }
 
@@ -577,7 +597,7 @@ const generateTableClienteTree = async (
     const detallex = 300;
     const detallerValue = 400;
     const DETALLE_TEXT = "AGUA:";
-    const SANAMIENTO_TEXT = `SERVICIO DE SANAMIENTO (${rowData.length}):`;
+    const SANAMIENTO_TEXT = `SERVICIO DE SANAMIENTO (${conteoIndexAlcantarillado}):`;
     const MULTA_TEXT = `TOTAL MULTAS (${multas.length}):`;
     const DETALLE_POSITION_Y = currentRow + 15;
     const SANAMIENTO_POSITION_Y = currentRow + 30;
@@ -638,7 +658,7 @@ const generateTableClienteTree = async (
       .fontSize(fontSizeDetaller)
       .text("TOTAL:", textoCuadroX, textoCuadroY)
       .text(
-        "$" + rowData[0].Acumulado.toFixed(2),
+        "$" + (rowData[0].Acumulado + multasSumaALL).toFixed(2),
         detallerValue + 100,
         textoCuadroY
       );
@@ -720,7 +740,7 @@ const generateTableMeasureCourtOne = async (doc, data, dataAll) => {
 
     const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día ${dayWeekTextValue} ${day} de ${
       fechasCorteMes[month]
-    }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${monthsCorte} meses, del medidor ${
+    }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${data.meses} meses, del medidor ${
       data.codigo
     }, de la manzana ${data.Manzana.trim()}, Solar nro ${data.Lote.trim()}, El monto adeudado es $${totalPagar[0].Acumulado.toFixed(
       2
@@ -873,7 +893,7 @@ const generateTableMeasureCourtTwo = async (doc, data, dataAll) => {
 
     const textEnUso = `En uso de las atribuciones establecidas en el Art. 18 del Reglamento Interno, se notifica que a partir del día ${dayWeekTextValue}, ${day} ${
       fechasCorteMes[month]
-    }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${monthsCorte} meses, del medidor ${
+    }, ${year} se iniciará el programa de corte y suspensión del servicio de agua por encontrarse en mora con ${data.meses} meses, del medidor ${
       data.codigo
     }, de la manzana ${data.Manzana.trim()}, Solar nro ${data.Lote.trim()}, El monto adeudado es $${totalPagar[0].Acumulado.toFixed(
       2
