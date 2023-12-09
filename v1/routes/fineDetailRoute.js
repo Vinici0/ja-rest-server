@@ -22,7 +22,6 @@ router.get("/calculateTotalAmount", calculateTotalAmount);
 
 router.post(
   "/",
-  /* JWT */
   createFineDetail
 );
 
