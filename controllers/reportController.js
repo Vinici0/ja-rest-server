@@ -179,7 +179,8 @@ const showCourt = async (req, res) => {
     const data = req.body;
 
     //TODO: Get all customers
-    const getAllCustomer = await configService.getMeasureCourt(data.meses);
+    const getAllCustomer = await configService.getMeasureCourt(2);
+    console.log(getAllCustomer.length);
     const outputPath = `${__dirname}/../confirmado.pdf`;
 
     // Genera el PDF y obtén el path del archivo creado

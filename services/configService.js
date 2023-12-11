@@ -200,14 +200,21 @@ const getAllClients = async () => {
 
 const getMeasureCourt = async (meses = 2) => {
   try {
+    const clientAll = []
     const client = await dbConnection.query(
       `EXEC JA_Corte @meses = ${meses}`,
       {
         type: sequelize.QueryTypes.SELECT,
       }
-    );
-    console.log('PDF Terminado');
-    return client;
+      );
+      
+    client.forEach((element) => {
+      if (element.Manzana != null && element.Lote != null) {
+        clientAll.push(element);
+      }
+    });
+
+    return clientAll;
   } catch (error) {
     consoleHelper.error(error.msg);
     throw new Error(error.msg);
