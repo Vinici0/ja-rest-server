@@ -125,6 +125,53 @@ const listTipoCliente = async (req, res) => {
 
 
 
+// Medidores
+const listEstados = async (req = request, res = response) => {
+    try {
+        const estado = await dashboardService.listEstado();
+        return new Response().success(res, "Estados obtenidos correctamente", {
+            total: estado,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+const listCantidad = async (req = request, res = response) => {
+    try {
+        const cantidades = await dashboardService.listCantidad();
+        return new Response().success(res, "Cantidades obtenidas correctamente", {
+            total: cantidades,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+const listLotes = async (req = request, res = response) => {
+    try {
+        const lotes = await dashboardService.listLote();
+        return new Response().success(res, "Lotes obtenidos correctamente", {
+            total: lotes,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+const listManzanas = async (req = request, res = response) => {
+    try {
+        const manzanas = await dashboardService.listManzana();
+        return new Response().success(res, "Manzanas obtenidas correctamente", {
+            total: manzanas,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+
+
 // Usuarios
 const listRoles = async (req = request, res = response) => {
     try {
@@ -139,6 +186,8 @@ const listRoles = async (req = request, res = response) => {
 
 
 
+
+
 /**
  * Obtener datos para la grafica
  * @param {*} req 
@@ -146,11 +195,33 @@ const listRoles = async (req = request, res = response) => {
  * @returns 
  */
 // Clientes
-const datosFiltrados = async (req, res) => {
+const datosFiltradosClients = async (req, res) => {
     try {
         const { idCiudad, idPais, idTipoCliente } = req.params;
 
-        const filteredData = await dashboardService.getFilteredData(idCiudad, idPais, idTipoCliente);
+        const filteredData = await dashboardService.getFilteredDataClients(idCiudad, idPais, idTipoCliente);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Datos filtrados obtenidos correctamente',
+            data: filteredData,
+        });
+    } catch (error) {
+        console.error('Error al obtener datos filtrados:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al obtener datos filtrados',
+            error: error.message,
+        });
+    }
+};
+
+// Medidores
+const datosFiltradosMedidores = async (req, res) => {
+    try {
+        const { estado, numMedidores, lote, manzana } = req.params;
+
+        const filteredData = await dashboardService.getFilteredDataMedidores(estado, numMedidores, lote, manzana);
 
         return res.status(200).json({
             success: true,
@@ -194,16 +265,6 @@ const graficaUser = async (req = request, res = response) => {
     }
 };
 
-// const graficaUserTodosFecha = async (req, res) => {
-//     try {
-//         const { fechIni, fechFin } = req.params;
-//         const result = await dashboardService.graficaUser_todos_fecha(fechIni, fechFin);
-//         return res.status(200).json({ ok: true, msg: 'Datos obtenidos correctamente', data: result });
-//     } catch (error) {
-//         return res.status(500).json({ ok: false, msg: error.message, data: null });
-//     }
-// };
-
 
 
 /**
@@ -215,15 +276,20 @@ module.exports = {
     contReportMeter,
     contUsers,
 
+    listEstados,
     listCiudad,
     listPais,
     listTipoCliente,
 
+    listCantidad,
+    listLotes,
+    listManzanas,
+
     listRoles,
 
-    datosFiltrados,
+    datosFiltradosClients,
+    datosFiltradosMedidores,
 
     graficaUser_todos,
     graficaUser,
-    // graficaUserTodosFecha
 };
