@@ -5,6 +5,68 @@ const dashboardService = require("../services/dashboardService");
 const Response = require("../helpers/response");
 
 /**
+ * Obtener Datos para list del filtro de medida
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+const listAnios = async (req = request, res = response) => {
+    try {
+        const anios = await dashboardService.listAnios();
+        return new Response().success(res, "Años obtenidos correctamente", {
+            total: anios,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+const listLoteG = async (req = request, res = response) => {
+    try {
+        const lote = await dashboardService.listLotesG();
+        return new Response().success(res, "Lotes obtenidos correctamente", {
+            total: lote,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+const listManzanaG = async (req = request, res = response) => {
+    try {
+        const manzana = await dashboardService.listManzanaG();
+        return new Response().success(res, "Manzanas obtenidas correctamente", {
+            total: manzana,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+const getFilteredDataMedidas = async (req, res) => {
+    try {
+        const { nombre, ruc, anio, mes, lote, manzana } = req.params;
+
+        const filteredData = await dashboardService.getFilteredDataMedida(nombre, ruc, anio, mes, lote, manzana);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Datos filtrados obtenidos correctamente',
+            data: filteredData,
+        });
+    } catch (error) {
+        console.error('Error al obtener datos filtrados:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al obtener datos filtrados',
+            error: error.message,
+        });
+    }
+};
+
+
+
+/**
  * Obtener numero de registros
  * @param {*} req 
  * @param {*} res 
@@ -32,11 +94,11 @@ const contMeter = async (req = request, res = response) => {
     }
 };
 
-const contReportMeter = async (req = request, res = response) => {
+const contFade = async (req = request, res = response) => {
     try {
-        const reportMeter = await dashboardService.contReportMeter();
+        const fade = await dashboardService.contFade();
         return new Response().success(res, "Numero de medidores dañados obtenidos correctamente", {
-            total: reportMeter,
+            total: fade,
         });
     } catch (error) {
         return new Response().error(res, error.message);
@@ -171,6 +233,30 @@ const listManzanas = async (req = request, res = response) => {
 };
 
 
+// Multas
+const listMultas = async (req = request, res = response) => {
+    try {
+        const multas = await dashboardService.listMultas();
+        return new Response().success(res, "Multas obtenidas correctamente", {
+            total: multas,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+const listPagado = async (req = request, res = response) => {
+    try {
+        const estado = await dashboardService.listPagado();
+        return new Response().success(res, "Pagadas obtenidas correctamente", {
+            total: estado,
+        });
+    } catch (error) {
+        return new Response().error(res, error.message);
+    }
+};
+
+
 
 // Usuarios
 const listRoles = async (req = request, res = response) => {
@@ -239,6 +325,28 @@ const datosFiltradosMedidores = async (req, res) => {
 };
 
 
+const datosFiltradosMultas = async (req, res) => {
+    try {
+        const { multa, estado } = req.params;
+
+        const filteredData = await dashboardService.getFilteredDataMultas(multa, estado);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Datos filtrados obtenidos correctamente',
+            data: filteredData,
+        });
+    } catch (error) {
+        console.error('Error al obtener datos filtrados:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al obtener datos filtrados',
+            error: error.message,
+        });
+    }
+};
+
+
 
 // Usuarios
 const graficaUser_todos = async (req = request, res = response) => {
@@ -271,9 +379,14 @@ const graficaUser = async (req = request, res = response) => {
  * Exportar los modulos de los filtros
  */
 module.exports = {
+    listAnios,
+    listLoteG,
+    listManzanaG,
+    getFilteredDataMedidas,
+
     contClients,
     contMeter,
-    contReportMeter,
+    contFade,
     contUsers,
 
     listEstados,
@@ -285,10 +398,14 @@ module.exports = {
     listLotes,
     listManzanas,
 
+    listMultas,
+    listPagado,
+
     listRoles,
 
     datosFiltradosClients,
     datosFiltradosMedidores,
+    datosFiltradosMultas,
 
     graficaUser_todos,
     graficaUser,
