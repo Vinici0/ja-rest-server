@@ -28,7 +28,7 @@ WITH SeleccionMedida AS (
         END AS Saldo
     FROM JA_Medida AS M
     INNER JOIN Cliente AS C ON C.idCliente = M.idCliente
-    WHERE Anio >= 2023
+    --WHERE Anio >= 2022
 ), TotalMedidas AS (
     SELECT
         Nombre, Ruc, Anio, Mes, Codigo, Lote, Manzana,
