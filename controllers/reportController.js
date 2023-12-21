@@ -58,19 +58,16 @@ const generatePdfMeasure = async (data) => {
     const doc = new PDFDocument();
     const measurementsPromises = [];
     const multasPromises = [];
-    // getFineDetailsByIdClient
     const fineDetailsByIdClient = [];
     const INTERES_BASE = await getInteresBase();
     const ja_table = await configService.getTabla();
 
-    // Preparar promesas para obtener mediciones y multas.
     for (let i = 0; i < data.length; i++) {
       measurementsPromises.push(getMeasurements(data[i].Codigo));
       multasPromises.push(userService.getFineByClient(data[i].idCliente));
       // fineDetailsByIdClient.push(userService.getFineDetailsByIdClient(data[i].idCliente));
     }
 
-    // Esperar a que todas las promesas se resuelvan.
     const measurementsResults = await Promise.all(measurementsPromises);
     const multasResults = await Promise.all(multasPromises);
     // const fineDetailsByIdClientResults = await Promise.all(fineDetailsByIdClient);
