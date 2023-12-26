@@ -61,4 +61,3 @@ BEGIN
 END;
 
 EXEC ActualizarEstadoMedidor 1, 0;
-
