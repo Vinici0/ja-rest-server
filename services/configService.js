@@ -199,7 +199,7 @@ const getAllClients = async () => {
 };
 
 const getMeasureCourt = async (meses = 2) => {
-  try {
+  try {//.
     const clientAll = []
     const client = await dbConnection.query(
       `EXEC JA_Corte @meses = ${meses}`,
