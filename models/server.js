@@ -22,6 +22,7 @@ class Server {
       reports: "/api/v1/reports",
       users: "/api/v1/users",
       uploads: "/api/v1/uploads",
+      dashboard: "/api/v1/dashboard"
     };
 
     // Conectar a base de datos
@@ -81,8 +82,9 @@ class Server {
     this.app.use(
       this.paths.finesDetails,
       require("../v1/routes/fineDetailRoute.js")
-    );
-  }
+      );
+    this.app.use(this.paths.dashboard, require("../v1/routes/dashboardRoute.js"));
+    }
 
   listen() {
     this.app.listen(this.port, () => {
