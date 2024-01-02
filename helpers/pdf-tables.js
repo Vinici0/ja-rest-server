@@ -2,6 +2,7 @@ const sequelize = require("sequelize");
 const { dbConnection } = require("../database/config");
 const { months } = require("moment/moment");
 const { getMeasurementsByCode } = require("../services/measureService");
+
 const MAX_ROWS = 4;
 
 const generateTableClienteOne = async (
@@ -138,7 +139,6 @@ const generateTableClienteOne = async (
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
         basico = rowData[i].Basico;
-        // conteoIndexAlcantarillado contar si alcantarillado mayor a cero
         if (rowData[i].Alcantarillado > 0) {
           conteoIndexAlcantarillado++;
         }
@@ -298,6 +298,7 @@ const generateTableClienteTwo = async (
     let currentRow = tableTop + 18;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
+    let totalAgua = 0;
     let conteoIndexAlcantarillado = 0;
     if (rowData.length !== 0) {
       for (let i = 0; i < rowData.length && i < MAX_ROWS; i++) {
@@ -367,9 +368,9 @@ const generateTableClienteTwo = async (
 
         // Actualizar el valor detotal
         total += rowData[i].Saldo;
+        totalAgua += rowData[i].Total;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
-        // conteoIndexAlcantarillado contar si alcantarillado mayor a cero
         if (rowData[i].Alcantarillado > 0) {
           conteoIndexAlcantarillado++;
         }
@@ -400,7 +401,7 @@ const generateTableClienteTwo = async (
 
       doc
         .text(DETALLE_TEXT, detallex, DETALLE_POSITION_Y)
-        .text("$" + total.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
+        .text("$" + totalAgua.toFixed(2), detallerValue + 100, DETALLE_POSITION_Y)
         .text(SANAMIENTO_TEXT, detallex, SANAMIENTO_POSITION_Y);
 
       doc
@@ -423,7 +424,7 @@ const generateTableClienteTwo = async (
       const textoCuadroY = cuadroY + 5;
 
       const totalValue = (
-        parseFloat(total) +
+        parseFloat(totalAgua) +
         parseFloat(totalAlacantarillado) +
         parseFloat(totalMultas)
       ).toFixed(2);
@@ -493,7 +494,6 @@ const generateTableClienteTree = async (
     //Sumar el total de consumo de agua
     let totalSumaALL = 0;
     let totalAlcantarrilladoAll = 0;
-    let conteoIndexAlcantarillado = 0;
     for (let i = 0; i < rowData.length; i++) {
       totalSumaALL += rowData[i].Total;
       totalAlcantarrilladoAll += rowData[i].Alcantarillado;
@@ -503,11 +503,13 @@ const generateTableClienteTree = async (
     for (let i = 0; i < multas.length; i++) {
       multasSumaALL += multas[i].valor_pagar;
     }
+
     let currentRow = tableTop + 18;
     let total = 0;
     let totalAgua = 0;
     let indexMultiplo = 2;
     let totalAlacantarillado = 0;
+    let conteoIndexAlcantarillado = 0;
     // let resGetSum = [];
     if (rowData.length !== 0) {
       for (let i = 0; i < rowData.length && i < 25; i++) {
@@ -585,7 +587,6 @@ const generateTableClienteTree = async (
         totalAgua += rowData[i].Total;
         totalAlacantarillado += rowData[i].Alcantarillado;
         currentRow += 15;
-        // conteoIndexAlcantarillado contar si alcantarillado mayor a cero
         if (rowData[i].Alcantarillado > 0) {
           conteoIndexAlcantarillado++;
         }
@@ -679,6 +680,7 @@ const getSum = async (idCliente) => {
   );
   return totales;
 };
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                        Cortes
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -975,6 +977,7 @@ const generateTableMeasureCourtTwo = async (doc, data, dataAll) => {
     console.log(error);
   }
 };
+
 module.exports = {
   generateTableClienteOne,
   generateTableClienteTwo,

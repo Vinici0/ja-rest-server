@@ -873,6 +873,22 @@ const getMeasurementsByCode = async (Codigo) => {
 }
 
 
+const getMeasureTotalFineByManzanaLote = async () => {
+  try {
+    const measure = await dbConnection.query(
+      `SELECT m.idCliente, m.nombre, m.codigo, m.manzana, M.lote, COUNT(DISTINCT d.idMultaDetalle) AS cantidadMultas FROM JA_Medida m LEFT JOIN JA_MultaDetalle d ON m.idCliente = d.id_cliente WHERE  d.pagado = 0 GROUP BY m.idCliente, m.Manzana, m.Lote,m.Nombre,m.codigo`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Medida obtenida correctamente");
+    return measure;
+  } catch (error) {
+    consoleHelper.error(error.msg);
+    throw new Error(error.msg);
+  }
+}
+
 module.exports = {
   execCorte,
   getMeasurements,
@@ -888,5 +904,6 @@ module.exports = {
   calculateAllAndUpdateMedidasAcumulado,
   updateDatosAlcantarilladoConSaldoPositivo,
   getCustomerInformation,
-  getMeasurementsByCode
+  getMeasurementsByCode,
+  getMeasureTotalFineByManzanaLote
 };

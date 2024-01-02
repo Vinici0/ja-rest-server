@@ -196,6 +196,17 @@ const getCustomerInformation = async (req, res) => {
   }
 };
 
+const getMeasureTotalFineByManzanaLote = async (req, res) => {
+  try {
+    const result = await measureService.getMeasureTotalFineByManzanaLote();
+    return new Response().success(res, "Medida actualizada correctamente", {
+      measure: result,
+    });
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   execCorte,
   getMeasurements,
@@ -211,4 +222,5 @@ module.exports = {
   calculateAllAndUpdateMedidasAcumulado,
   getCustomerInformation,
   updateDatosAlcantarilladoConSaldoPositivo,
+  getMeasureTotalFineByManzanaLote
 };
