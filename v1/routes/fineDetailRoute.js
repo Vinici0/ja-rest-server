@@ -11,7 +11,8 @@ const {
   updateFineDetail,
   getFineDetailById,
   calculateTotalAmount,
-  getFineDetailsByIdClient
+  getFineDetailsByIdClient,
+  updateFineAbono
 } = require("../../controllers/fineController");
 
 const router = Router();
@@ -42,6 +43,10 @@ router.delete("/:id", deleteFineDetail);
 router.get("/:id", getFineDetailById);
 
 router.get("/client/:id", getFineDetailsByIdClient);
+
+
+// En tu archivo de rutas del backend
+router.put("/:id_multaDetalle/abono", updateFineAbono);
 
 
 module.exports = router;

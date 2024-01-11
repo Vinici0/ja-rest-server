@@ -147,6 +147,7 @@ const deleteFineDetail = async (req = request, res = response) => {
   }
 };
 
+// Nones
 const getFineDetailById = async (req = request, res = response) => {
   const { id } = req.params;
   try {
@@ -162,6 +163,29 @@ const getFineDetailById = async (req = request, res = response) => {
     return new Response().error(res, error.message);
   }
 };
+
+
+// En tu controlador del backend
+const updateFineAbono = async (req = request, res = response) => {
+  const { id_multaDetalle } = req.params;
+  const { id_cliente, abonoNumber } = req.body;
+
+  try {
+    const fineDetail = await fineService.updateFineAbono(id_multaDetalle, id_cliente, abonoNumber);
+    return new Response().success(
+      res,
+      "Detalle de multa actualizado correctamente",
+      {
+        fineDetails: fineDetail,
+      }
+    );
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
+
+
 
 const calculateTotalAmount = async (req = request, res = response) => {
   try {
@@ -207,5 +231,6 @@ module.exports = {
   updateFineDetail,
   getFineDetailById,
   calculateTotalAmount,
-  getFineDetailsByIdClient
+  getFineDetailsByIdClient,
+  updateFineAbono
 };
