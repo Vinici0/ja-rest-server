@@ -2,7 +2,8 @@ CREATE TABLE JA_MultaDetalleAbono (
     idMultaDetalleAbono INT PRIMARY KEY,
     id_cliente INT,
     id_multaDetalle INT,
-    total_abono DECIMAL(10, 2)
+    total_abono DECIMAL(10, 2),
+    descripcion nchar(100)
 );
 
 ALTER TABLE JA_MultaDetalleAbono
