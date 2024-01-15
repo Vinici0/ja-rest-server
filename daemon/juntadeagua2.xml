@@ -1,0 +1,31 @@
+<service>
+	<id>juntadeagua2.exe</id>
+	<name>Junta de Agua 2</name>
+	<description>Junta de Agua 2</description>
+	<executable>C:\Program Files\nodejs\node.exe</executable>
+	<argument>--harmony</argument>
+	<argument>C:\rest-server-junta-agua\v4\ja-rest-server-main\node_modules\node-windows\lib\wrapper.js</argument>
+	<argument>--file</argument>
+	<argument>C:\rest-server-junta-agua\v4\ja-rest-server-main\index.js</argument>
+	<argument>--scriptoptions=</argument>
+	<argument>--log</argument>
+	<argument>Junta de Agua 2 wrapper</argument>
+	<argument>--grow</argument>
+	<argument>0.25</argument>
+	<argument>--wait</argument>
+	<argument>1</argument>
+	<argument>--maxrestarts</argument>
+	<argument>3</argument>
+	<argument>--abortonerror</argument>
+	<argument>n</argument>
+	<argument>--stopparentfirst</argument>
+	<argument>undefined</argument>
+	<logmode>rotate</logmode>
+	<stoptimeout>30sec</stoptimeout>
+	<serviceaccount>
+		<domain>DESKTOP-O1M5TLO</domain>
+		<user>LocalSystem</user>
+		<password></password>
+	</serviceaccount>
+	<workingdirectory>C:\rest-server-junta-agua\v4\ja-rest-server-main</workingdirectory>
+</service>

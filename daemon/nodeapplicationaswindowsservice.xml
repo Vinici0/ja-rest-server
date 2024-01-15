@@ -1,0 +1,31 @@
+<service>
+	<id>nodeapplicationaswindowsservice.exe</id>
+	<name>Node application as Windows Service</name>
+	<description>Node application as Windows Service</description>
+	<executable>C:\Program Files\nodejs\node.exe</executable>
+	<argument>--harmony</argument>
+	<argument>D:\descargas\Downloads\cursos-2023\ingMilton\angular-rest-server\rest-server-junta-agua\node_modules\node-windows\lib\wrapper.js</argument>
+	<argument>--file</argument>
+	<argument>D:\descargas\Downloads\cursos-2023\ingMilton\angular-rest-server\rest-server-junta-agua\index.js</argument>
+	<argument>--scriptoptions=</argument>
+	<argument>--log</argument>
+	<argument>Node application as Windows Service wrapper</argument>
+	<argument>--grow</argument>
+	<argument>0.25</argument>
+	<argument>--wait</argument>
+	<argument>1</argument>
+	<argument>--maxrestarts</argument>
+	<argument>3</argument>
+	<argument>--abortonerror</argument>
+	<argument>n</argument>
+	<argument>--stopparentfirst</argument>
+	<argument>undefined</argument>
+	<logmode>rotate</logmode>
+	<stoptimeout>30sec</stoptimeout>
+	<serviceaccount>
+		<domain>LEONARDO-BORJA</domain>
+		<user>LocalSystem</user>
+		<password></password>
+	</serviceaccount>
+	<workingdirectory>D:\descargas\Downloads\cursos-2023\ingMilton\angular-rest-server\rest-server-junta-agua</workingdirectory>
+</service>
