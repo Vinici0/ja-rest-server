@@ -131,8 +131,6 @@ const createFineDetail = async (fineDetail) => {
   }
 };
 
-
-// No se usa ya
 const updateFineDetail = async (idMultaDetalle, fineDetail) => {
   try {
     const updatedFineDetail = await dbConnection.query(
@@ -161,12 +159,6 @@ const updateFineDetail = async (idMultaDetalle, fineDetail) => {
     throw new Error(error.message);
   }
 };
-
-
-
-
-
-
 
 const togglePaymentStatus = async (idMultaDetalle, pagado, fecha) => {
   try {
@@ -261,14 +253,6 @@ const togglePaymentStatus = async (idMultaDetalle, pagado, fecha) => {
 };
 
 
-
-
-
-
-
-
-
-
 const getFineDetails = async () => {
   try {
     const fineDetails = await dbConnection.query(
@@ -285,7 +269,7 @@ const getFineDetails = async () => {
   }
 };
 
-// cambio
+
 const getFineDetailsByIdClient = async (idCliente) => {
   try {
     const fineDetails = await dbConnection.query(
@@ -333,9 +317,6 @@ const deleteFineDetail = async (idMultaDetalle) => {
   }
 };
 
-
-
-
 //Obtener por id fineDetail
 const getFineDetailById = async (idMultaDetalle) => {
   try {
@@ -361,7 +342,6 @@ const getFineDetailById = async (idMultaDetalle) => {
     throw new Error(error.message);
   }
 };
-
 
 
 const updateFineAbono = async (id_multaDetalle, id_cliente, abonoNumber) => {
@@ -419,8 +399,6 @@ const updateFineAbono = async (id_multaDetalle, id_cliente, abonoNumber) => {
   }
 };
 
-
-
 const calculateTotalAmount = async () => {
   try {
     const result = await dbConnection.query(
@@ -436,7 +414,6 @@ const calculateTotalAmount = async () => {
     throw new Error(error.message);
   }
 };
-
 
 const getFineReport = async (idCliente) => {
   try {
@@ -478,8 +455,6 @@ const getMeasureReport = async (idCliente) => {
     throw new Error(error.message);
   }
 };
-
-
 
 module.exports = {
   deleteFineDetail,

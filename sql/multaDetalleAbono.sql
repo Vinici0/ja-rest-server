@@ -1,5 +1,5 @@
 CREATE TABLE JA_MultaDetalleAbono (
-    idMultaDetalleAbono INT PRIMARY KEY,
+    idMultaDetalleAbono INT PRIMARY KEY IDENTITY(1,1),
     id_cliente INT,
     id_multaDetalle INT,
     total_abono DECIMAL(10, 2),

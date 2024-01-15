@@ -85,7 +85,7 @@ const updateMeasurement = async (
     );
 
     const medidas = await dbConnection.query(
-      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 ORDER BY Anio DESC, Mes DESC`,
+      `SELECT * FROM JA_Medida WHERE Codigo = :Codigo AND Saldo > 0 AND LecturaAnterior >= 0 AND LecturaActual > 0 ORDER BY Anio DESC, Mes DESC`,
       {
         replacements: { Codigo: Codigo },
         type: sequelize.QueryTypes.SELECT,
