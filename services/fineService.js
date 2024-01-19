@@ -392,8 +392,8 @@ const updateFineAbono = async (id_multaDetalle, id_cliente, abonoNumber) => {
     // Paso 2: Insertar en JA_MultaDetalleAbono
     await dbConnection.query(
       `
-      INSERT INTO JA_MultaDetalleAbono (id_cliente, id_multaDetalle, total_abono)
-      VALUES (:id_cliente, :id_multaDetalle, :abonoNumber)
+      INSERT INTO JA_MultaDetalleAbono (id_cliente, id_multaDetalle, total_abono, fecha)
+      VALUES (:id_cliente, :id_multaDetalle, :abonoNumber, GETDATE())
       `,
       {
         replacements: {
@@ -481,6 +481,92 @@ const getMeasureReport = async (idCliente) => {
 
 
 
+
+
+// Vista para ver las multas por abono
+const getMultaDetalleAbono = async (idMultaDetalle) => {
+  try {
+    const result = await dbConnection.query(
+      `
+      SELECT * 
+      FROM JA_MultaDetalleAbono AS MDA
+      INNER JOIN JA_MultaDetalle AS MD ON MD.idMultaDetalle = MDA.id_multaDetalle
+      INNER JOIN Cliente AS C ON C.idCliente = MDA.id_cliente
+      WHERE MDA.id_multaDetalle = :idMultaDetalle
+      `
+      ,
+      {
+        replacements: {
+          idMultaDetalle,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+    consoleHelper.success("Detalle de multa abono obtenida correctamente");
+    return result;
+  }
+  catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
+};
+
+const deleteFineDetailAbono = async (idMultaDetalleAbono) => {
+  try {
+    // Obtener detalles antes de eliminar
+    const fineDetail = await dbConnection.query(
+      `SELECT * FROM JA_MultaDetalleAbono WHERE idMultaDetalleAbono = :idMultaDetalleAbono`,
+      {
+        replacements: {
+          idMultaDetalleAbono,
+        },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    if (!fineDetail || fineDetail.length === 0) {
+      consoleHelper.error("Detalle de multa no encontrado");
+      return null; // O lanza una excepción según tus necesidades
+    }
+
+    const { id_multaDetalle, total_abono } = fineDetail[0];
+
+    
+    // Actualizar el registro en JA_MultaDetalle
+    await dbConnection.query(
+      `UPDATE JA_MultaDetalle 
+       SET valor_pagar = valor_pagar + :total_abono 
+       WHERE idMultaDetalle = :id_multaDetalle`,
+       {
+        replacements: {
+          total_abono,
+          id_multaDetalle,
+        },
+        type: sequelize.QueryTypes.UPDATE,
+      }
+      );
+      
+      // Eliminar el registro en JA_MultaDetalleAbono
+      await dbConnection.query(
+        `DELETE FROM JA_MultaDetalleAbono WHERE idMultaDetalleAbono = :idMultaDetalleAbono`,
+        {
+          replacements: {
+            idMultaDetalleAbono,
+          },
+          type: sequelize.QueryTypes.DELETE,
+        }
+      );
+
+    consoleHelper.success("Operaciones completadas correctamente");
+    return { id_multaDetalle };
+  } catch (error) {
+    consoleHelper.error(error.message);
+    throw new Error(error.message);
+  }
+};
+
+
+
 module.exports = {
   deleteFineDetail,
   createFine,
@@ -497,5 +583,8 @@ module.exports = {
   getFineDetailsByIdClient,
   getFineReport,
   getMeasureReport,
-  updateFineAbono
+  updateFineAbono,
+
+  getMultaDetalleAbono,
+  deleteFineDetailAbono
 };

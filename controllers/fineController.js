@@ -218,6 +218,41 @@ const getFineDetailsByIdClient = async (req = request, res = response) => {
   }
 };
 
+
+// Vista para ver las multas por abono
+const getMultaDetalleAbono = async (req = request, res = response) => {
+  const { id } = req.params;
+  try {
+    const fineDetail = await fineService.getMultaDetalleAbono(id);
+    return new Response().success(
+      res,
+      "Detalle de multa abono obtenido correctamente",
+      {
+        fineDetails: fineDetail,
+      }
+    );
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
+
+const deleteFineDetailAbono = async (req = request, res = response) => {
+  const { id } = req.params;
+  try {
+    const fineDetail = await fineService.deleteFineDetailAbono(id);
+    return new Response().success(
+      res,
+      "Detalle de multa abono eliminado correctamente",
+      {
+        fineDetail: fineDetail,
+      }
+    );
+  } catch (error) {
+    return new Response().error(res, error.message);
+  }
+};
+
 module.exports = {
   createFine,
   createFineDetail,
@@ -232,5 +267,8 @@ module.exports = {
   getFineDetailById,
   calculateTotalAmount,
   getFineDetailsByIdClient,
-  updateFineAbono
+  updateFineAbono,
+
+  getMultaDetalleAbono,
+  deleteFineDetailAbono
 };

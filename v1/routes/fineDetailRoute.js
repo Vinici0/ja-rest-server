@@ -12,7 +12,10 @@ const {
   getFineDetailById,
   calculateTotalAmount,
   getFineDetailsByIdClient,
-  updateFineAbono
+  updateFineAbono,
+
+  getMultaDetalleAbono,
+  deleteFineDetailAbono
 } = require("../../controllers/fineController");
 
 const router = Router();
@@ -47,6 +50,11 @@ router.get("/client/:id", getFineDetailsByIdClient);
 
 // En tu archivo de rutas del backend
 router.put("/:id_multaDetalle/abono", updateFineAbono);
+
+
+// Ver las listas por abono
+router.get("/abonos/:id", getMultaDetalleAbono);
+router.delete("/abonos/:id", deleteFineDetailAbono);
 
 
 module.exports = router;
